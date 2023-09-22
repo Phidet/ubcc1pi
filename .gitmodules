@@ -4,3 +4,6 @@
 [submodule "ubcc1pi_standalone/ubcc1pi-unfold"]
 	path = ubcc1pi_standalone/ubcc1pi-unfold
 	url = https://github.com/Phidet/ubcc1pi-unfold.git
+[submodule "ubcc1pi_standalone/xsec_analyzer"]
+	path = ubcc1pi_standalone/xsec_analyzer
+	url = https://github.com/uboone/xsec_analyzer
