@@ -141,7 +141,6 @@ void SelectionHelper::EventSelection::CutTracker::AssignPDGCode(const unsigned i
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
-// -----------------------------------------------------------------------------------------------------------------------------------------
 
 SelectionHelper::EventSelection::EventSelection(const std::vector<Cut> &cuts, BDTMap &bdtMap, const SelectionLogic &logic) :
     m_cuts(cuts),
@@ -323,7 +322,6 @@ SelectionHelper::EventSelection SelectionHelper::GetOriginalSelection()
         // ----------------------------------------------------------------------------------
         // passesCCInclusive
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG original passesCCInclusive"<<std::endl;
 
         // Insist the event passes the CC inclusive preselection
         if (!pEvent->reco.passesCCInclusive())
@@ -335,7 +333,6 @@ SelectionHelper::EventSelection SelectionHelper::GetOriginalSelection()
         // ----------------------------------------------------------------------------------
         // min2Tracks
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG original min2Tracks"<<std::endl;
 
         // Count the particles with a track fit and check if they are contained
         unsigned int nTrackParticles = 0u;
@@ -367,7 +364,6 @@ SelectionHelper::EventSelection SelectionHelper::GetOriginalSelection()
         // max1Uncontained
         // ----------------------------------------------------------------------------------
 
-        // std::cout<<"DEBUG original nUncontainedParticles: "<< nUncontainedParticles<<std::endl;
         // Insist that at most one particle is uncontained
         if (nUncontainedParticles > 1)
             return false;
@@ -387,7 +383,6 @@ SelectionHelper::EventSelection SelectionHelper::GetOriginalSelection()
         // 2NonProtons
         // ----------------------------------------------------------------------------------
 
-        // std::cout<<"DEBUG original 2NonProtons muonIndex: "<<muonIndex<<std::endl;
         // Identify the rest of the particles using the proton BDT
         const auto protonBDTThreshold = cutTracker.GetCutValue("2NonProtons");
 
@@ -397,23 +392,19 @@ SelectionHelper::EventSelection SelectionHelper::GetOriginalSelection()
         // Keep track of the number of protons and pions we have identifies
         unsigned int nProtons = 0;
         std::vector<unsigned int> pionIndices;
-        // std::cout<<"DEBUG original 2NonProtons recoParticles.size(): "<<recoParticles.size()<<std::endl;
         for (unsigned int i = 0; i < recoParticles.size(); ++i)
         {
-            // std::cout<<"DEBUG original i: "<<i<<" generation: "<<recoParticles.at(i).generation()<<std::endl;
             const auto &particle = recoParticles.at(i);
 
             // Skip the muon candidate as we've already identified it
             if (i == muonIndex)
             {
-                // std::cout<<"DEBUG original Point 5 i == muonIndex"<<std::endl;
                 continue;
             }
 
             // Assume particles without a track fit are just small protons
             if (!AnalysisHelper::HasTrackFit(particle))
             {
-                // std::cout<<"DEBUG original Point 6 !AnalysisHelper::HasTrackFit(particle)"<<std::endl;
                 nProtons++;
                 cutTracker.AssignPDGCode(i, 2212);
 
@@ -422,7 +413,7 @@ SelectionHelper::EventSelection SelectionHelper::GetOriginalSelection()
 
             // The particle should be contained (as only the muon candidate is allowed to escape). But for sanity, let's check
             if (!AnalysisHelper::IsContained(particle))
-                throw std::logic_error("DefaultSelection - Found an uncontained particle that isn't the muon. This shouldn't happen!");
+                throw std::logic_error("GetOriginalSelection - Found an uncontained particle that isn't the muon. This shouldn't happen!");
 
             // Get run the proton BDT
             std::vector<float> features;
@@ -431,7 +422,6 @@ SelectionHelper::EventSelection SelectionHelper::GetOriginalSelection()
             // If one or more of the BDT features are missing, then assume the particle is a proton
             if (!hasFeatures)
             {
-                // std::cout<<"DEBUG original Point 7 !hasFeatures"<<std::endl;
                 nProtons++;
                 cutTracker.AssignPDGCode(i, 2212);
 
@@ -442,7 +432,6 @@ SelectionHelper::EventSelection SelectionHelper::GetOriginalSelection()
             const auto bdtResponse = pProtonBDT->GetResponse(features);
             if (bdtResponse >= protonBDTThreshold)
             {
-                // std::cout<<"DEBUG original Point 8 bdtResponse >= protonBDTThreshold"<<std::endl;
                 nProtons++;
                 cutTracker.AssignPDGCode(i, 2212);
 
@@ -451,7 +440,6 @@ SelectionHelper::EventSelection SelectionHelper::GetOriginalSelection()
 
             // If we've got to this point then we haven't identified the particle as a muon or a proton.
             // Instead let's identify the particle as a pion
-            // std::cout<<"DEBUG original Point 9 i: "<<i<<std::endl;
             pionIndices.push_back(i);
             cutTracker.AssignPDGCode(i, 211);
         }
@@ -463,7 +451,6 @@ SelectionHelper::EventSelection SelectionHelper::GetOriginalSelection()
             throw std::logic_error("DefaultSelection - Identified the wrong number of particles. This shouldn't happen!");
 
         // Insist that we exacly one pion (i.e we have have 2 non-protons)
-        // std::cout<<"DEBUG original 2NonProtons nPions: "<<nPions<<std::endl;
         if (nPions != 1)
             return false;
 
@@ -617,7 +604,7 @@ SelectionHelper::EventSelection SelectionHelper::GetOriginalSelection()
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
 
-SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
+SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection(const bool skipOldCuts /*= false*/)
 {
     // Define the cuts
     const std::vector<EventSelection::Cut> cuts = {
@@ -649,7 +636,7 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // Flash χ2 < 10 OR topological score > 0.25
         {"topologicalOrFlashMatch"},
         // Topological score > 0.06
-        {"topologicalScoreCC", 0.06f},
+        // {"topologicalScoreCC", 0.06f},
 
         // {"passesCCInclusive"},
         {"min2Tracks"},
@@ -672,20 +659,19 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
     };
 
     // Define the actual selection logic
-    const auto logic = [](const auto &pEvent, auto &bdtMap, auto &cutTracker)
+    const auto logic = [skipOldCuts](const auto &pEvent, auto &bdtMap, auto &cutTracker)
     {
         const auto &recoParticles = pEvent->reco.particles; // Use all neutrino downstream particles 
         std::vector<bool> selectedParticles(recoParticles.size(), true);
+        
         // ----------------------------------------------------------------------------------
         // particleTrackScore
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default particleTrackScore"<<std::endl;
         
         // Get the track score cut value
         const auto minTrackScore = cutTracker.GetCutValue("particleTrackScore");
         for(unsigned int i = 0; i< recoParticles.size(); ++i)
         {
-            // // std::cout<<"DEBUG default 2 - particleTrackScore: "<<recoParticles.at(i).trackScore()<<"("<<selectedParticles.at(i)<<")"<<std::endl;
             // Skip particles without a track fit
             if (!AnalysisHelper::HasTrackFit(recoParticles.at(i)))
             {
@@ -694,7 +680,7 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
             }
 
             // Skip particles that didn't pass the CC inclusive selection
-            if(!selectedParticles.at(i)) continue;
+            // if(!selectedParticles.at(i)) continue;
             if(!recoParticles.at(i).trackScore.IsSet() || recoParticles.at(i).trackScore() < minTrackScore) selectedParticles.at(i) = false;
         }
         // Mark the cut "particleTrackScore" as passed as long as there is at least one particle that passes the cut
@@ -705,7 +691,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // particleVertexDistance
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default particleVertexDistance"<<std::endl;
 
         // Get the vertex distance cut value
         const auto maxParticleVertexDist = cutTracker.GetCutValue("particleVertexDistance");
@@ -733,7 +718,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // particleGeneration
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default particleGeneration"<<std::endl;
 
         for(unsigned int i = 0; i< recoParticles.size(); ++i)
         {
@@ -749,17 +733,14 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // particleTrackLength
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default particleTrackLength"<<std::endl;
 
         // Get the track length cut value
         const auto minTrackLength = cutTracker.GetCutValue("particleTrackLength");
         for(unsigned int i = 0; i< recoParticles.size(); ++i)
         {
-            // // std::cout<<"DEBUG default 6 - particleTrackLength: "<<recoParticles.at(i).range()<<"("<<selectedParticles.at(i)<<")"<<std::endl;
             // Skip particles that didn't pass the previous cuts
             if(!selectedParticles.at(i)) continue;
             if(recoParticles.at(i).range() < minTrackLength) selectedParticles.at(i) = false;
-            // // std::cout<<"DEBUG default recoParticles.at(i).range(): "<<recoParticles.at(i).range()<<std::endl;
         }
         // Mark the cut "particleTrackLength" as passed as long as there is at least one particle that passes the cut
         if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
@@ -769,13 +750,11 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // particleProtonChi2
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default particleProtonChi2"<<std::endl;
 
         // Get the proton chi2 cut value
         const auto minProtonChi2 = cutTracker.GetCutValue("particleProtonChi2");
         for(unsigned int i = 0; i< recoParticles.size(); ++i)
         {
-            // std::cout<<"DEBUG default (4) - chi2ForwardProtonW: ";
             // if(recoParticles.at(i).chi2ForwardProtonW.IsSet())std::cout<<recoParticles.at(i).chi2ForwardProtonW();
             // else std::cout<<"not set";
             // std::cout<<"("<<selectedParticles.at(i)<<")"<<std::endl;
@@ -791,13 +770,11 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // particleMuonChi2
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default particleMuonChi2"<<std::endl;
 
         // Get the muon chi2 cut value
         const auto maxMuonChi2 = cutTracker.GetCutValue("particleMuonChi2");
         for(unsigned int i = 0; i< recoParticles.size(); ++i)
         {
-            // std::cout<<"DEBUG default (5) - chi2ForwardMuonW: ";
             // if(recoParticles.at(i).chi2ForwardMuonW.IsSet())std::cout<<recoParticles.at(i).chi2ForwardMuonW();
             // else std::cout<<"not set";
             // std::cout<<"("<<selectedParticles.at(i)<<")"<<std::endl;
@@ -813,18 +790,14 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // particleProtonChi2OverMuonChi2
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default particleProtonChi2OverMuonChi2"<<std::endl;
 
         // Get the proton chi2 over muon chi2 cut value
         const auto minProtonChi2OverMuonChi2 = cutTracker.GetCutValue("particleProtonChi2OverMuonChi2");
         for(unsigned int i = 0; i< recoParticles.size(); ++i)
         {
-            // // std::cout<<"DEBUG default 7 - particleProtonChi2OverMuonChi2: "<<recoParticles.at(i).chi2ForwardProtonW()/recoParticles.at(i).chi2ForwardMuonW()<<"("<<selectedParticles.at(i)<<")"<<" "<<recoParticles.at(i).chi2ForwardProtonW()<<" "<<recoParticles.at(i).chi2ForwardMuonW()<<std::endl;
             // Skip particles that didn't pass the previous cuts
             if(!selectedParticles.at(i)) continue;
             if(recoParticles.at(i).chi2ForwardProtonW()/recoParticles.at(i).chi2ForwardMuonW() < minProtonChi2OverMuonChi2) selectedParticles.at(i) = false;
-            // std::cout<<"DEBUG default chi2ForwardProtonW()/chi2ForwardMuonW(): "<<recoParticles.at(i).chi2ForwardProtonW()/recoParticles.at(i).chi2ForwardMuonW()\
-            <<" "<<recoParticles.at(i).chi2ForwardProtonW()<<" "<<recoParticles.at(i).chi2ForwardMuonW()<<std::endl;
         }
         // Mark the cut "particleProtonChi2OverMuonChi2" as passed as long as there is at least one particle that passes the cut
         if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
@@ -834,7 +807,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // Not a cut: In case there are multiple muon candidates, we select the longest one 
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default longest particle"<<std::endl;
 
         // Get the longest particle
         auto ccInclusiveMuonCandidateIndex = 0u;
@@ -853,14 +825,20 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // pandoraNuPDGIsNumu
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default pandoraNuPDGIsNumu"<<std::endl;
 
-        // Get the pandora neutrino PDG
-        const auto pandoraNuPDGIsNumu = pEvent->reco.nuPdgCode();
+        if(!skipOldCuts)
+        {
+            // Get the pandora neutrino PDG
+            const auto pandoraNuPDGIsNumu = pEvent->reco.nuPdgCode();
 
-        // Insist that the pandora PDG is a muon neutrino
-        if (pandoraNuPDGIsNumu != 14)
-            return false;
+            // Insist that the pandora PDG is a muon neutrino
+            if (pandoraNuPDGIsNumu != 14)
+                return false;
+        }
+        // else
+        // {
+        //     std::cout<<"Warning: skipping pandoraNuPDGIsNumu cut"<<std::endl;
+        // }
 
         // Mark the cut "pandoraNuPDGIsNumu" as passed
         cutTracker.MarkCutAsPassed("pandoraNuPDGIsNumu");
@@ -868,7 +846,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // daughterVerticesContained
         // ----------------------------------------------------------------------------------
-        // std::cout<<"DEBUG default daughterVerticesContained"<<std::endl;
 
         // Get the start near vertex cut value
         const auto margin = cutTracker.GetCutValue("daughterVerticesContained");
@@ -876,33 +853,26 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // Insist that all particles with a fitted track start near the vertex
         for (const auto &particle : recoParticles)
         {
-            // // std::cout<<"DEBUG default daughterVerticesContained 2"<<std::endl;
             // Skip particles without a track fit
             // if (!(particle.startX.IsSet() && particle.startY.IsSet() && particle.startZ.IsSet()))
             //     continue;
             if (!AnalysisHelper::HasTrackFit(particle))
             {
-                // // std::cout<<"DEBUG default particle without track fit skipped"<<std::endl;
                 continue;
             }
 
-            // // std::cout<<"DEBUG default daughterVerticesContained 3"<<std::endl;
             // Get the distance between the particle's start position and the vertex
             if(!particle.vertexX.IsSet() || !particle.vertexY.IsSet() || !particle.vertexZ.IsSet())
             {
-                // std::cout<<"DEBUG default daughterVerticesContained 3.1 vertexX.IsSet() "<<particle.vertexX.IsSet()<<" vertexY.IsSet() "<<particle.vertexY.IsSet()<<" vertexZ.IsSet() "<<particle.vertexZ.IsSet()<<std::endl;
                 return false;
             }
             
-            // // std::cout<<"DEBUG default daughterVerticesContained 4"<<std::endl;
 
             const TVector3 vertex(particle.vertexX(), particle.vertexY(), particle.vertexZ());
             
-            // std::cout<<"DEBUG default daughterVerticesContained 5"<<std::endl;
             // Insist that all vertices are contained within the margin
             if (!AnalysisHelper::IsPointWithinMargins(vertex, margin, margin, margin, margin, margin, margin))
                 return false;
-            // std::cout<<"DEBUG default daughterVerticesContained 6"<<std::endl;
         }
 
         // Mark the cut "daughterVerticesContained" as passed
@@ -911,7 +881,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // nuVertexFiducial
         // ----------------------------------------------------------------------------------
-        // std::cout<<"DEBUG default nuVertexFiducial"<<std::endl;
 
         // Get the vertex position
         const auto recoVertexCC = pEvent->reco.nuVertexNoSCC();
@@ -924,7 +893,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // topologicalOrFlashMatch
         // ----------------------------------------------------------------------------------
-        // std::cout<<"DEBUG default topologicalOrFlashMatch"<<std::endl;
 
         // Get the topological score cut value
         const auto minTopologicalScoreCC1 = 0.25f;
@@ -935,8 +903,15 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // if(pEvent->reco.flashChi2.IsSet()) std::cout<<"flashChi2: "<<pEvent->reco.flashChi2.IsSet()<<std::endl;
         // else std::cout<<"flashChi2 not set"<<std::endl;
 
-        if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1 && pEvent->reco.flashChi2.IsSet() && pEvent->reco.flashChi2() >= maxFlashMatchScore)
-            return false;
+        if(!skipOldCuts)
+        {
+            if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1 && pEvent->reco.flashChi2.IsSet() && pEvent->reco.flashChi2() >= maxFlashMatchScore)
+                return false;
+        }
+        // else
+        // {
+        //     std::cout<<"Warning: skipping topologicalOrFlashMatch cut"<<std::endl;
+        // }
 
         // Mark the cut "topologicalOrFlashMatch" as passed
         cutTracker.MarkCutAsPassed("topologicalOrFlashMatch");
@@ -944,17 +919,16 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // topologicalScoreCC
         // ----------------------------------------------------------------------------------
-        // std::cout<<"DEBUG default topologicalScoreCC"<<std::endl;
 
-        // Get the topological score cut value
-        const auto minTopologicalScoreCC2 = cutTracker.GetCutValue("topologicalScoreCC");
+        // // Get the topological score cut value
+        // const auto minTopologicalScoreCC2 = cutTracker.GetCutValue("topologicalScoreCC");
 
-        // Insist that the topological score is above the cut value
-        if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC2)
-            return false;
+        // // Insist that the topological score is above the cut value
+        // if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC2)
+        //     return false;
 
-        // Mark the cut "topologicalScoreCC" as passed
-        cutTracker.MarkCutAsPassed("topologicalScoreCC");
+        // // Mark the cut "topologicalScoreCC" as passed
+        // cutTracker.MarkCutAsPassed("topologicalScoreCC");
 
         // ##################################################################################
         // Start of pion selection
@@ -974,7 +948,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // min2Tracks
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default (After CC inclusive) min2Tracks"<<std::endl;
 
         // Count the particles with a track fit and check if they are contained
         unsigned int nTrackParticles = 0u;
@@ -1005,12 +978,10 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // max1Uncontained
         // ----------------------------------------------------------------------------------
 
-        // std::cout<<"DEBUG default nUncontainedParticles: "<< nUncontainedParticles<<std::endl;
         // Insist that at most one particle is uncontained
         if (nUncontainedParticles > 1)
             return false;
 
-        // // std::cout<<"DEBUG default Point 2"<<std::endl;
 
         // Mark the cut "max1Uncontained" as passed
         cutTracker.MarkCutAsPassed("max1Uncontained");
@@ -1019,7 +990,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // Identify the muon candidate
         auto &pMuonBDT = bdtMap.at("muon");
         const auto muonIndex = SelectionHelper::GetMuonCandidateIndex(recoParticles, BDTHelper::MuonBDTFeatureNames, *pMuonBDT, ccInclusiveMuonCandidateIndex);
-        // // std::cout<<"DEBUG default muonIndex: "<< muonIndex<<" ccInclusiveMuonCandidateIndex: "<<ccInclusiveMuonCandidateIndex<<std::endl;
 
         // Assign the muon candidate a muon PDG code
         cutTracker.AssignPDGCode(muonIndex, 13);
@@ -1027,7 +997,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         // ----------------------------------------------------------------------------------
         // 2NonProtons
         // ----------------------------------------------------------------------------------
-        // std::cout<<"DEBUG default 2NonProtons muonIndex: "<<muonIndex<<std::endl;
 
         // Identify the rest of the particles using the proton BDT
         const auto protonBDTThreshold = cutTracker.GetCutValue("2NonProtons");
@@ -1039,23 +1008,19 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         unsigned int nProtons = 0;
         std::vector<unsigned int> pionIndices;
 
-        // std::cout<<"DEBUG default 2NonProtons recoParticles.size(): "<<recoParticles.size()<<std::endl;
         for (unsigned int i = 0; i < recoParticles.size(); ++i)
         {
-            // std::cout<<"DEBUG default i: "<<i<<" generation: "<<recoParticles.at(i).generation()<<std::endl;
             const auto &particle = recoParticles.at(i);
 
             // Skip the muon candidate as we've already identified it
             if (i == muonIndex)
             {
-                // std::cout<<"DEBUG default Point 5 i == muonIndex"<<std::endl;
                 continue;
             }
 
             // Assume particles without a track fit are just small protons
             if (!AnalysisHelper::HasTrackFit(particle))
             {
-                // std::cout<<"DEBUG default Point 6 !AnalysisHelper::HasTrackFit(particle)"<<std::endl;
                 nProtons++;
                 cutTracker.AssignPDGCode(i, 2212);
 
@@ -1073,7 +1038,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
             // If one or more of the BDT features are missing, then assume the particle is a proton
             if (!hasFeatures)
             {
-                // std::cout<<"DEBUG default Point 7 !hasFeatures"<<std::endl;
                 nProtons++;
                 cutTracker.AssignPDGCode(i, 2212);
 
@@ -1084,7 +1048,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
             const auto bdtResponse = pProtonBDT->GetResponse(features);
             if (bdtResponse >= protonBDTThreshold)
             {
-                // std::cout<<"DEBUG default Point 8 bdtResponse >= protonBDTThreshold"<<std::endl;
                 nProtons++;
                 cutTracker.AssignPDGCode(i, 2212);
 
@@ -1093,7 +1056,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
 
             // If we've got to this point then we haven't identified the particle as a muon or a proton.
             // Instead let's identify the particle as a pion
-            // std::cout<<"DEBUG default Point 9 i: "<<i<<std::endl;
             pionIndices.push_back(i);
             cutTracker.AssignPDGCode(i, 211);
         }
@@ -1105,7 +1067,6 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
             throw std::logic_error("DefaultSelection - Identified the wrong number of particles. This shouldn't happen!");
 
         // Insist that we exacly one pion (i.e we have have 2 non-protons)
-        // std::cout<<"DEBUG default 2NonProtons nPions: "<<nPions<<std::endl;
         if (nPions != 1)
             return false;
 
@@ -1211,7 +1172,9 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
         {
             // Skip particles without a track fit
             if (!AnalysisHelper::HasTrackFit(particle))
+            {
                 continue;
+            }
 
             // Get the distance between the particle's start position and the vertex
             const TVector3 start(particle.startX(), particle.startY(), particle.startZ());
@@ -1219,7 +1182,9 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
 
             // Insist that this isn't too large
             if (vertexDist2 > maxVertexDist2)
+            {
                 return false;
+            }
         }
 
         // Mark the cut "startNearVertex" as passed
@@ -1259,7 +1224,974 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection()
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
 
-SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(const float muonLikeProtonValue /*= -0.4f*/, const float barelyResemblingProtonValue /*= 0.1f*/)
+SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection2(const bool skipOldCuts /*= false*/)
+{
+    // Define the cuts
+    const std::vector<EventSelection::Cut> cuts = {
+        // ########### CC inclusive selection starting from sliceID cuts; all conditions need to be met by at least one particle ###########
+        // See docID: 25589-v2 for details
+
+        // track score > 0.85
+        {"particleTrackScore", 0.85f},
+        // vertex distance < 4 cm
+        {"particleVertexDistance", 4.0f},
+        // generation = 2 (direct neutrino daughter)
+        {"particleGeneration"},
+        // track length > 20 cm
+        {"particleTrackLength", 20.0f}, // ATTN: This analysis and pelee use SCE corrected lengths numucc does not
+        // Proton χ2 > 60
+        {"particleProtonChi2", 60.0f},
+        // Muon χ2 < 30
+        {"particleMuonChi2", 30.0f},
+        // Proton χ2/Muon χ2 > 7
+        {"particleProtonChi2OverMuonChi2", 7.0f},
+
+        // ########### CC inclusive selection continued; conditions now apply to events ###########
+        // Pandora PDG code = 14 (reconstructed object with the most hits is track-like).
+        {"pandoraNuPDGIsNumu"},
+        // Start vertex of all daughters is at least 10 cm from all borders
+        {"daughterVerticesContained", 10.0f},
+        // Neutrino vertex is in the fiducial volume.
+        {"nuVertexFiducial"},
+        // Flash χ2 < 10 OR topological score > 0.25
+        {"topologicalOrFlashMatch"},
+        // Topological score > 0.06
+        // {"topologicalScoreCC", 0.06f},
+
+        // {"passesCCInclusive"},
+        {"min2Tracks"},
+        {"max1Uncontained"},
+        {"2NonProtons", -0.06f},
+        {"pionHasValiddEdx", 1.0f},
+        {"pionNotInGap"},
+        {"muonNotInGap"},
+        {"openingAngle", 2.65f},
+        {"topologicalScore", 0.67f},
+        {"startNearVertex", 9.5f},
+        {"likelyGoldenPion", -0.03f}
+    };
+
+    // Load up the BDTs and store them in a map
+    EventSelection::BDTMap bdtMap = {
+        {"muon",       std::make_shared<BDTHelper::BDT>("muon", BDTHelper::MuonBDTFeatureNames)},
+        {"proton",     std::make_shared<BDTHelper::BDT>("proton", BDTHelper::ProtonBDTFeatureNames)},
+        {"goldenPion", std::make_shared<BDTHelper::BDT>("goldenPion", BDTHelper::GoldenPionBDTFeatureNames)}
+    };
+
+    // Define the actual selection logic
+    const auto logic = [skipOldCuts](const auto &pEvent, auto &bdtMap, auto &cutTracker)
+    {
+        const auto &recoParticles = pEvent->reco.particles; // Use all neutrino downstream particles 
+        std::vector<bool> selectedParticles(recoParticles.size(), true);
+        // ----------------------------------------------------------------------------------
+        // particleTrackScore
+        // ----------------------------------------------------------------------------------
+        
+        // Get the track score cut value
+        const auto minTrackScore = cutTracker.GetCutValue("particleTrackScore");
+        for(unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // Skip particles without a track fit
+            if (!AnalysisHelper::HasTrackFit(recoParticles.at(i)))
+            {
+                selectedParticles.at(i) = false;
+                continue;
+            }
+
+            // Skip particles that didn't pass the CC inclusive selection
+            if(!selectedParticles.at(i)) continue;
+            if(!recoParticles.at(i).trackScore.IsSet() || recoParticles.at(i).trackScore() < minTrackScore) selectedParticles.at(i) = false;
+        }
+        // Mark the cut "particleTrackScore" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleTrackScore");
+
+        // ----------------------------------------------------------------------------------
+        // particleVertexDistance
+        // ----------------------------------------------------------------------------------
+
+        // Get the vertex distance cut value
+        const auto maxParticleVertexDist = cutTracker.GetCutValue("particleVertexDistance");
+        const auto maxParticleVertexDist2 = maxParticleVertexDist*maxParticleVertexDist;
+
+        // Insist that all particles with a fitted track start near the vertex
+        const auto recoVertexCC1 = pEvent->reco.nuVertexNoSCC();
+        for (unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // Skip particles that didn't pass the previous cuts
+            if(!selectedParticles.at(i)) continue;
+
+            // Get the distance between the particle's start position and the vertex
+            const TVector3 start(recoParticles.at(i).vertexX(), recoParticles.at(i).vertexY(), recoParticles.at(i).vertexZ());
+            const auto vertexDist2 = (start - recoVertexCC1).Mag2();
+
+            // Insist that this isn't too large
+            if (vertexDist2 > maxParticleVertexDist2) selectedParticles.at(i) = false;
+        }
+        // Mark the cut "particleVertexDistance" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleVertexDistance");
+
+        // ----------------------------------------------------------------------------------
+        // particleGeneration
+        // ----------------------------------------------------------------------------------
+        std::vector<unsigned int> daughterRecoParticleIndices{};
+        for(unsigned int i = 0; i < recoParticles.size(); ++i)
+        {
+            // Skip particles that didn't pass the previous cuts
+            // if(!selectedParticles.at(i)) continue; // This saves some time but here we want to iterate over all particles to also crete daughterRecoParticleIndices
+            if(recoParticles.at(i).generation() == 2)
+            {
+                daughterRecoParticleIndices.push_back(i);
+            }
+            else
+            {
+                selectedParticles.at(i) = false;
+            }
+        }
+        // Mark the cut "particleGeneration" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleGeneration");
+
+        // ----------------------------------------------------------------------------------
+        // particleTrackLength
+        // ----------------------------------------------------------------------------------
+
+        // Get the track length cut value
+        const auto minTrackLength = cutTracker.GetCutValue("particleTrackLength");
+        for(unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // Skip particles that didn't pass the previous cuts
+            if(!selectedParticles.at(i)) continue;
+            if(recoParticles.at(i).range() < minTrackLength) selectedParticles.at(i) = false;
+        }
+        // Mark the cut "particleTrackLength" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleTrackLength");
+
+        // ----------------------------------------------------------------------------------
+        // particleProtonChi2
+        // ----------------------------------------------------------------------------------
+
+        // Get the proton chi2 cut value
+        const auto minProtonChi2 = cutTracker.GetCutValue("particleProtonChi2");
+        for(unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // if(recoParticles.at(i).chi2ForwardProtonW.IsSet())std::cout<<recoParticles.at(i).chi2ForwardProtonW();
+            // else std::cout<<"not set";
+            // std::cout<<"("<<selectedParticles.at(i)<<")"<<std::endl;
+            // Skip particles that didn't pass the previous cuts
+            if(!selectedParticles.at(i)) continue;
+            if(!recoParticles.at(i).chi2ForwardProtonW.IsSet() || recoParticles.at(i).chi2ForwardProtonW() < minProtonChi2) selectedParticles.at(i) = false;
+        }
+        // Mark the cut "particleProtonChi2" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleProtonChi2");
+
+        // ----------------------------------------------------------------------------------
+        // particleMuonChi2
+        // ----------------------------------------------------------------------------------
+
+        // Get the muon chi2 cut value
+        const auto maxMuonChi2 = cutTracker.GetCutValue("particleMuonChi2");
+        for(unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // if(recoParticles.at(i).chi2ForwardMuonW.IsSet())std::cout<<recoParticles.at(i).chi2ForwardMuonW();
+            // else std::cout<<"not set";
+            // std::cout<<"("<<selectedParticles.at(i)<<")"<<std::endl;
+            // Skip particles that didn't pass the previous cuts
+            if(!selectedParticles.at(i)) continue;
+            if(recoParticles.at(i).chi2ForwardMuonW() > maxMuonChi2) selectedParticles.at(i) = false;
+        }
+        // Mark the cut "particleMuonChi2" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleMuonChi2");
+
+        // ----------------------------------------------------------------------------------
+        // particleProtonChi2OverMuonChi2
+        // ----------------------------------------------------------------------------------
+
+        // Get the proton chi2 over muon chi2 cut value
+        const auto minProtonChi2OverMuonChi2 = cutTracker.GetCutValue("particleProtonChi2OverMuonChi2");
+        for(unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // Skip particles that didn't pass the previous cuts
+            if(!selectedParticles.at(i)) continue;
+            if(recoParticles.at(i).chi2ForwardProtonW()/recoParticles.at(i).chi2ForwardMuonW() < minProtonChi2OverMuonChi2) selectedParticles.at(i) = false;
+        }
+        // Mark the cut "particleProtonChi2OverMuonChi2" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleProtonChi2OverMuonChi2");
+
+        // ----------------------------------------------------------------------------------
+        // Not a cut: In case there are multiple muon candidates, we select the longest one 
+        // ----------------------------------------------------------------------------------
+
+        // Get the longest particle
+        auto ccInclusiveMuonCandidateIndex = 0u;
+        auto longestParticleLength = 0.0f;
+        for(unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // Skip particles that didn't pass the previous cuts
+            if(!selectedParticles.at(i)) continue;
+            if(recoParticles.at(i).range() > longestParticleLength)
+            {
+                longestParticleLength = recoParticles.at(i).range();
+                ccInclusiveMuonCandidateIndex = i;
+            }
+        }
+
+        // ----------------------------------------------------------------------------------
+        // pandoraNuPDGIsNumu
+        // ----------------------------------------------------------------------------------
+
+        if(!skipOldCuts)
+        {
+            // Get the pandora neutrino PDG
+            const auto pandoraNuPDGIsNumu = pEvent->reco.nuPdgCode();
+
+            // Insist that the pandora PDG is a muon neutrino
+            if (pandoraNuPDGIsNumu != 14)
+                return false;
+        }
+        // else
+        // {
+        //     std::cout<<"Warning: skipping pandoraNuPDGIsNumu cut"<<std::endl;
+        // }
+
+        // Mark the cut "pandoraNuPDGIsNumu" as passed
+        cutTracker.MarkCutAsPassed("pandoraNuPDGIsNumu");
+
+        // ----------------------------------------------------------------------------------
+        // daughterVerticesContained
+        // ----------------------------------------------------------------------------------
+
+        // Get the start near vertex cut value
+        const auto margin = cutTracker.GetCutValue("daughterVerticesContained");
+
+        // Insist that all particles with a fitted track start near the vertex
+        for (const auto &particle : recoParticles)
+        {
+            // Skip particles without a track fit
+            // if (!(particle.startX.IsSet() && particle.startY.IsSet() && particle.startZ.IsSet()))
+            //     continue;
+            if (!AnalysisHelper::HasTrackFit(particle))
+            {
+                continue;
+            }
+
+            // Get the distance between the particle's start position and the vertex
+            if(!particle.vertexX.IsSet() || !particle.vertexY.IsSet() || !particle.vertexZ.IsSet())
+            {
+                return false;
+            }
+            
+
+            const TVector3 vertex(particle.vertexX(), particle.vertexY(), particle.vertexZ());
+            
+            // Insist that all vertices are contained within the margin
+            if (!AnalysisHelper::IsPointWithinMargins(vertex, margin, margin, margin, margin, margin, margin))
+            {
+                return false;
+            }
+        }
+
+        // Mark the cut "daughterVerticesContained" as passed
+        cutTracker.MarkCutAsPassed("daughterVerticesContained");
+
+        // ----------------------------------------------------------------------------------
+        // nuVertexFiducial
+        // ----------------------------------------------------------------------------------
+
+        // Get the vertex position
+        const auto recoVertexCC = pEvent->reco.nuVertexNoSCC();
+        if(!AnalysisHelper::IsFiducial(recoVertexCC))
+            return false;
+        
+        // Mark the cut "nuVertexFiducial" as passed
+        cutTracker.MarkCutAsPassed("nuVertexFiducial");
+
+        // ----------------------------------------------------------------------------------
+        // topologicalOrFlashMatch
+        // ----------------------------------------------------------------------------------
+
+        // Get the topological score cut value
+        const auto minTopologicalScoreCC1 = 0.25f;
+        const auto maxFlashMatchScore = 10.0f;
+
+        // Insist that the topological score is above the cut value or the flash match score is below the cut value
+        // Here: when neither is the case, the event is rejected 
+        // if(pEvent->reco.flashChi2.IsSet()) std::cout<<"flashChi2: "<<pEvent->reco.flashChi2.IsSet()<<std::endl;
+        // else std::cout<<"flashChi2 not set"<<std::endl;
+
+        if(!skipOldCuts)
+        {
+            if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1 && pEvent->reco.flashChi2.IsSet() && pEvent->reco.flashChi2() >= maxFlashMatchScore)
+                return false;
+        }
+        // else
+        // {
+        //     std::cout<<"Warning: skipping topologicalOrFlashMatch cut"<<std::endl;
+        // }
+
+        // Mark the cut "topologicalOrFlashMatch" as passed
+        cutTracker.MarkCutAsPassed("topologicalOrFlashMatch");
+
+        // ----------------------------------------------------------------------------------
+        // topologicalScoreCC
+        // ----------------------------------------------------------------------------------
+
+        // // Get the topological score cut value
+        // const auto minTopologicalScoreCC2 = cutTracker.GetCutValue("topologicalScoreCC");
+
+        // // Insist that the topological score is above the cut value
+        // if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC2)
+        //     return false;
+
+        // // Mark the cut "topologicalScoreCC" as passed
+        // cutTracker.MarkCutAsPassed("topologicalScoreCC");
+
+        // ##################################################################################
+        // Start of pion selection
+        // ##################################################################################
+
+        // // ----------------------------------------------------------------------------------
+        // // passesCCInclusive
+        // // ----------------------------------------------------------------------------------
+
+        // // Insist the event passes the CC inclusive preselection
+        // if (!pEvent->reco.passesCCInclusive())
+        //     return false;
+
+        // // Mark the cut "passesCCInclusive" as passed
+        // cutTracker.MarkCutAsPassed("passesCCInclusive");
+
+        // ----------------------------------------------------------------------------------
+        // min2Tracks
+        // ----------------------------------------------------------------------------------
+        // std::cout<<"DEBUG min2Tracks"<<std::endl;
+
+        // auto pionSectionRecoParticles = recoParticles;
+        // for (int i = pionSectionRecoParticles.size() - 1; i >= 0; --i) // Loop backwards so we can erase elements
+        // {
+        //     const auto &particle = pionSectionRecoParticles.at(i);
+        //     if (particle.generation() != 2)
+        //     {
+        //         pionSectionRecoParticles.erase(pionSectionRecoParticles.begin() + i);
+        //     }
+        // }
+
+        // Count the particles with a track fit and check if they are contained
+        unsigned int nTrackParticles = 0u;
+        unsigned int nUncontainedParticles = 0u;
+
+        for (const auto i:daughterRecoParticleIndices)//unsigned int i = 0; i < pionSectionRecoParticles.size(); ++i)
+        {
+            const auto &particle = recoParticles.at(i);
+
+            if (!AnalysisHelper::HasTrackFit(particle))
+                continue;
+
+            nTrackParticles++;
+
+            if (!AnalysisHelper::IsContained(particle))
+                nUncontainedParticles++;
+        }
+
+        // Insist that we have at least two tracks
+        if (nTrackParticles < 2)
+            return false;
+
+        // Mark the cut "min2Tracks" as passed
+        cutTracker.MarkCutAsPassed("min2Tracks");
+        //std::cout<<"CC1pi: min2Tracks"<<std::endl;
+
+        // ----------------------------------------------------------------------------------
+        // max1Uncontained
+        // ----------------------------------------------------------------------------------
+        // std::cout<<"DEBUG max1Uncontained"<<std::endl;
+
+        // Insist that at most one particle is uncontained
+        if (nUncontainedParticles > 1)
+            return false;
+
+
+        // Mark the cut "max1Uncontained" as passed
+        cutTracker.MarkCutAsPassed("max1Uncontained");
+        //std::cout<<"CC1pi: max1Uncontained"<<std::endl;
+
+        // Identify the muon candidate
+        auto &pMuonBDT = bdtMap.at("muon");
+        const auto muonIndex = SelectionHelper::GetMuonCandidateIndex(recoParticles, BDTHelper::MuonBDTFeatureNames, *pMuonBDT, ccInclusiveMuonCandidateIndex);
+
+        // Assign the muon candidate a muon PDG code
+        cutTracker.AssignPDGCode(muonIndex, 13);
+
+        // ----------------------------------------------------------------------------------
+        // 2NonProtons
+        // ----------------------------------------------------------------------------------
+        // std::cout<<"DEBUG 2NonProtons"<<std::endl;
+
+        // Identify the rest of the particles using the proton BDT
+        const auto protonBDTThreshold = cutTracker.GetCutValue("2NonProtons");
+
+        // Get the proton BDT from the map
+        auto &pProtonBDT = bdtMap.at("proton");
+
+        // Keep track of the number of protons and pions we have identifies
+        unsigned int nProtons = 0;
+        std::vector<unsigned int> pionIndices;
+
+        for (const auto i:daughterRecoParticleIndices)//unsigned int i = 0; i < pionSectionRecoParticles.size(); ++i)
+        {
+            const auto &particle = recoParticles.at(i);
+
+            // Skip the muon candidate as we've already identified it
+            if (i == muonIndex)
+            {
+                continue;
+            }
+
+            // Assume particles without a track fit are just small protons
+            if (!AnalysisHelper::HasTrackFit(particle))
+            {
+                nProtons++;
+                cutTracker.AssignPDGCode(i, 2212);
+
+                continue;
+            }
+
+            // The particle should be contained (as only the muon candidate is allowed to escape). But for sanity, let's check
+            if (!AnalysisHelper::IsContained(particle))
+                throw std::logic_error("GetDefaultSelection2 - Found an uncontained particle that isn't the muon. This shouldn't happen!");
+
+            // Get run the proton BDT
+            std::vector<float> features;
+            const auto hasFeatures = BDTHelper::GetBDTFeatures(particle, BDTHelper::ProtonBDTFeatureNames, features);
+
+            // If one or more of the BDT features are missing, then assume the particle is a proton
+            if (!hasFeatures)
+            {
+                nProtons++;
+                cutTracker.AssignPDGCode(i, 2212);
+
+                continue;
+            }
+
+            // Insist that the BDT response is greater than the cut value to identify the particle as a proton
+            const auto bdtResponse = pProtonBDT->GetResponse(features);
+            if (bdtResponse >= protonBDTThreshold)
+            {
+                nProtons++;
+                cutTracker.AssignPDGCode(i, 2212);
+
+                continue;
+            }
+
+            // If we've got to this point then we haven't identified the particle as a muon or a proton.
+            // Instead let's identify the particle as a pion
+            pionIndices.push_back(i);
+            cutTracker.AssignPDGCode(i, 211);
+        }
+
+        // Sanity check that we have identified every particle
+        const auto nMuons = 1u;
+        const auto nPions = pionIndices.size();
+        if (nProtons + nPions + nMuons != daughterRecoParticleIndices.size())
+            throw std::logic_error("DefaultSelection - Identified the wrong number of particles. This shouldn't happen! # protons: " + std::to_string(nProtons) + ", # pions: " + std::to_string(nPions) + ", # muons: " + std::to_string(nMuons) + ", # particles: " + std::to_string(daughterRecoParticleIndices.size())); 
+
+        // Insist that we exacly one pion (i.e we have have 2 non-protons)
+        if (nPions != 1)
+            return false;
+
+        // Mark the cut "2NonProtons" as passed
+        cutTracker.MarkCutAsPassed("2NonProtons");
+        //std::cout<<"CC1pi: 2NonProtons"<<std::endl;
+
+        // ----------------------------------------------------------------------------------
+        // pionHasValiddEdx
+        // ----------------------------------------------------------------------------------
+        // std::cout<<"DEBUG pionHasValiddEdx"<<std::endl;
+
+        const auto piondEdxThreshold = cutTracker.GetCutValue("pionHasValiddEdx");
+
+        // Get the pion reco particle
+        const auto pionIndex = pionIndices.front();
+        const auto &pion = recoParticles.at(pionIndex);
+
+        // Insist that the pion has a valid deEdx measurement (i.e. truncated mean dE/dx is above threshold)
+        if (pion.truncatedMeandEdx() < piondEdxThreshold)
+            return false;
+
+        // Mark the cut "pionHasValiddEdx" as passed
+        cutTracker.MarkCutAsPassed("pionHasValiddEdx");
+        //std::cout<<"CC1pi: pionHasValiddEdx"<<std::endl;
+
+        // ----------------------------------------------------------------------------------
+        // pionNotInGap
+        // ----------------------------------------------------------------------------------
+        // std::cout<<"DEBUG pionNotInGap"<<std::endl;
+
+        // Sanity check that our muon and pion are not the same particle
+        if (muonIndex == pionIndex)
+            throw std::logic_error("DefaultSelection - The muon and the pion candidates are the same particle. This shouldn't happen!");
+
+        // Insist that the pion has at least one hit in each view (i.e. not in a gap)
+        if (pion.nHitsU() == 0 || pion.nHitsV() == 0 || pion.nHitsW() == 0)
+            return false;
+
+        // Mark the cut "pionNotInGap" as passed
+        cutTracker.MarkCutAsPassed("pionNotInGap");
+        //std::cout<<"CC1pi: pionNotInGap"<<std::endl;
+
+        // ----------------------------------------------------------------------------------
+        // muonNotInGap
+        // ----------------------------------------------------------------------------------
+        // std::cout<<"DEBUG muonNotInGap"<<std::endl;
+
+        // Get the muon reco particle
+        const auto &muon = recoParticles.at(muonIndex);
+
+        // Insist that the muon has at least one hit in each view (i.e. not in a gap)
+        if (muon.nHitsU() == 0 || muon.nHitsV() == 0 || muon.nHitsW() == 0)
+            return false;
+
+        // Mark the cut "muonNotInGap" as passed
+        cutTracker.MarkCutAsPassed("muonNotInGap");
+        //std::cout<<"CC1pi: muonNotInGap"<<std::endl;
+
+        // ----------------------------------------------------------------------------------
+        // openingAngle
+        // ----------------------------------------------------------------------------------
+        // std::cout<<"DEBUG openingAngle"<<std::endl;
+
+        // Get the opening angle cut value
+        const auto maxOpeningAngle = cutTracker.GetCutValue("openingAngle");
+        
+        // if( !(muon.directionX.IsSet() && muon.directionY.IsSet() && muon.directionZ.IsSet() && pion.directionX.IsSet() && pion.directionY.IsSet() && pion.directionZ.IsSet()) ) return false;
+        // Get the opening angle between the muon and pion
+        const auto muonDir = TVector3(muon.directionX(), muon.directionY(), muon.directionZ()).Unit();
+        const auto pionDir = TVector3(pion.directionX(), pion.directionY(), pion.directionZ()).Unit();
+        const auto openingAngle = muonDir.Angle(pionDir);
+
+        // Insist that the opening angle isn't too wide
+        if (openingAngle >= maxOpeningAngle)
+            return false;
+
+        // Mark the cut "openingAngle" as passed
+        cutTracker.MarkCutAsPassed("openingAngle");
+        //std::cout<<"CC1pi: openingAngle"<<std::endl;
+
+        // ----------------------------------------------------------------------------------
+        // topologicalScore
+        // ----------------------------------------------------------------------------------
+        // std::cout<<"DEBUG topologicalScore"<<std::endl;
+
+        // Get the topological score cut value
+        const auto minTopologicalScore = cutTracker.GetCutValue("topologicalScore");
+
+        // Insist that the topological score is above the cut value
+        if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScore)
+            return false;
+
+        // Mark the cut "topologicalScore" as passed
+        cutTracker.MarkCutAsPassed("topologicalScore");
+        //std::cout<<"CC1pi: topologicalScore"<<std::endl;
+        
+        // ----------------------------------------------------------------------------------
+        // startNearVertex
+        // ----------------------------------------------------------------------------------
+        // std::cout<<"DEBUG startNearVertex"<<std::endl;
+
+        // Get the start near vertex cut value
+        const auto maxVertexDist = cutTracker.GetCutValue("startNearVertex");
+        const auto maxVertexDist2 = maxVertexDist*maxVertexDist;
+
+        // Insist that all particles with a fitted track start near the vertex
+        const auto recoVertex = pEvent->reco.nuVertex();
+        for (const auto i:daughterRecoParticleIndices)
+        {
+            const auto &particle = recoParticles.at(i);
+            // Skip particles without a track fit
+            if (!AnalysisHelper::HasTrackFit(particle))
+            {
+                continue;
+            }
+
+            // Get the distance between the particle's start position and the vertex
+            const TVector3 start(particle.startX(), particle.startY(), particle.startZ());
+            const auto vertexDist2 = (start - recoVertex).Mag2();
+
+            // Insist that this isn't too large
+            if (vertexDist2 > maxVertexDist2)
+            {
+                return false;
+            }
+        }
+
+        // Mark the cut "startNearVertex" as passed
+        cutTracker.MarkCutAsPassed("startNearVertex");
+        //std::cout<<"CC1pi: startNearVertex"<<std::endl;
+
+        // ----------------------------------------------------------------------------------
+        // likelyGoldenPion
+        // ----------------------------------------------------------------------------------
+        // std::cout<<"DEBUG likelyGoldenPion"<<std::endl;
+
+        // Get the likely golden pion cut value
+        const auto goldenPionBDTThreshold = cutTracker.GetCutValue("likelyGoldenPion");
+
+        // Get the golden pion BDT
+        auto &pGoldenPionBDT = bdtMap.at("goldenPion");
+
+        // Get the features of the pion
+        std::vector<float> features;
+        if (!BDTHelper::GetBDTFeatures(pion, BDTHelper::GoldenPionBDTFeatureNames, features))
+            throw std::logic_error("DefaultSelection - Can't get golden pion BDT features of pion candidate");
+
+        // Insist that the BDT response is greater than the cut value to identify the pion as a golden pion
+        const auto bdtResponse = pGoldenPionBDT->GetResponse(features);
+        if (bdtResponse <= goldenPionBDTThreshold)
+            return false;
+
+        // Mark the cut "likelyGoldenPion" as passed
+        cutTracker.MarkCutAsPassed("likelyGoldenPion");
+        //std::cout<<"CC1pi: likelyGoldenPion"<<std::endl;
+
+        // We passed all cuts!
+        return true;
+    };
+
+    // std::cout<<"DEBUG done with Default2 logic"<<std::endl;
+    return EventSelection(cuts, bdtMap, logic);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+SelectionHelper::EventSelection SelectionHelper::GetCCInclusiveSelection2(const bool skipOldCuts /*= false*/)
+{
+    // Define the cuts
+    const std::vector<EventSelection::Cut> cuts = {
+        // ########### CC inclusive selection starting from sliceID cuts; all conditions need to be met by at least one particle ###########
+        // See docID: 25589-v2 for details
+
+        // track score > 0.85
+        {"particleTrackScore", 0.85f},
+        // vertex distance < 4 cm
+        {"particleVertexDistance", 4.0f},
+        // generation = 2 (direct neutrino daughter)
+        {"particleGeneration"},
+        // track length > 20 cm
+        {"particleTrackLength", 20.0f}, // ATTN: This analysis and pelee use SCE corrected lengths numucc does not
+        // Proton χ2 > 60
+        {"particleProtonChi2", 60.0f},
+        // Muon χ2 < 30
+        {"particleMuonChi2", 30.0f},
+        // Proton χ2/Muon χ2 > 7
+        {"particleProtonChi2OverMuonChi2", 7.0f},
+
+        // ########### CC inclusive selection continued; conditions now apply to events ###########
+        // Pandora PDG code = 14 (reconstructed object with the most hits is track-like).
+        {"pandoraNuPDGIsNumu"},
+        // Start vertex of all daughters is at least 10 cm from all borders
+        {"daughterVerticesContained", 10.0f},
+        // Neutrino vertex is in the fiducial volume.
+        {"nuVertexFiducial"},
+        // Flash χ2 < 10 OR topological score > 0.25
+        {"topologicalOrFlashMatch"},
+        // Topological score > 0.06
+        // {"topologicalScoreCC", 0.06f},
+    };
+
+    // Load up the BDTs and store them in a map
+    EventSelection::BDTMap bdtMap = {};
+
+    // Define the actual selection logic
+    const auto logic = [skipOldCuts](const auto &pEvent, auto &bdtMap, auto &cutTracker)
+    {
+        const auto &recoParticles = pEvent->reco.particles; // Use all neutrino downstream particles 
+        std::vector<bool> selectedParticles(recoParticles.size(), true);
+        // ----------------------------------------------------------------------------------
+        // particleTrackScore
+        // ----------------------------------------------------------------------------------
+        
+        // Get the track score cut value
+        const auto minTrackScore = cutTracker.GetCutValue("particleTrackScore");
+        for(unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // Skip particles without a track fit
+            if (!AnalysisHelper::HasTrackFit(recoParticles.at(i)))
+            {
+                selectedParticles.at(i) = false;
+                continue;
+            }
+
+            // Skip particles that didn't pass the CC inclusive selection
+            if(!selectedParticles.at(i)) continue;
+            if(!recoParticles.at(i).trackScore.IsSet() || recoParticles.at(i).trackScore() < minTrackScore) selectedParticles.at(i) = false;
+        }
+        // Mark the cut "particleTrackScore" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleTrackScore");
+
+        // ----------------------------------------------------------------------------------
+        // particleVertexDistance
+        // ----------------------------------------------------------------------------------
+
+        // Get the vertex distance cut value
+        const auto maxParticleVertexDist = cutTracker.GetCutValue("particleVertexDistance");
+        const auto maxParticleVertexDist2 = maxParticleVertexDist*maxParticleVertexDist;
+
+        // Insist that all particles with a fitted track start near the vertex
+        const auto recoVertexCC1 = pEvent->reco.nuVertexNoSCC();
+        for (unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // Skip particles that didn't pass the previous cuts
+            if(!selectedParticles.at(i)) continue;
+
+            // Get the distance between the particle's start position and the vertex
+            const TVector3 start(recoParticles.at(i).vertexX(), recoParticles.at(i).vertexY(), recoParticles.at(i).vertexZ());
+            const auto vertexDist2 = (start - recoVertexCC1).Mag2();
+
+            // Insist that this isn't too large
+            if (vertexDist2 > maxParticleVertexDist2) selectedParticles.at(i) = false;
+        }
+        // Mark the cut "particleVertexDistance" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleVertexDistance");
+
+        // ----------------------------------------------------------------------------------
+        // particleGeneration
+        // ----------------------------------------------------------------------------------
+        std::vector<unsigned int> daughterRecoParticleIndices{};
+        for(unsigned int i = 0; i < recoParticles.size(); ++i)
+        {
+            // Skip particles that didn't pass the previous cuts
+            // if(!selectedParticles.at(i)) continue; // This saves some time but here we want to iterate over all particles to also crete daughterRecoParticleIndices
+            if(recoParticles.at(i).generation() == 2)
+            {
+                daughterRecoParticleIndices.push_back(i);
+            }
+            else
+            {
+                selectedParticles.at(i) = false;
+            }
+        }
+        // Mark the cut "particleGeneration" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleGeneration");
+
+        // ----------------------------------------------------------------------------------
+        // particleTrackLength
+        // ----------------------------------------------------------------------------------
+
+        // Get the track length cut value
+        const auto minTrackLength = cutTracker.GetCutValue("particleTrackLength");
+        for(unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // Skip particles that didn't pass the previous cuts
+            if(!selectedParticles.at(i)) continue;
+            if(recoParticles.at(i).range() < minTrackLength) selectedParticles.at(i) = false;
+        }
+        // Mark the cut "particleTrackLength" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleTrackLength");
+
+        // ----------------------------------------------------------------------------------
+        // particleProtonChi2
+        // ----------------------------------------------------------------------------------
+
+        // Get the proton chi2 cut value
+        const auto minProtonChi2 = cutTracker.GetCutValue("particleProtonChi2");
+        for(unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // if(recoParticles.at(i).chi2ForwardProtonW.IsSet())std::cout<<recoParticles.at(i).chi2ForwardProtonW();
+            // else std::cout<<"not set";
+            // std::cout<<"("<<selectedParticles.at(i)<<")"<<std::endl;
+            // Skip particles that didn't pass the previous cuts
+            if(!selectedParticles.at(i)) continue;
+            if(!recoParticles.at(i).chi2ForwardProtonW.IsSet() || recoParticles.at(i).chi2ForwardProtonW() < minProtonChi2) selectedParticles.at(i) = false;
+        }
+        // Mark the cut "particleProtonChi2" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleProtonChi2");
+
+        // ----------------------------------------------------------------------------------
+        // particleMuonChi2
+        // ----------------------------------------------------------------------------------
+
+        // Get the muon chi2 cut value
+        const auto maxMuonChi2 = cutTracker.GetCutValue("particleMuonChi2");
+        for(unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // if(recoParticles.at(i).chi2ForwardMuonW.IsSet())std::cout<<recoParticles.at(i).chi2ForwardMuonW();
+            // else std::cout<<"not set";
+            // std::cout<<"("<<selectedParticles.at(i)<<")"<<std::endl;
+            // Skip particles that didn't pass the previous cuts
+            if(!selectedParticles.at(i)) continue;
+            if(recoParticles.at(i).chi2ForwardMuonW() > maxMuonChi2) selectedParticles.at(i) = false;
+        }
+        // Mark the cut "particleMuonChi2" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleMuonChi2");
+
+        // ----------------------------------------------------------------------------------
+        // particleProtonChi2OverMuonChi2
+        // ----------------------------------------------------------------------------------
+
+        // Get the proton chi2 over muon chi2 cut value
+        const auto minProtonChi2OverMuonChi2 = cutTracker.GetCutValue("particleProtonChi2OverMuonChi2");
+        for(unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // Skip particles that didn't pass the previous cuts
+            if(!selectedParticles.at(i)) continue;
+            if(recoParticles.at(i).chi2ForwardProtonW()/recoParticles.at(i).chi2ForwardMuonW() < minProtonChi2OverMuonChi2) selectedParticles.at(i) = false;
+        }
+        // Mark the cut "particleProtonChi2OverMuonChi2" as passed as long as there is at least one particle that passes the cut
+        if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
+            return false;
+        cutTracker.MarkCutAsPassed("particleProtonChi2OverMuonChi2");
+
+        // ----------------------------------------------------------------------------------
+        // Not a cut: In case there are multiple muon candidates, we select the longest one 
+        // ----------------------------------------------------------------------------------
+
+        // Get the longest particle
+        auto ccInclusiveMuonCandidateIndex = 0u;
+        auto longestParticleLength = 0.0f;
+        for(unsigned int i = 0; i< recoParticles.size(); ++i)
+        {
+            // Skip particles that didn't pass the previous cuts
+            if(!selectedParticles.at(i)) continue;
+            if(recoParticles.at(i).range() > longestParticleLength)
+            {
+                longestParticleLength = recoParticles.at(i).range();
+                ccInclusiveMuonCandidateIndex = i;
+            }
+        }
+
+        // ----------------------------------------------------------------------------------
+        // pandoraNuPDGIsNumu
+        // ----------------------------------------------------------------------------------
+
+        if(!skipOldCuts)
+        {
+            // Get the pandora neutrino PDG
+            const auto pandoraNuPDGIsNumu = pEvent->reco.nuPdgCode();
+
+            // Insist that the pandora PDG is a muon neutrino
+            if (pandoraNuPDGIsNumu != 14)
+                return false;
+        }
+        // else
+        // {
+        //     std::cout<<"Warning: skipping pandoraNuPDGIsNumu cut"<<std::endl;
+        // }
+
+        // Mark the cut "pandoraNuPDGIsNumu" as passed
+        cutTracker.MarkCutAsPassed("pandoraNuPDGIsNumu");
+
+        // ----------------------------------------------------------------------------------
+        // daughterVerticesContained
+        // ----------------------------------------------------------------------------------
+
+        // Get the start near vertex cut value
+        const auto margin = cutTracker.GetCutValue("daughterVerticesContained");
+
+        // Insist that all particles with a fitted track start near the vertex
+        for (const auto &particle : recoParticles)
+        {
+            // Skip particles without a track fit
+            // if (!(particle.startX.IsSet() && particle.startY.IsSet() && particle.startZ.IsSet()))
+            //     continue;
+            if (!AnalysisHelper::HasTrackFit(particle))
+            {
+                continue;
+            }
+
+            // Get the distance between the particle's start position and the vertex
+            if(!particle.vertexX.IsSet() || !particle.vertexY.IsSet() || !particle.vertexZ.IsSet())
+            {
+                return false;
+            }
+            
+
+            const TVector3 vertex(particle.vertexX(), particle.vertexY(), particle.vertexZ());
+            
+            // Insist that all vertices are contained within the margin
+            if (!AnalysisHelper::IsPointWithinMargins(vertex, margin, margin, margin, margin, margin, margin))
+            {
+                return false;
+            }
+        }
+
+        // Mark the cut "daughterVerticesContained" as passed
+        cutTracker.MarkCutAsPassed("daughterVerticesContained");
+
+        // ----------------------------------------------------------------------------------
+        // nuVertexFiducial
+        // ----------------------------------------------------------------------------------
+
+        // Get the vertex position
+        const auto recoVertexCC = pEvent->reco.nuVertexNoSCC();
+        if(!AnalysisHelper::IsFiducial(recoVertexCC))
+            return false;
+        
+        // Mark the cut "nuVertexFiducial" as passed
+        cutTracker.MarkCutAsPassed("nuVertexFiducial");
+
+        // ----------------------------------------------------------------------------------
+        // topologicalOrFlashMatch
+        // ----------------------------------------------------------------------------------
+
+        // Get the topological score cut value
+        const auto minTopologicalScoreCC1 = 0.25f;
+        const auto maxFlashMatchScore = 10.0f;
+
+        // Insist that the topological score is above the cut value or the flash match score is below the cut value
+        // Here: when neither is the case, the event is rejected 
+        // if(pEvent->reco.flashChi2.IsSet()) std::cout<<"flashChi2: "<<pEvent->reco.flashChi2.IsSet()<<std::endl;
+        // else std::cout<<"flashChi2 not set"<<std::endl;
+
+        if(!skipOldCuts)
+        {
+            if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1 && pEvent->reco.flashChi2.IsSet() && pEvent->reco.flashChi2() >= maxFlashMatchScore)
+                return false;
+        }
+        // else
+        // {
+        //     std::cout<<"Warning: skipping topologicalOrFlashMatch cut"<<std::endl;
+        // }
+
+        // Mark the cut "topologicalOrFlashMatch" as passed
+        cutTracker.MarkCutAsPassed("topologicalOrFlashMatch");
+
+        // We passed all cuts!
+        return true;
+    };
+
+    // std::cout<<"DEBUG done with Default2 logic"<<std::endl;
+    return EventSelection(cuts, bdtMap, logic);
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(const float muonLikeProtonValue /*= -0.4f*/, const float barelyResemblingProtonValue /*= 0.1f*/, const bool skipOldCuts /*= false*/)
 {
     // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 0\n";
     // Define the cuts
@@ -1292,7 +2224,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // Flash χ2 < 10 OR topological score > 0.25
         {"topologicalOrFlashMatch"},
         // Topological score > 0.06
-        {"topologicalScoreCC", 0.06f},
+        // {"topologicalScoreCC", 0.06f},
 
         // {"passesCCInclusive"},
         {"min2Tracks"},
@@ -1318,20 +2250,18 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
     };
 
     // Define the actual selection logic
-    const auto logic = [](const auto &pEvent, auto &bdtMap, auto &cutTracker)
+    const auto logic = [skipOldCuts](const auto &pEvent, auto &bdtMap, auto &cutTracker)
     {
         const auto &recoParticles = pEvent->reco.particles; // Use all neutrino downstream particles
         std::vector<bool> selectedParticles(recoParticles.size(), true);
         // ----------------------------------------------------------------------------------
         // particleTrackScore
         // ----------------------------------------------------------------------------------
-        // // // std::cout<<"DEBUG default particleTrackScore"<<std::endl;
 
         // Get the track score cut value
         const auto minTrackScore = cutTracker.GetCutValue("particleTrackScore");
         for(unsigned int i = 0; i< recoParticles.size(); ++i)
         {
-            // // // std::cout<<"DEBUG default 2 - particleTrackScore: "<<recoParticles.at(i).trackScore()<<"("<<selectedParticles.at(i)<<")"<<std::endl;
             // Skip particles without a track fit
             if (!AnalysisHelper::HasTrackFit(recoParticles.at(i)))
             {
@@ -1351,7 +2281,6 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // ----------------------------------------------------------------------------------
         // particleVertexDistance
         // ----------------------------------------------------------------------------------
-        // // // std::cout<<"DEBUG default particleVertexDistance"<<std::endl;
 
         // Get the vertex distance cut value
         const auto maxParticleVertexDist = cutTracker.GetCutValue("particleVertexDistance");
@@ -1379,13 +2308,19 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // ----------------------------------------------------------------------------------
         // particleGeneration
         // ----------------------------------------------------------------------------------
-        // // // std::cout<<"DEBUG default particleGeneration"<<std::endl;
-
+        std::vector<unsigned int> daughterRecoParticleIndices{};
         for(unsigned int i = 0; i< recoParticles.size(); ++i)
         {
             // Skip particles that didn't pass the previous cuts
-            if(!selectedParticles.at(i)) continue;
-            if(recoParticles.at(i).generation() != 2) selectedParticles.at(i) = false;
+            // if(!selectedParticles.at(i)) continue; // This saves some time but here we want to iterate over all particles to also crete daughterRecoParticleIndices
+            if(recoParticles.at(i).generation() == 2)
+            {
+                daughterRecoParticleIndices.push_back(i);
+            }
+            else
+            {
+                selectedParticles.at(i) = false;
+            }
         }
         // Mark the cut "particleGeneration" as passed as long as there is at least one particle that passes the cut
         if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
@@ -1395,17 +2330,14 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // ----------------------------------------------------------------------------------
         // particleTrackLength
         // ----------------------------------------------------------------------------------
-        // // // std::cout<<"DEBUG default particleTrackLength"<<std::endl;
 
         // Get the track length cut value
         const auto minTrackLength = cutTracker.GetCutValue("particleTrackLength");
         for(unsigned int i = 0; i< recoParticles.size(); ++i)
         {
-            // // // std::cout<<"DEBUG default 6 - particleTrackLength: "<<recoParticles.at(i).range()<<"("<<selectedParticles.at(i)<<")"<<std::endl;
             // Skip particles that didn't pass the previous cuts
             if(!selectedParticles.at(i)) continue;
             if(recoParticles.at(i).range() < minTrackLength) selectedParticles.at(i) = false;
-            // // // std::cout<<"DEBUG default recoParticles.at(i).range(): "<<recoParticles.at(i).range()<<std::endl;
         }
         // Mark the cut "particleTrackLength" as passed as long as there is at least one particle that passes the cut
         if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
@@ -1415,13 +2347,11 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // ----------------------------------------------------------------------------------
         // particleProtonChi2
         // ----------------------------------------------------------------------------------
-        // // // std::cout<<"DEBUG default particleProtonChi2"<<std::endl;
 
         // Get the proton chi2 cut value
         const auto minProtonChi2 = cutTracker.GetCutValue("particleProtonChi2");
         for(unsigned int i = 0; i< recoParticles.size(); ++i)
         {
-            // // std::cout<<"DEBUG default (4) - chi2ForwardProtonW: ";
             // if(recoParticles.at(i).chi2ForwardProtonW.IsSet())std::cout<<recoParticles.at(i).chi2ForwardProtonW();
             // else std::cout<<"not set";
             // std::cout<<"("<<selectedParticles.at(i)<<")"<<std::endl;
@@ -1437,13 +2367,11 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // ----------------------------------------------------------------------------------
         // particleMuonChi2
         // ----------------------------------------------------------------------------------
-        // // // std::cout<<"DEBUG default particleMuonChi2"<<std::endl;
 
         // Get the muon chi2 cut value
         const auto maxMuonChi2 = cutTracker.GetCutValue("particleMuonChi2");
         for(unsigned int i = 0; i< recoParticles.size(); ++i)
         {
-            // // std::cout<<"DEBUG default (5) - chi2ForwardMuonW: ";
             // if(recoParticles.at(i).chi2ForwardMuonW.IsSet())std::cout<<recoParticles.at(i).chi2ForwardMuonW();
             // else std::cout<<"not set";
             // std::cout<<"("<<selectedParticles.at(i)<<")"<<std::endl;
@@ -1459,18 +2387,14 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // ----------------------------------------------------------------------------------
         // particleProtonChi2OverMuonChi2
         // ----------------------------------------------------------------------------------
-        // // // std::cout<<"DEBUG default particleProtonChi2OverMuonChi2"<<std::endl;
 
         // Get the proton chi2 over muon chi2 cut value
         const auto minProtonChi2OverMuonChi2 = cutTracker.GetCutValue("particleProtonChi2OverMuonChi2");
         for(unsigned int i = 0; i< recoParticles.size(); ++i)
         {
-            // // // std::cout<<"DEBUG default 7 - particleProtonChi2OverMuonChi2: "<<recoParticles.at(i).chi2ForwardProtonW()/recoParticles.at(i).chi2ForwardMuonW()<<"("<<selectedParticles.at(i)<<")"<<" "<<recoParticles.at(i).chi2ForwardProtonW()<<" "<<recoParticles.at(i).chi2ForwardMuonW()<<std::endl;
             // Skip particles that didn't pass the previous cuts
             if(!selectedParticles.at(i)) continue;
             if(recoParticles.at(i).chi2ForwardProtonW()/recoParticles.at(i).chi2ForwardMuonW() < minProtonChi2OverMuonChi2) selectedParticles.at(i) = false;
-            // // std::cout<<"DEBUG default chi2ForwardProtonW()/chi2ForwardMuonW(): "<<recoParticles.at(i).chi2ForwardProtonW()/recoParticles.at(i).chi2ForwardMuonW()\
-            <<" "<<recoParticles.at(i).chi2ForwardProtonW()<<" "<<recoParticles.at(i).chi2ForwardMuonW()<<std::endl;
         }
         // Mark the cut "particleProtonChi2OverMuonChi2" as passed as long as there is at least one particle that passes the cut
         if(!std::any_of(selectedParticles.begin(), selectedParticles.end(), [](bool value) {return value;}))
@@ -1480,7 +2404,6 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // ----------------------------------------------------------------------------------
         // Not a cut: In case there are multiple muon candidates, we select the longest one
         // ----------------------------------------------------------------------------------
-        // // // std::cout<<"DEBUG default longest particle"<<std::endl;
 
         // Get the longest particle
         auto ccInclusiveMuonCandidateIndex = 0u;
@@ -1499,14 +2422,20 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // ----------------------------------------------------------------------------------
         // pandoraNuPDGIsNumu
         // ----------------------------------------------------------------------------------
-        // // // std::cout<<"DEBUG default pandoraNuPDGIsNumu"<<std::endl;
 
+        if(!skipOldCuts)
+        {
         // Get the pandora neutrino PDG
         const auto pandoraNuPDGIsNumu = pEvent->reco.nuPdgCode();
 
         // Insist that the pandora PDG is a muon neutrino
         if (pandoraNuPDGIsNumu != 14)
             return false;
+        }
+        // else
+        // {
+        //     std::cout<<"Warning: skipping pandoraNuPDGIsNumu cut"<<std::endl;
+        // }
 
         // Mark the cut "pandoraNuPDGIsNumu" as passed
         cutTracker.MarkCutAsPassed("pandoraNuPDGIsNumu");
@@ -1514,7 +2443,6 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // ----------------------------------------------------------------------------------
         // daughterVerticesContained
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default daughterVerticesContained"<<std::endl;
 
         // Get the start near vertex cut value
         const auto margin = cutTracker.GetCutValue("daughterVerticesContained");
@@ -1522,33 +2450,28 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // Insist that all particles with a fitted track start near the vertex
         for (const auto &particle : recoParticles)
         {
-            // // // std::cout<<"DEBUG default daughterVerticesContained 2"<<std::endl;
             // Skip particles without a track fit
             // if (!(particle.startX.IsSet() && particle.startY.IsSet() && particle.startZ.IsSet()))
             //     continue;
             if (!AnalysisHelper::HasTrackFit(particle))
             {
-                // // // std::cout<<"DEBUG default particle without track fit skipped"<<std::endl;
                 continue;
             }
 
-            // // // std::cout<<"DEBUG default daughterVerticesContained 3"<<std::endl;
             // Get the distance between the particle's start position and the vertex
             if(!particle.vertexX.IsSet() || !particle.vertexY.IsSet() || !particle.vertexZ.IsSet())
             {
-                // // std::cout<<"DEBUG default daughterVerticesContained 3.1 vertexX.IsSet() "<<particle.vertexX.IsSet()<<" vertexY.IsSet() "<<particle.vertexY.IsSet()<<" vertexZ.IsSet() "<<particle.vertexZ.IsSet()<<std::endl;
                 return false;
             }
 
-            // // // std::cout<<"DEBUG default daughterVerticesContained 4"<<std::endl;
 
             const TVector3 vertex(particle.vertexX(), particle.vertexY(), particle.vertexZ());
 
-            // // std::cout<<"DEBUG default daughterVerticesContained 5"<<std::endl;
             // Insist that all vertices are contained within the margin
             if (!AnalysisHelper::IsPointWithinMargins(vertex, margin, margin, margin, margin, margin, margin))
+            {
                 return false;
-            // // std::cout<<"DEBUG default daughterVerticesContained 6"<<std::endl;
+            }
         }
 
         // Mark the cut "daughterVerticesContained" as passed
@@ -1557,7 +2480,6 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // ----------------------------------------------------------------------------------
         // nuVertexFiducial
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default nuVertexFiducial"<<std::endl;
 
         // Get the vertex position
         const auto recoVertexCC = pEvent->reco.nuVertexNoSCC();
@@ -1570,7 +2492,6 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // ----------------------------------------------------------------------------------
         // topologicalOrFlashMatch
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default topologicalOrFlashMatch"<<std::endl;
 
         // Get the topological score cut value
         const auto minTopologicalScoreCC1 = 0.25f;
@@ -1578,8 +2499,18 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
 
         // Insist that the topological score is above the cut value or the flash match score is below the cut value
         // Here: when neither is the case, the event is rejected
-        if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1 && pEvent->reco.flashChi2.IsSet() && pEvent->reco.flashChi2() >= maxFlashMatchScore)
-            return false;
+        // if(pEvent->reco.flashChi2.IsSet()) std::cout<<"flashChi2: "<<pEvent->reco.flashChi2.IsSet()<<std::endl;
+        // else std::cout<<"flashChi2 not set"<<std::endl;
+
+        if(!skipOldCuts)
+        {
+            if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1 && pEvent->reco.flashChi2.IsSet() && pEvent->reco.flashChi2() >= maxFlashMatchScore)
+                return false;
+        }
+        // else
+        // {
+        //     std::cout<<"Warning: skipping topologicalOrFlashMatch cut"<<std::endl;
+        // }
 
         // Mark the cut "topologicalOrFlashMatch" as passed
         cutTracker.MarkCutAsPassed("topologicalOrFlashMatch");
@@ -1587,17 +2518,16 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // ----------------------------------------------------------------------------------
         // topologicalScoreCC
         // ----------------------------------------------------------------------------------
-        // // std::cout<<"DEBUG default topologicalScoreCC"<<std::endl;
 
-        // Get the topological score cut value
-        const auto minTopologicalScoreCC2 = cutTracker.GetCutValue("topologicalScoreCC");
+        // // Get the topological score cut value
+        // const auto minTopologicalScoreCC2 = cutTracker.GetCutValue("topologicalScoreCC");
 
-        // Insist that the topological score is above the cut value
-        if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC2)
-            return false;
+        // // Insist that the topological score is above the cut value
+        // if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC2)
+        //     return false;
 
         // Mark the cut "topologicalScoreCC" as passed
-        cutTracker.MarkCutAsPassed("topologicalScoreCC");
+        // cutTracker.MarkCutAsPassed("topologicalScoreCC");
 
         // ##################################################################################
         // Start of pion selection
@@ -1615,7 +2545,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // cutTracker.MarkCutAsPassed("passesCCInclusive");
         // //std::cout<<"CC0pi: passesCCInclusive"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 3\n";
+        std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 3\n";
         // ----------------------------------------------------------------------------------
         // min2Tracks
         // ----------------------------------------------------------------------------------
@@ -1624,8 +2554,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         unsigned int nTrackParticles = 0u;
         unsigned int nUncontainedParticles = 0u;
 
-        // const auto &recoParticles = pEvent->reco.particles;
-        for (unsigned int i = 0; i < recoParticles.size(); ++i)
+        for (const auto i:daughterRecoParticleIndices)//unsigned int i = 0; i < pionSectionRecoParticles.size(); ++i)
         {
             const auto &particle = recoParticles.at(i);
 
@@ -1646,7 +2575,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         cutTracker.MarkCutAsPassed("min2Tracks");
         //std::cout<<"CC0pi: min2Tracks"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 4\n";
+        std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 4\n";
         // ----------------------------------------------------------------------------------
         // max1Uncontained
         // ----------------------------------------------------------------------------------
@@ -1654,6 +2583,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // Insist that at most one particle is uncontained
         if (nUncontainedParticles > 1)
             return false;
+
 
         // Mark the cut "max1Uncontained" as passed
         cutTracker.MarkCutAsPassed("max1Uncontained");
@@ -1666,7 +2596,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // Assign the muon candidate a muon PDG code
         cutTracker.AssignPDGCode(muonIndex, 13);
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 5\n";
+        std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 5\n";
         // ----------------------------------------------------------------------------------
         // 1NonProton
         // ----------------------------------------------------------------------------------
@@ -1684,7 +2614,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         std::vector<unsigned int> protonIndices;
         std::vector<unsigned int> pionIndices;
 
-        for (unsigned int i = 0; i < recoParticles.size(); ++i)
+        for (const auto i:daughterRecoParticleIndices)//unsigned int i = 0; i < pionSectionRecoParticles.size(); ++i)
         {
             const auto &particle = recoParticles.at(i);
 
@@ -1706,7 +2636,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
 
             // The particle should be contained (as only the muon candidate is allowed to escape). But for sanity, let's check
             if (!AnalysisHelper::IsContained(particle))
-                throw std::logic_error("DefaultSelection - Found an uncontained particle that isn't the muon. This shouldn't happen!");
+                throw std::logic_error("GetCC0piSelectionModifiedPeLEE - Found an uncontained particle that isn't the muon. This shouldn't happen!");
 
             // Get run the proton BDT
             std::vector<float> features;
@@ -1749,7 +2679,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // Sanity check that we have identified every particle
         const auto nMuons = 1u;
         const auto nPions = pionIndices.size();
-        if (nProtons + nBadProtons + nPions + nMuons != recoParticles.size())
+        if (nProtons + nBadProtons + nPions + nMuons != daughterRecoParticleIndices.size())
             throw std::logic_error("DefaultSelection - Identified the wrong number of particles. This shouldn't happen!");
 
         // Insist that we exacly zero pions (i.e we have only 1 non-proton, the muon)
@@ -1796,7 +2726,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         //std::cout<<"CC0pi: muonLikeProton"<<std::endl;
 
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 7\n";
+        std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 7\n";
         // ----------------------------------------------------------------------------------
         // barelyResemblingProton
         // ----------------------------------------------------------------------------------
@@ -1949,8 +2879,9 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
 
         // Insist that all particles with a fitted track start near the vertex
         const auto recoVertex = pEvent->reco.nuVertex();
-        for (const auto &particle : recoParticles)
+        for (const auto i:daughterRecoParticleIndices)
         {
+            const auto &particle = recoParticles.at(i);
             // Skip particles without a track fit
             if (!AnalysisHelper::HasTrackFit(particle))
                 continue;
@@ -2132,7 +3063,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
 
             // The particle should be contained (as only the muon candidate is allowed to escape). But for sanity, let's check
             if (!AnalysisHelper::IsContained(particle))
-                throw std::logic_error("DefaultSelection - Found an uncontained particle that isn't the muon. This shouldn't happen!");
+                throw std::logic_error("GetCC0piSelection - Found an uncontained particle that isn't the muon. This shouldn't happen!");
 
             // Get run the proton BDT
             std::vector<float> features;
@@ -2349,13 +3280,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
     return EventSelection(cuts, bdtMap, logic);
 }
 
-
-
-
 // -----------------------------------------------------------------------------------------------------------------------------------------
-
-
-
 
 SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const float muonLikeProtonValue /*= -0.4f*/, const float barelyResemblingProtonValue /*= 0.1f*/)
 {
@@ -2490,7 +3415,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
 
             // The particle should be contained (as only the muon candidate is allowed to escape). But for sanity, let's check
             if (!AnalysisHelper::IsContained(particle))
-                throw std::logic_error("DefaultSelection - Found an uncontained particle that isn't the muon. This shouldn't happen!");
+                throw std::logic_error("GetCC0piSelectionModified - Found an uncontained particle that isn't the muon. This shouldn't happen!");
 
             // Get run the proton BDT
             std::vector<float> features;
@@ -2783,11 +3708,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
     return EventSelection(cuts, bdtMap, logic);
 }
 
-
 // -----------------------------------------------------------------------------------------------------------------------------------------
-
-
-
 
 SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1()
 {
@@ -2920,7 +3841,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
 
             // The particle should be contained (as only the muon candidate is allowed to escape). But for sanity, let's check
             if (!AnalysisHelper::IsContained(particle))
-                throw std::logic_error("DefaultSelection - Found an uncontained particle that isn't the muon. This shouldn't happen!");
+                throw std::logic_error("GetCC0piSelectionModifiedPart1 - Found an uncontained particle that isn't the muon. This shouldn't happen!");
 
             // Get run the proton BDT
             std::vector<float> features;
@@ -3108,9 +4029,6 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
 SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart2(const float muonLikeProtonValue /*= -0.4f*/, const float barelyResemblingProtonValue /*= 0.1f*/)
 {
     // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point -1"<<std::endl;
@@ -3172,7 +4090,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart2(
 
             // The particle should be contained (as only the muon candidate is allowed to escape). But for sanity, let's check
             if (!AnalysisHelper::IsContained(particle))
-                throw std::logic_error("DefaultSelection - Found an uncontained particle that isn't the muon. This shouldn't happen!");
+                throw std::logic_error("GetCC0piSelectionModifiedPart2 - Found an uncontained particle that isn't the muon. This shouldn't happen!");
 
             // Get run the proton BDT
             std::vector<float> features;
@@ -3296,6 +4214,7 @@ unsigned int SelectionHelper::GetMuonCandidateIndex(const std::vector<Event::Rec
     for (unsigned int index = 0; index < particles.size(); ++index)
     {
         const auto &particle = particles.at(index);
+        if(particle.generation() != 2) continue; // This is needed because the PeLEE ntuples comtain all particles
 
         // When no cc-inclusive muon candidate is explicitly provided (ccInclusiveMuonCandidateIndex), get it via the cc-inclusive muon candidate flag provided by the numucc filter
         if (ccInclusiveMuonCandidateIndex < 0 && particle.isCCInclusiveMuonCandidate())
@@ -3334,6 +4253,7 @@ unsigned int SelectionHelper::GetMuonCandidateIndex(const std::vector<Event::Rec
     for (unsigned int index = 0; index < particles.size(); ++index)
     {
         const auto &particle = particles.at(index);
+        if(particle.generation() != 2) continue; // This is needed because the PeLEE ntuples comtain all particles
 
         if (!AnalysisHelper::HasTrackFit(particle))
             continue;

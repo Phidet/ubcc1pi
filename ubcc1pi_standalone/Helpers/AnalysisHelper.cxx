@@ -506,7 +506,6 @@ bool AnalysisHelper::IsTrueCC1Pi(const std::shared_ptr<Event> &pEvent, const boo
     const auto nPion = AnalysisHelper::CountParticlesWithPdgCode(visibleParticles, 211, useAbsPdg);
     const auto nOther = visibleParticles.size() - (nMu + nProton + nPion);
 
-    // std::cout<<"DEBUG AnalysisHelper::IsTrueCC1Pi - nMu: "<<nMu<<" nProton: "<<nProton<<" nPion: "<<nPion<<" nOther: "<<nOther<<std::endl;
     // Insist on the CC1Pi topology
     return (nMu == 1 && nPion == 1 && nOther == 0);
 }
@@ -838,20 +837,116 @@ bool AnalysisHelper::IsInActiveVolume(const TVector3 &point)
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
-
 unsigned int AnalysisHelper::GetBestMatchedTruthParticleIndex(const Event::Reco::Particle &recoParticle, const std::vector<Event::Truth::Particle> &truthParticles, const bool applyVisibilityThreshold)
 {
+    if(recoParticle.hasMatchedMCParticle.IsSet()) 
+    {
+        std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndex - reco particle has matched MC particle"<<std::endl;
+        return GetBestMatchedTruthParticleIndexUbCC1pi(recoParticle, truthParticles, applyVisibilityThreshold);
+    }
+    else
+    {
+        return GetBestMatchedTruthParticleIndexPeLEE(recoParticle, truthParticles, applyVisibilityThreshold);
+    }
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+unsigned int AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE(const Event::Reco::Particle &recoParticle, const std::vector<Event::Truth::Particle> &truthParticles, const bool applyVisibilityThreshold)
+{
+    if (truthParticles.empty())
+        throw std::invalid_argument("AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - no truth particles supplied but reco particle has a match!");
+
+    std::string errorMessage = "AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - input reco particle has missing or invalid backtracked values: ";
+
+    bool hasError = false;
+
+    if (!recoParticle.momentumXBacktracked.IsSet()) {
+        errorMessage += "momentumXBacktracked is not set, ";
+        hasError = true;
+    }
+
+    if (!recoParticle.momentumYBacktracked.IsSet()) {
+        errorMessage += "momentumYBacktracked is not set, ";
+        hasError = true;
+    }
+
+    if (!recoParticle.momentumZBacktracked.IsSet()) {
+        errorMessage += "momentumZBacktracked is not set, ";
+        hasError = true;
+    }
+
+    if (!recoParticle.pdgBacktracked.IsSet()) {
+        errorMessage += "pdgBacktracked is not set, ";
+        hasError = true;
+    } else if (recoParticle.pdgBacktracked() == -2147483647) {
+        errorMessage += "pdgBacktracked is invalid, ";
+        hasError = true;
+    }
+
+    if (hasError) {
+        throw std::logic_error(errorMessage);
+    }
+
+    constexpr auto tolerance = 1e-6;
+
+
+    unsigned int bestMatchedParticleId = std::numeric_limits<unsigned int>::max();
+    const auto backtrackedPDG = recoParticle.pdgBacktracked();
+    const auto momentumX = recoParticle.momentumXBacktracked();
+    const auto momentumY = recoParticle.momentumYBacktracked();
+    const auto momentumZ = recoParticle.momentumZBacktracked();
+    const auto backtrackedMomentum = std::sqrt(momentumX * momentumX + momentumY * momentumY + momentumZ * momentumZ);
+
+    for (unsigned int i = 0; i < truthParticles.size(); ++i)
+    {
+        if (applyVisibilityThreshold && !AnalysisHelper::PassesVisibilityThreshold(truthParticles.at(i)))
+        {
+            std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - truth particle with pdg "<<truthParticles.at(i).pdgCode()<<" doesn't pass visibility threshold"<<std::endl;
+            continue;
+        }
+
+        if (backtrackedPDG != truthParticles.at(i).pdgCode()) {
+            std::cout << "DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - truth particle pdg doesn't match. Backtracked: " << backtrackedPDG << " vs Truth particle: " << truthParticles.at(i).pdgCode() << std::endl;
+            continue;
+        }
+
+        const auto diff = std::abs(backtrackedMomentum - truthParticles.at(i).momentum());
+        if(diff < tolerance)
+        {
+            if(bestMatchedParticleId != std::numeric_limits<unsigned int>::max())
+                throw std::logic_error("AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - input reco particle has more than one matched truth particle");
+            bestMatchedParticleId = i;
+        }
+        else
+        {
+            std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - truth particle momentum doesn't match. Backtracked: "<<backtrackedMomentum<<" vs Truth particle: "<<truthParticles.at(i).momentum()<<std::endl;
+        }
+    }
+
+    if (bestMatchedParticleId == std::numeric_limits<unsigned int>::max())
+        throw std::logic_error("AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - input reco particle with pdg: "+std::to_string(backtrackedPDG)+" has no matched truth particle");
+
+
+    std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - successfully matched reco to truth particle"<<std::endl;
+    return bestMatchedParticleId;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+unsigned int AnalysisHelper::GetBestMatchedTruthParticleIndexUbCC1pi(const Event::Reco::Particle &recoParticle, const std::vector<Event::Truth::Particle> &truthParticles, const bool applyVisibilityThreshold)
+{
     if (!recoParticle.hasMatchedMCParticle.IsSet())
-        throw std::invalid_argument("AnalysisHelper::GetBestMatchedTruthParticleIndex - input reco particle is from an event without truth info");
+        throw std::invalid_argument("AnalysisHelper::GetBestMatchedTruthParticleIndexUbCC1pi - input reco particle is from an event without truth info");
 
     if (!recoParticle.hasMatchedMCParticle())
-        throw std::invalid_argument("AnalysisHelper::GetBestMatchedTruthParticleIndex - input reco particle has no matched truth particle");
+        throw std::invalid_argument("AnalysisHelper::GetBestMatchedTruthParticleIndexUbCC1pi - input reco particle has no matched truth particle");
 
     if (truthParticles.size() != recoParticle.truthMatchPurities().size())
-        throw std::invalid_argument("AnalysisHelper::GetBestMatchedTruthParticleIndex - wrong number of input truth particles");
+        throw std::invalid_argument("AnalysisHelper::GetBestMatchedTruthParticleIndexUbCC1pi - wrong number of input truth particles");
 
     if (truthParticles.empty())
-        throw std::invalid_argument("AnalysisHelper::GetBestMatchedTruthParticleIndex - no truth particles supplied but reco particle has a match!");
+        throw std::invalid_argument("AnalysisHelper::GetBestMatchedTruthParticleIndexUbCC1pi - no truth particles supplied but reco particle has a match!");
 
 
     unsigned int bestMatchedParticleId = std::numeric_limits<unsigned int>::max();
@@ -873,7 +968,7 @@ unsigned int AnalysisHelper::GetBestMatchedTruthParticleIndex(const Event::Reco:
     }
 
     if (!foundMatch)
-        throw std::logic_error("AnalysisHelper::GetBestMatchedTruthParticleIndex - input reco particle has no matched truth particle");
+        throw std::logic_error("AnalysisHelper::GetBestMatchedTruthParticleIndexUbCC1pi - input reco particle has no matched truth particle");
 
     return bestMatchedParticleId;
 }
@@ -1432,6 +1527,7 @@ AnalysisHelper::AnalysisData AnalysisHelper::GetTruthAnalysisData(const Event::T
     data.nProtons = 0u;
     TVector3 pionDir, muonDir;
 
+
     for (const auto &particle : AnalysisHelper::SelectVisibleParticles(truth.particles))
     {
         const auto pdg = useAbsPdg ? std::abs(particle.pdgCode()) : particle.pdgCode();
@@ -1439,6 +1535,7 @@ AnalysisHelper::AnalysisData AnalysisHelper::GetTruthAnalysisData(const Event::T
         const auto dir = TVector3(particle.momentumX(), particle.momentumY(), particle.momentumZ()).Unit();
         const auto cosTheta = dir.Z();
         const auto phi = std::atan2(dir.Y(), dir.X());
+
 
         if (pdg == 211)
         {

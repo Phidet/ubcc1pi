@@ -199,7 +199,7 @@ void AnalyzerTest(const Config &config)
 
             // const auto event = isPeLEE ? static_cast<Event>(*pEventPeLEE) : *pEvent;
             const auto hasTruth = true;
-            Event event(*pEventPeLEE, hasTruth);
+            Event event(*pEventPeLEE);//, hasTruth);
             // event.Print();
             std::cout << "DEBUG Point Y10" << std::endl;
 

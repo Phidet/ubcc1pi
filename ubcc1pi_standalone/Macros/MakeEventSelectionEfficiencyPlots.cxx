@@ -22,7 +22,7 @@ namespace ubcc1pi_macros
 void MakeEventSelectionEfficiencyPlots(const Config &config)
 {
     // Get the selection
-    auto selection = SelectionHelper::GetSelection(config.global.selection);
+    auto selection = SelectionHelper::GetDefaultSelection(true);
     const auto allCuts = selection.GetCuts();
 
     std::cout << "Making plots for cuts:" << std::endl;
@@ -86,37 +86,26 @@ void MakeEventSelectionEfficiencyPlots(const Config &config)
     TH2F *GoldenSel_GoldenPionCosThetaPhi = new TH2F("GoldenSel_GoldenPionCosThetaPhi",";True #pi^{+} cos(theta);True #pi^{+} phi / rad",20,-1,1,15, -TMath::Pi(), TMath::Pi());
     TH2F *GoldenSel_GoldenPionMomentumPhi = new TH2F("GoldenSel_GoldenPionMomentumPhi",";True #pi^{+} Momentum / GeV;True #pi^{+} phi / rad", 20,0,1.5,15, -TMath::Pi(), TMath::Pi());
 
-
-    std::vector< std::tuple<AnalysisHelper::SampleType, std::string, std::string, float> > inputData;
-    for (const auto run: config.global.runs)
+    for (const auto &[run, normalisation, sampleType, useThisFile, filePath] : config.input.files)
     {
-        if(run == 1)
-        {
-            inputData.emplace_back(AnalysisHelper::Overlay, "", config.filesRun1.overlaysFileName, NormalisationHelper::GetOverlaysNormalisation(config, 1));
-        }
-        else if(run == 2)
-        {
-            inputData.emplace_back(AnalysisHelper::Overlay, "", config.filesRun2.overlaysFileName, NormalisationHelper::GetOverlaysNormalisation(config, 2));
-        }
-        else if(run == 3)
-        {
-            inputData.emplace_back(AnalysisHelper::Overlay, "", config.filesRun3.overlaysFileName, NormalisationHelper::GetOverlaysNormalisation(config, 3));
-        }
-        else throw std::logic_error("ExtractSidebandFit - Invalid run number");
-    }
-
-    for (const auto &[sampleType, sampleName, fileName, normalisation] : inputData)
-    {
+        if(!useThisFile) continue;
+        if(sampleType != AnalysisHelper::Overlay) continue;
+        const auto isMC = (sampleType != AnalysisHelper::DataEXT && sampleType != AnalysisHelper::DataBNB);
         // Read the input file
-        FileReader reader(fileName);
-        auto pEvent = reader.GetBoundEventAddress();
+        FileReader<EventPeLEE, SubrunPeLEE> readerPeLEE(filePath, isMC);
+        if (isMC) readerPeLEE.EnableSystematicBranches(); // Todo: Is this correct/optimal?
+        const auto nEvents = readerPeLEE.GetNumberOfEvents();
+        const auto pEventPeLEE = readerPeLEE.GetBoundEventAddress();
 
         // Run the selection
-        const auto nEvents = reader.GetNumberOfEvents();
-        for (unsigned int i = 0; i < nEvents; ++i)
+        std::cout << "### Only processing 5\% of events ###" << std::endl;
+        for (unsigned int i = 0; i < nEvents/20; i++) //nEvents; i++) // Todo: Remove!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         {
             AnalysisHelper::PrintLoadingBar(i, nEvents);
-            reader.LoadEvent(i);
+            readerPeLEE.LoadEvent(i);
+            Event event(*pEventPeLEE);
+            const auto pEvent = std::make_shared<Event>(event);
+
 
             // Only care about signal events
             if (!AnalysisHelper::IsTrueCC1Pi(pEvent, config.global.useAbsPdg))

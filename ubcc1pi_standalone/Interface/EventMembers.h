@@ -209,7 +209,13 @@
     f(p, q, false, float,               distance) /* New PeLEE variable; not SCE corrected (unlike transverse- and logitudinalVertexDist)*/\
     f(p, q, false, float,               vertexX) /* New variable !ONLY USED FOR UBCC1PI INPUT*/                                            \
     f(p, q, false, float,               vertexY) /* New variable !ONLY USED FOR UBCC1PI INPUT*/                                            \
-    f(p, q, false, float,               vertexZ) /* New variable !ONLY USED FOR UBCC1PI INPUT*/
+    f(p, q, false, float,               vertexZ) /* New variable !ONLY USED FOR UBCC1PI INPUT*/                                            \
+    f(p, q, false, int,                 pdgBacktracked) /* New PeLEE variable */                                                           \
+    f(p, q, false, float,               purityBacktracked) /* New PeLEE variable */                                                        \
+    f(p, q, false, float,               completenessBacktracked) /* New PeLEE variable */                                                  \
+    f(p, q, false, float,               momentumXBacktracked) /* New PeLEE variable */                                                           \
+    f(p, q, false, float,               momentumYBacktracked) /* New PeLEE variable */                                                           \
+    f(p, q, false, float,               momentumZBacktracked) /* New PeLEE variable */                                                           \
     // f(p, q, false, double,              vertexDistanceToXBoundary) /* New PeLEE variable !ONLY USED FOR PELEE INPUT*/
     // f(p, q, false, double,              vertexDistanceToZBoundary) /* New PeLEE variable !ONLY USED FOR PELEE INPUT*/
     // f(p, q, false, double,              vertexDistanceToYBoundary) /* New PeLEE variable !ONLY USED FOR PELEE INPUT*/
@@ -387,7 +393,7 @@
     f(p, q, false, int,                 trk_nhits_u_v) /*Used for truncatedMeandEdx*/                                                      \
     f(p, q, false, int,                 trk_nhits_v_v) /*Used for truncatedMeandEdx*/                                                      \
     f(p, q, false, int,                 trk_nhits_y_v) /*Used for truncatedMeandEdx*/
-
+    
     // f(p, q, false, float,               trk_bragg_p_v) /*ATTN: Not same as ubcc1pi - max of fwd and bwd*/
     // f(p, q, false, float,               trk_bragg_mu_v) /*ATTN: Not same as ubcc1pi - max of fwd and bwd*/
     // f(p, q, false, float,               trk_bragg_pion_v) /*ATTN: Not same as ubcc1pi - max of fwd and bwd*/
@@ -403,6 +409,19 @@
     // f(p, q, false, double,              dvtx_x_boundary) /*vertexDistanceToXBoundary; todo: Warning conversion from double to float*/
     // f(p, q, false, double,              dvtx_y_boundary) /*vertexDistanceToYBoundary; todo: Warning conversion from double to float*/
     // f(p, q, false, double,              dvtx_z_boundary) /*vertexDistanceToZBoundary; todo: Warning conversion from double to float*/
+
+
+/** The event backtracked members */
+// #define PELEE_MACRO_EVENT_BACKTRACKED_MEMBERS(p, q, f)
+
+/** The event backtracked particle information members */
+#define PELEE_MACRO_EVENT_BACKTRACKED_PARTICLE_MEMBERS(p, q, f)                                                                            \
+    f(p, q, false, int,                 backtracked_pdg) /*pdgBacktracked*/                                                                \
+    f(p, q, false, float,               backtracked_purity) /*purityBacktracked*/                                                          \
+    f(p, q, false, float,               backtracked_completeness) /*completenessBacktracked*/                                              \
+    f(p, q, false, float,               backtracked_px) /*momentumXBacktracked*/                                                           \
+    f(p, q, false, float,               backtracked_py) /*momentumYBacktracked*/                                                           \
+    f(p, q, false, float,               backtracked_pz) /*momentumZBacktracked*/
 
     /*f(p, q, false, bool,                isCCInclusiveMuonCandidate)                                                                      \
     f(p, q, false, int,                 nDescendentHitsU)                                                                                  \
@@ -447,5 +466,124 @@
     f(p, q, false, std::vector<float>,  truthMatchCompletenesses)                                                                          \
     f(p, q, false, bool,                hasMatchedMCParticle)                                                                              \
     f(p, q, false, int,                 bestMatchedMCParticleIndex)*/
+
+
+//*****************************************************************************************************************************************
+//**************************************************************************************************************************************
+//***********************************************************************************************************************************
+// XSec Mode:
+//***********************************************************************************************************************************
+//***************************************************************************************************************************************
+//*****************************************************************************************************************************************
+// /** The event metadata members */
+// #define XSEC_MACRO_EVENT_METADATA_MEMBERS(p, q, f)
+//     f(p, q, false, int,         run)
+
+// /** The event truth information members */
+// #define COMMA , // This is needed for the std::map macro below since it uses commas to separate arguments
+// #define XSEC_MACRO_EVENT_TRUTH_OPTIONAL_MEMBERS(p, q, f)
+//     f(p, q, false, float,                                           weightSpline) /*splineEventWeight*/
+
+#define XSEC_MACRO_EVENT_TRUTH_MEMBERS(p, q, f) \
+    f(p, q, false, int,                        run) \
+    f(p, q, false, int,                        category) \
+    f(p, q, false, bool,                       true_cc0pi) \
+    f(p, q, false, bool,                       true_cc1pi) \
+    f(p, q, false, bool,                       cc0pi_signal) \
+    f(p, q, false, bool,                       cc1pi_signal) \
+    f(p, q, false, float,                      cc1pi_truth_muonMomentum) \
+    f(p, q, false, float,                      cc1pi_truth_muonCosTheta) \
+    f(p, q, false, float,                      cc1pi_truth_muonPhi) \
+    f(p, q, false, float,                      cc1pi_truth_pionMomentum) \
+    f(p, q, false, float,                      cc1pi_truth_pionCosTheta) \
+    f(p, q, false, float,                      cc1pi_truth_pionPhi) \
+    f(p, q, false, float,                      cc1pi_truth_muonPionAngle) \
+    f(p, q, false, int,                        cc1pi_truth_nProtons) \
+    f(p, q, false, float,                      cc0pi_truth_muonMomentum) \
+    f(p, q, false, float,                      cc0pi_truth_muonCosTheta) \
+    f(p, q, false, float,                      cc0pi_truth_muonPhi) \
+    f(p, q, false, float,                      cc0pi_truth_pionMomentum) \
+    f(p, q, false, float,                      cc0pi_truth_pionCosTheta) \
+    f(p, q, false, float,                      cc0pi_truth_pionPhi) \
+    f(p, q, false, float,                      cc0pi_truth_muonPionAngle) \
+    f(p, q, false, int,                        cc0pi_truth_nProtons)
+
+// /** The event truth particle information members */
+// #define XSEC_MACRO_EVENT_TRUTH_PARTICLE_MEMBERS(p, q, f)
+//     f(p, q, false, int,                 mc_pdg) /*pdgCode*/
+
+/** The event reco information members */
+#define XSEC_MACRO_EVENT_RECO_MEMBERS(p, q, f) \
+    f(p, q, false, bool,                       cc0pi_selected_generic) \
+    f(p, q, false, bool,                       cc0pi_selected_golden) \
+    f(p, q, false, bool,                       cc1pi_selected_generic) \
+    f(p, q, false, bool,                       cc1pi_selected_golden) \
+    f(p, q, false, float,                      cc1pi_reco_muonMomentum) \
+    f(p, q, false, float,                      cc1pi_reco_muonCosTheta) \
+    f(p, q, false, float,                      cc1pi_reco_muonPhi) \
+    f(p, q, false, float,                      cc1pi_reco_pionMomentum) \
+    f(p, q, false, float,                      cc1pi_reco_pionCosTheta) \
+    f(p, q, false, float,                      cc1pi_reco_pionPhi) \
+    f(p, q, false, float,                      cc1pi_reco_muonPionAngle) \
+    f(p, q, false, float,                      cc1pi_reco_nProtons) \
+    f(p, q, false, float,                      cc0pi_reco_muonMomentum) \
+    f(p, q, false, float,                      cc0pi_reco_muonCosTheta) \
+    f(p, q, false, float,                      cc0pi_reco_muonPhi) \
+    f(p, q, false, float,                      cc0pi_reco_pionMomentum) \
+    f(p, q, false, float,                      cc0pi_reco_pionCosTheta) \
+    f(p, q, false, float,                      cc0pi_reco_pionPhi) \
+    f(p, q, false, float,                      cc0pi_reco_muonPionAngle) \
+    f(p, q, false, float,                      cc0pi_reco_nProtons) \
+    f(p, q, false, bool,                       passed_particleTrackScore) \
+    f(p, q, false, bool,                       passed_particleVertexDistance) \
+    f(p, q, false, bool,                       passed_particleGeneration) \
+    f(p, q, false, bool,                       passed_particleTrackLength) \
+    f(p, q, false, bool,                       passed_particleProtonChi2) \
+    f(p, q, false, bool,                       passed_particleMuonChi2) \
+    f(p, q, false, bool,                       passed_particleProtonChi2OverMuonChi2) \
+    f(p, q, false, bool,                       passed_pandoraNuPDGIsNumu) \
+    f(p, q, false, bool,                       passed_daughterVerticesContained) \
+    f(p, q, false, bool,                       passed_nuVertexFiducial) \
+    f(p, q, false, bool,                       passed_topologicalOrFlashMatch) \
+    f(p, q, false, bool,                       passed_min2Tracks) \
+    f(p, q, false, bool,                       passed_max1Uncontained) \
+    f(p, q, false, bool,                       passed_2NonProtons) \
+    f(p, q, false, bool,                       passed_pionHasValiddEdx) \
+    f(p, q, false, bool,                       passed_pionNotInGap) \
+    f(p, q, false, bool,                       passed_muonNotInGap) \
+    f(p, q, false, bool,                       passed_openingAngle) \
+    f(p, q, false, bool,                       passed_topologicalScore) \
+    f(p, q, false, bool,                       passed_startNearVertex) \
+    f(p, q, false, bool,                       passed_likelyGoldenPion)
+
+
+// /** The event reco particle information members */
+// #define XSEC_MACRO_EVENT_RECO_PARTICLE_MEMBERS(p, q, f)
+//     f(p, q, false, int,                 pfpdg) /*pdgCode*/
+
+
+
+
+
+
+// pTrackScoreCutValues
+// pVertexDistanceCutValues
+// pGenerationCutValues
+// pTrackLengthCutValues
+// pProtonChi2CutValues
+// pMuonChi2CutValues
+// event_cutValue_nuPdgCode
+// event_cutValue_topologicalScore
+// event_cutValue_flashChi2
+// event_cutValue_pionTruncatedMeandEdx
+// event_cutValue_openingAngle
+// event_cutValue_maxVertexDist
+// event_cutValue_goldenPionBDT
+
+// pBestMatchedTruthPDGs
+// mc_nu_pdg
+// spline_weight
+// tuned_cv_weight
+
 
 #endif

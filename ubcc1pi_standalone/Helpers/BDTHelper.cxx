@@ -181,9 +181,13 @@ void BDTHelper::BDTFactory::TrainAndTest()
     if (!m_pOutputFile || !m_pFactory)
         throw std::logic_error("BDTFactory::OptimizeParameters - Invalid output file or TMVA factory");
 
+    std::cout << "DEBUG - TrainAndTest - Training BDT" << std::endl;
     m_pFactory->TrainAllMethods();
+    std::cout << "DEBUG - TrainAndTest - Testing BDT" << std::endl;
     m_pFactory->TestAllMethods();
+    std::cout << "DEBUG - TrainAndTest - Evaluating BDT" << std::endl;
     m_pFactory->EvaluateAllMethods();
+    std::cout << "DEBUG - TrainAndTest - Done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------

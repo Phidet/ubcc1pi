@@ -9,8 +9,10 @@
 
 #include "ubcc1pi_standalone/Interface/Event.h"
 #include "ubcc1pi_standalone/Interface/EventPeLEE.h"
+#include "ubcc1pi_standalone/Interface/EventXSec.h"
 #include "ubcc1pi_standalone/Interface/Subrun.h"
 #include "ubcc1pi_standalone/Interface/SubrunPeLEE.h"
+#include "ubcc1pi_standalone/Interface/SubrunXSec.h"
 
 #include <memory>
 #include <TFile.h>

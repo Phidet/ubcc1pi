@@ -176,6 +176,20 @@ namespace ubcc1pi_macros
     void MakeEventSelectionTable(const Config &config = Config());
 
     /**
+     *  @brief  Make the event selection table
+     *
+     *  @param  config the input configuration
+     */
+    void MakeEventSelectionTableRecycle(const Config &config = Config());
+
+    /**
+     *  @brief  Execute the unfolding steps in the xsec_analyser
+     *
+     *  @param  config the input configuration
+     */
+    void Unfold(const Config &config = Config());
+
+    /**
      *  @brief  Make the sideband event selection table
      *
      *  @param  config the input configuration

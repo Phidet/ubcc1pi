@@ -484,6 +484,28 @@ class AnalysisHelper
         static unsigned int GetBestMatchedTruthParticleIndex(const Event::Reco::Particle &recoParticle, const std::vector<Event::Truth::Particle> &truthParticles, const bool applyVisibilityThreshold = true);
 
         /**
+         *  @brief  Get the index of the truth particle that best matches to the input reco particle for UbCC1pi
+         *
+         *  @param  recoParticle the input reco particle
+         *  @param  truthParticles the input list of all truth particles from the event
+         *  @param  applyVisibilityThreshold whether to apply the visibility threshold when considering possible matches
+         *
+         *  @return the output truth particle index
+         */
+        static unsigned int GetBestMatchedTruthParticleIndexUbCC1pi(const Event::Reco::Particle &recoParticle, const std::vector<Event::Truth::Particle> &truthParticles, const bool applyVisibilityThreshold = true);
+
+        /**
+         *  @brief  Get the index of the truth particle that best matches to the input reco particle for PeLEE
+         *
+         *  @param  recoParticle the input reco particle
+         *  @param  truthParticles the input list of all truth particles from the event
+         *  @param  applyVisibilityThreshold whether to apply the visibility threshold when considering possible matches
+         *
+         *  @return the output truth particle index
+         */
+        static unsigned int GetBestMatchedTruthParticleIndexPeLEE(const Event::Reco::Particle &recoParticle, const std::vector<Event::Truth::Particle> &truthParticles, const bool applyVisibilityThreshold = true);
+
+        /**
          *  @brief  Get the truth particle that best matches to the input reco particle
          *
          *  @param  recoParticle the input reco particle

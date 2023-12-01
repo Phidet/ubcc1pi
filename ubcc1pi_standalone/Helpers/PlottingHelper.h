@@ -327,10 +327,11 @@ class PlottingHelper
          *  @param  truthParticles the input list of all truth particles
          *  @param  usePoints if we should use datapoints instead of a line
          *  @param  useAbsPdg if we should use the absolute PDG codes
+         *  @param  peleeMode if we are in pelee mode
          *
          *  @return the particle style
          */
-        static PlotStyle GetPlotStyle(const Event::Reco::Particle &particle, const AnalysisHelper::SampleType &sampleType, const std::vector<Event::Truth::Particle> &truthParticles, const bool usePoints = false, const bool useAbsPdg = false);
+        static PlotStyle GetPlotStyle(const Event::Reco::Particle &particle, const AnalysisHelper::SampleType &sampleType, const std::vector<Event::Truth::Particle> &truthParticles, const bool usePoints = false, const bool useAbsPdg = false, const bool peleeMode = false);
 
         /**
          *  @brief  Get a color for a given style
@@ -357,7 +358,7 @@ class PlottingHelper
          *
          *  @return the plot style
          */
-        static PlotStyle GetPlotStyle(const AnalysisHelper::SampleType &sampleType, const std::shared_ptr<Event> &pEvent, const bool useAbsPdg);
+        static PlotStyle GetPlotStyle(const AnalysisHelper::SampleType &sampleType, const std::shared_ptr<Event> &pEvent, const bool useAbsPdg, const bool treatNuWroLikeData = false);
 
         /**
          *  @brief  Get the plot style of an interaction

@@ -257,7 +257,22 @@ class SelectionHelper
          *
          *  @return the event selection
          */
-        static EventSelection GetDefaultSelection();
+        static EventSelection GetDefaultSelection(const bool skipOldCuts = false);
+
+        /**
+         *  @brief  Get the default CC1Pi event selection
+         *
+         *  @return the event selection
+         */
+        static EventSelection GetDefaultSelection2(const bool skipOldCuts = false);
+
+
+        /**
+         *  @brief  Get the cc inclusive numu event selection
+         *
+         *  @return the event selection
+         */
+        static EventSelection GetCCInclusiveSelection2(const bool skipOldCuts = false);
 
         /**
          *  @brief  Get the CC0pi event selection
@@ -278,7 +293,7 @@ class SelectionHelper
          *
          *  @return the event selection
          */
-        static EventSelection GetCC0piSelectionModifiedPeLEE(const float muonLikeProtonValue = -0.4f, const float barelyResemblingProtonValue = 0.1f);
+        static EventSelection GetCC0piSelectionModifiedPeLEE(const float muonLikeProtonValue = -0.4f, const float barelyResemblingProtonValue = 0.1f, const bool skipOldCuts = false);
 
         /**
          *  @brief  Get the CC0pi event selection

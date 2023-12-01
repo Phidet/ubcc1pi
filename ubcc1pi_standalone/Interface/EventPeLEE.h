@@ -94,9 +94,25 @@ class EventPeLEE
             std::vector<Particle> particles; ///< The reco particles
         };
 
+        struct Backtracked
+        {
+            // PELEE_MACRO_EVENT_BACKTRACKED_MEMBERS("", "", PELEE_MACRO_DECLARE_MEMBER)
+
+            /**
+             *  @brief  The backtracked particle information structure
+             */
+            struct Particle
+            {
+                PELEE_MACRO_EVENT_BACKTRACKED_PARTICLE_MEMBERS("", "", PELEE_MACRO_DECLARE_MEMBER)
+            };
+
+            std::vector<Particle> particles; ///< The backtracked particles
+        };
+
         Metadata metadata;  ///< The metadata
         Truth truth;        ///< The truth information
         Reco  reco;         ///< The reco information
+        Backtracked backtracked; ///< The backtracked information
 
     private:
 
@@ -138,6 +154,7 @@ class EventPeLEE
         // Here we define private member variables for each of the particle parameters as a vector so they can be read from the root file
         PELEE_MACRO_EVENT_TRUTH_PARTICLE_MEMBERS(truth_particle, "", PELEE_MACRO_DECLARE_MEMBER_VECTOR)
         PELEE_MACRO_EVENT_RECO_PARTICLE_MEMBERS(reco_particle, "", PELEE_MACRO_DECLARE_MEMBER_VECTOR)
+        PELEE_MACRO_EVENT_BACKTRACKED_PARTICLE_MEMBERS(backtracked_particle, "", PELEE_MACRO_DECLARE_MEMBER_VECTOR)
 };
 
 } // namespace ubcc1pi

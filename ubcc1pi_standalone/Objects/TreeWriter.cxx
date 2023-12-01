@@ -12,18 +12,24 @@ namespace ubcc1pi
 
 TreeWriter::TreeWriter(const std::vector<std::string> inputFiles, const std::string outputFile)
   {
+    // std::cout<<"DEBUG TreeWriter Point 0"<<std::endl;
     // OUTPUT TTREE
     // Make an output TTree for plotting (one entry per event)
     m_pOutFile = new TFile(outputFile.c_str(), "recreate");
-    m_pOutTree = new TTree( "ubcc1pi_tree", "Ubcc1pi analysis tree" );
+    // std::cout<<"DEBUG TreeWriter Point 1"<<std::endl;
+    m_pOutTree = new TTree( "stv_tree", "Ubcc1pi analysis tree" ); // Todo: maybe this can be changed to a custom name at some point when xsec_analyzer allows it
+    // std::cout<<"DEBUG TreeWriter Point 2"<<std::endl;
 
     m_pEventChain = new TChain("nuselection/NeutrinoSelectionFilter");
+    // std::cout<<"DEBUG TreeWriter Point 3"<<std::endl;
     m_pSubrunChain = new TChain("nuselection/SubRun");
+    // std::cout<<"DEBUG TreeWriter Point 4"<<std::endl;
     for (const auto& fileName : inputFiles)
     {
         m_pEventChain->Add(fileName.c_str());
         m_pSubrunChain->Add(fileName.c_str());
     }
+    // std::cout<<"DEBUG TreeWriter Point 5"<<std::endl;
 
     // Get the total POT from the subruns TTree. Save it in the output
     // TFile as a TParameter<float>. Real data doesn't have this TTree,
@@ -34,13 +40,15 @@ TreeWriter::TreeWriter(const std::vector<std::string> inputFiles, const std::str
     if (hasPotBranch) {
         m_pSubrunChain->SetBranchAddress("pot", &pot);
         for (int se = 0; se < m_pSubrunChain->GetEntries(); ++se) {
-        m_pSubrunChain->GetEntry(se);
-        totalExposurePOT += pot;
+            m_pSubrunChain->GetEntry(se);
+            totalExposurePOT += pot;
         }
     }
+    // std::cout<<"DEBUG TreeWriter Point 6"<<std::endl;
 
     m_pTotalExposurePOTParam = new TParameter<float>("summed_pot", totalExposurePOT);
     m_pTotalExposurePOTParam->Write();
+    // std::cout<<"DEBUG TreeWriter Point 7"<<std::endl;
   }
 
 // Create destructor
@@ -104,6 +112,13 @@ void TreeWriter::SetObjectOutputBranchAddress(const std::string& branchName, con
 }
 
 // template <typename T>
+// void TreeWriter::SetObjectOutputBranchAddress(const std::string& branchName, T* address)
+// {
+//     if ( !m_createdOutputBranches ) m_pOutTree->Branch( branchName.c_str(), &address );
+//     else m_pOutTree->SetBranchAddress( branchName.c_str(), &address );
+// }
+
+// template <typename T>
 // void TreeWriter::SetObjectOutputBranchAddress(const std::string& branchName, TreeWriter::Pointer<T>& ptr)
 // {
 //   T*& address = ptr.getBarePtr();
@@ -117,6 +132,8 @@ void TreeWriter::CreateNoNewBranches()
 
 // Need to explicitly instantiate the template we use
 template void TreeWriter::SetObjectOutputBranchAddress<std::vector<double>>(const std::string& branchName, const std::vector<double>*& address);
+template void TreeWriter::SetObjectOutputBranchAddress<std::vector<int>>(const std::string& branchName, const std::vector<int>*& address);
+template void TreeWriter::SetObjectOutputBranchAddress<std::vector<float>>(const std::string& branchName, const std::vector<float>*& address);
 
 
 } // namespace ubcc1pi

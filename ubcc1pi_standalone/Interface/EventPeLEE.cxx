@@ -14,6 +14,7 @@ EventPeLEE::EventPeLEE(const bool hasTruthInfo) : hasTruthWeights(hasTruthInfo)
 {
     PELEE_MACRO_EVENT_TRUTH_PARTICLE_MEMBERS(truth_particle, "", PELEE_MACRO_INIT_MEMBER_VECTOR)
     PELEE_MACRO_EVENT_RECO_PARTICLE_MEMBERS(reco_particle, "", PELEE_MACRO_INIT_MEMBER_VECTOR)
+    PELEE_MACRO_EVENT_BACKTRACKED_PARTICLE_MEMBERS(backtracked_particle, "", PELEE_MACRO_INIT_MEMBER_VECTOR)
 }
 // -----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -73,6 +74,7 @@ void EventPeLEE::BindToOutputTree(TTree * pTree)
     PELEE_MACRO_EVENT_TRUTH_PARTICLE_MEMBERS(truth_particle, "", PELEE_MACRO_BIND_OUTPUT_VECTOR_BRANCH)
     PELEE_MACRO_EVENT_RECO_MEMBERS(reco, reco, PELEE_MACRO_BIND_OUTPUT_BRANCH)
     PELEE_MACRO_EVENT_RECO_PARTICLE_MEMBERS(reco_particle, "", PELEE_MACRO_BIND_OUTPUT_VECTOR_BRANCH)
+    PELEE_MACRO_EVENT_BACKTRACKED_PARTICLE_MEMBERS(backtracked_particle, "", PELEE_MACRO_BIND_OUTPUT_VECTOR_BRANCH)
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
@@ -85,6 +87,8 @@ void EventPeLEE::BindToInputTree(TTree * pTree)
     PELEE_MACRO_EVENT_TRUTH_PARTICLE_MEMBERS(truth_particle, "", PELEE_MACRO_BIND_INPUT_VECTOR_BRANCH)
     PELEE_MACRO_EVENT_RECO_MEMBERS(reco, reco, PELEE_MACRO_BIND_INPUT_BRANCH)
     PELEE_MACRO_EVENT_RECO_PARTICLE_MEMBERS(reco_particle, "", PELEE_MACRO_BIND_INPUT_VECTOR_BRANCH)
+    // PELEE_MACRO_EVENT_BACKTRACKED_MEMBERS(backtracked, backtracked, PELEE_MACRO_BIND_INPUT_BRANCH)
+    PELEE_MACRO_EVENT_BACKTRACKED_PARTICLE_MEMBERS(backtracked_particle, "", PELEE_MACRO_BIND_INPUT_VECTOR_BRANCH)
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
@@ -94,13 +98,16 @@ void EventPeLEE::Reset()
     PELEE_MACRO_EVENT_METADATA_MEMBERS("", metadata, PELEE_MACRO_RESET_MEMBER)
 
     PELEE_MACRO_EVENT_TRUTH_MEMBERS("", truth, PELEE_MACRO_RESET_MEMBER)
-    if(hasTruthWeights) {PELEE_MACRO_EVENT_TRUTH_OPTIONAL_MEMBERS(truth, truth, PELEE_MACRO_RESET_MEMBER)} 
+    if(hasTruthWeights) {PELEE_MACRO_EVENT_TRUTH_OPTIONAL_MEMBERS(truth, truth, PELEE_MACRO_RESET_MEMBER)}
     PELEE_MACRO_EVENT_TRUTH_PARTICLE_MEMBERS(truth_particle, "", PELEE_MACRO_RESET_MEMBER_VECTOR)
     truth.particles.clear();
 
     PELEE_MACRO_EVENT_RECO_MEMBERS("", reco, PELEE_MACRO_RESET_MEMBER)
     PELEE_MACRO_EVENT_RECO_PARTICLE_MEMBERS(reco_particle, "", PELEE_MACRO_RESET_MEMBER_VECTOR)
     reco.particles.clear();
+
+    PELEE_MACRO_EVENT_BACKTRACKED_PARTICLE_MEMBERS(backtracked_particle, "", PELEE_MACRO_RESET_MEMBER_VECTOR)
+    backtracked.particles.clear();
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
@@ -120,6 +127,13 @@ void EventPeLEE::PrepareForTreeFill()
             std::cout<<"pelee reco particle "<<i<<std::endl; i++;
             PELEE_MACRO_EVENT_RECO_PARTICLE_MEMBERS(reco_particle, particle, PELEE_MACRO_FILL_MEMBER_VECTOR)
     }
+
+    i = 0;
+    for (const auto &particle : backtracked.particles)
+    {
+            std::cout<<"pelee backtracked particle "<<i<<std::endl; i++;
+            PELEE_MACRO_EVENT_BACKTRACKED_PARTICLE_MEMBERS(backtracked_particle, particle, PELEE_MACRO_FILL_MEMBER_VECTOR)
+    }
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
@@ -137,6 +151,12 @@ void EventPeLEE::PrepareAfterTreeRead()
 
     reco.particles.resize(nRecoParticles);
     PELEE_MACRO_EVENT_RECO_PARTICLE_MEMBERS(reco_particle, reco.particles, PELEE_MACRO_READ_MEMBER_VECTOR)
+
+    unsigned int nBacktrackedParticles;
+    PELEE_MACRO_EVENT_BACKTRACKED_PARTICLE_MEMBERS(backtracked_particle, &nBacktrackedParticles, PELEE_MACRO_GET_MEMBER_VECTOR_SIZE)
+
+    backtracked.particles.resize(nBacktrackedParticles);
+    PELEE_MACRO_EVENT_BACKTRACKED_PARTICLE_MEMBERS(backtracked_particle, backtracked.particles, PELEE_MACRO_READ_MEMBER_VECTOR)
 }
 
 } // namespace ubcc1pi

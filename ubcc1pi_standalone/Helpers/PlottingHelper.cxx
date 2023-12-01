@@ -780,7 +780,7 @@ void PlottingHelper::EfficiencyPlot::SaveAs(const std::string &fileName)
 // -----------------------------------------------------------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------------------------------------------------------
 
-PlottingHelper::PlotStyle PlottingHelper::GetPlotStyle(const Event::Reco::Particle &particle, const AnalysisHelper::SampleType &sampleType, const std::vector<Event::Truth::Particle> &truthParticles, const bool usePoints, const bool useAbsPdg)
+PlottingHelper::PlotStyle PlottingHelper::GetPlotStyle(const Event::Reco::Particle &particle, const AnalysisHelper::SampleType &sampleType, const std::vector<Event::Truth::Particle> &truthParticles, const bool usePoints, const bool useAbsPdg, const bool peleeMode /* = false*/)
 {
     const auto externalType = usePoints ? ExternalPoints : External;
     const auto dirtType = usePoints ? DirtPoints : Dirt;
@@ -794,11 +794,11 @@ PlottingHelper::PlotStyle PlottingHelper::GetPlotStyle(const Event::Reco::Partic
     if (sampleType == AnalysisHelper::DataEXT)
         return externalType;
 
-    if (!particle.hasMatchedMCParticle.IsSet())
+    if ((peleeMode && (!particle.pdgBacktracked.IsSet() || particle.pdgBacktracked() == -2147483647)) 
+        || (!peleeMode && (!particle.hasMatchedMCParticle.IsSet() || !particle.hasMatchedMCParticle())))
+    {
         return externalType;
-
-    if (!particle.hasMatchedMCParticle())
-        return externalType;
+    }
 
     if (truthParticles.empty())
         return externalType;
@@ -845,7 +845,7 @@ PlottingHelper::PlotStyle PlottingHelper::GetPlotStyle(const Event::Reco::Partic
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
 
-PlottingHelper::PlotStyle PlottingHelper::GetPlotStyle(const AnalysisHelper::SampleType &sampleType, const std::shared_ptr<Event> &pEvent, const bool useAbsPdg)
+PlottingHelper::PlotStyle PlottingHelper::GetPlotStyle(const AnalysisHelper::SampleType &sampleType, const std::shared_ptr<Event> &pEvent, const bool useAbsPdg, const bool treatNuWroLikeData /* = false */)
 {
     if (sampleType == AnalysisHelper::Dirt)
         return Dirt;
@@ -853,7 +853,7 @@ PlottingHelper::PlotStyle PlottingHelper::GetPlotStyle(const AnalysisHelper::Sam
     if (sampleType == AnalysisHelper::DataEXT)
         return External;
 
-    if (sampleType == AnalysisHelper::DataBNB)
+    if (sampleType == AnalysisHelper::DataBNB || (treatNuWroLikeData && sampleType == AnalysisHelper::NuWro))
         return BNBData;
 
     if (!AnalysisHelper::IsFiducial(pEvent->truth.nuVertex()))

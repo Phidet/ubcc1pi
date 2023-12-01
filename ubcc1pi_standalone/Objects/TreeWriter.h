@@ -86,6 +86,15 @@ class TreeWriter
         template <typename T>
         void SetObjectOutputBranchAddress(const std::string& branchName, const T*& address);
 
+        // /**
+        //  * @brief  Set the output branch addresses for objects
+        //  *
+        //  * @param  branchName the name of the branch
+        //  * @param  address the address of the branch
+        //  */
+        // template <typename T>
+        // void SetObjectOutputBranchAddress(const std::string& branchName, T* address);
+
     private:
 
         TChain* m_pEventChain;  ///< The event chain

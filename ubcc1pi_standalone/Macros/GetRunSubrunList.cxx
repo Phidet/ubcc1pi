@@ -22,10 +22,25 @@ void GetRunSubrunList(const Config &config)
     ifstream f("/uboone/app/users/zarko/getDataInfo.py");
     const bool zarkosToolExists = f.good(); 
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+    // Get list of good runs
+    // -------------------------------------------------------------------------------------------------------------------------------------
+    std::vector<int> goodRuns;
+    std::ifstream file(config.global.goodRunListFile);
+    int run;
+    while (file >> run) {
+        goodRuns.push_back(run);
+    }
+
     // For each of the input files
-    for (const auto &[sampleType, useThisFile, inputFilePath] : config.inputFiles)
+    std::cout << "DEBUG - Point 1" << std::endl;
+    for (const auto &[run, normalisation, sampleType, useThisFile, inputFilePath] : config.input.files)
     {
+        std::cout << "DEBUG - Point 2" << std::endl;
+        if(!useThisFile) continue;
+        std::cout << "DEBUG - Point 3" << std::endl;
         if(sampleType!=AnalysisHelper::DataBNB && sampleType != AnalysisHelper::DataEXT) continue;
+        std::cout << "DEBUG - Point 4" << std::endl;
         // std::filesystem::path pathObj(inputFilePath);
         // std::string outputFilePath = "./" + pathObj.stem().string() + ".list"; // C++ 17 only
         std::string outputFilePath = "./";
@@ -44,7 +59,7 @@ void GetRunSubrunList(const Config &config)
 
         const auto nSubruns = reader.GetNumberOfSubruns();
         std::cout << "Writing " << nSubruns << " sub-runs to file: " << outputFilePath << std::endl;
-
+        // std::cout << "### Only processing 10 nSubruns ###" << std::endl;
         for (unsigned int i = 0; i < nSubruns; ++i)
         {
             reader.LoadSubrun(i);
@@ -54,6 +69,18 @@ void GetRunSubrunList(const Config &config)
                 outFile.close();
                 std::logic_error("Error while reading subrun, metadata isn't set!");
             }
+
+            const auto isGoodRun = std::find(goodRuns.begin(), goodRuns.end(), pSubrun->run()) != goodRuns.end(); // Apply good runs cuts to data
+            // if(!isGoodRun) continue;
+            if(!isGoodRun)
+            {
+                // std::cout << "DEBUG - bad run: "<<pSubrun->run()<<std::endl;
+                continue;
+            }
+            // else
+            // {
+            //     std::cout << "DEBUG - good run: " << run << std::endl;
+            // }
 
             outFile << pSubrun->run() << " " << pSubrun->subRun() << std::endl;
         }

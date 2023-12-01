@@ -22,8 +22,10 @@ namespace ubcc1pi
 
 class Event;
 class EventPeLEE;
+class EventXSec;
 class Subrun;
 class SubrunPeLEE;
+class SubrunXSec;
 class EventFactory;
 class SubrunFactory;
 
@@ -78,10 +80,12 @@ class Member
 
         friend class Event;
         friend class EventPeLEE;
+        friend class EventXSec;
         friend class EventFactory;
 
         friend class Subrun;
         friend class SubrunPeLEE;
+        friend class SubrunXSec;
         friend class SubrunFactory;
 
         /**
@@ -843,8 +847,11 @@ inline std::string Member< std::map<std::string, std::vector<double>> >::ToStrin
 /** Define a macro to bind a member variable to an input branch */
 #define PELEE_MACRO_BIND_INPUT_BRANCH(p, q, r, t, n)                                                                                       \
     std::cout << "Binding input branch " << #n << std::endl;                                                                               \
+    std::cout << "DEBUG Binding input branch P0" << std::endl;                                                                             \
     q.n.m_isSet = true;                                                                                                                    \
+    std::cout << "DEBUG Before binding input branch " << #n << " with r = " << r << ", address = " << q.n.m_pAddress << std::endl;         \
     if (r) {pTree->SetBranchAddress(#n, &(q.n.m_pAddress));} else {pTree->SetBranchAddress(#n, q.n.m_pAddress);}                           \
+    std::cout << "DEBUG Done binding input branch " << #n << " with r = " << r << ", address = " << q.n.m_pAddress << std::endl;
 
 /** Define a macro to bind a member variable to an input vector branch */
 #define PELEE_MACRO_BIND_INPUT_VECTOR_BRANCH(p, q, r, t, n)                                                                                \
@@ -853,7 +860,7 @@ inline std::string Member< std::map<std::string, std::vector<double>> >::ToStrin
 
 
 /** Define a macro to convert between members of different classes */
-#define PELEE_TO_UBCC1PI_MEMBER_CONVERSION(p, q, r)                                                                                                      \
+#define PELEE_TO_UBCC1PI_MEMBER_CONVERSION(p, q, r)                                                                                        \
     q.Set(p);
 
 } // namespace ubcc1pi

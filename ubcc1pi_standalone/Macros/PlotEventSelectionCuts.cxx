@@ -24,7 +24,7 @@ void PlotEventSelectionCuts(const Config &config)
     //
     // Setup the input files
     //
-    std::vector< std::tuple<AnalysisHelper::SampleType, std::string, float> > inputData;
+    // std::vector< std::tuple<AnalysisHelper::SampleType, std::string, float> > inputData;
 
     // inputData.emplace_back(AnalysisHelper::Overlay, config.files.overlaysFileName, NormalisationHelper::GetOverlaysNormalisation(config));
     // inputData.emplace_back(AnalysisHelper::Dirt,    config.files.dirtFileName,     NormalisationHelper::GetDirtNormalisation(config));
@@ -32,31 +32,31 @@ void PlotEventSelectionCuts(const Config &config)
     // inputData.emplace_back(AnalysisHelper::DataBNB, config.files.dataBNBFileName,  1.f);
 
 
-std::cout<<"##########################################\nUSING NUWRO AS DATA & Only CC0pi!\n##########################################"<<std::endl;
- for (const auto run: config.global.runs)
-    {
-        if(run == 1)
-        {
-            inputData.emplace_back(AnalysisHelper::Overlay, config.filesRun1.overlaysFileName, NormalisationHelper::GetOverlaysNormalisationToNuWro(config, 1));
-            inputData.emplace_back(AnalysisHelper::DataBNB, config.filesRun1.nuWroFileName, 1.f);
-        }
-        else if(run == 2)
-        {
-            inputData.emplace_back(AnalysisHelper::Overlay, config.filesRun2.overlaysFileName, NormalisationHelper::GetOverlaysNormalisationToNuWro(config, 2));
-            inputData.emplace_back(AnalysisHelper::DataBNB, config.filesRun2.nuWroFileName, 1.f);
-        }
-        else if(run == 3)
-        {
-            inputData.emplace_back(AnalysisHelper::Overlay, config.filesRun3.overlaysFileName, NormalisationHelper::GetOverlaysNormalisationToNuWro(config, 3));
-            inputData.emplace_back(AnalysisHelper::DataBNB, config.filesRun3.nuWroFileName, 1.f);
-        }
-        else throw std::logic_error("PlotEventSelectionCuts - Invalid run number");
-    }
+// std::cout<<"##########################################\nUSING NUWRO AS DATA & Only CC0pi!\n##########################################"<<std::endl;
+//  for (const auto run: config.global.runs)
+//     {
+//         if(run == 1)
+//         {
+//             inputData.emplace_back(AnalysisHelper::Overlay, config.filesRun1.overlaysFileName, NormalisationHelper::GetOverlaysNormalisationToNuWro(config, 1));
+//             inputData.emplace_back(AnalysisHelper::DataBNB, config.filesRun1.nuWroFileName, 1.f);
+//         }
+//         else if(run == 2)
+//         {
+//             inputData.emplace_back(AnalysisHelper::Overlay, config.filesRun2.overlaysFileName, NormalisationHelper::GetOverlaysNormalisationToNuWro(config, 2));
+//             inputData.emplace_back(AnalysisHelper::DataBNB, config.filesRun2.nuWroFileName, 1.f);
+//         }
+//         else if(run == 3)
+//         {
+//             inputData.emplace_back(AnalysisHelper::Overlay, config.filesRun3.overlaysFileName, NormalisationHelper::GetOverlaysNormalisationToNuWro(config, 3));
+//             inputData.emplace_back(AnalysisHelper::DataBNB, config.filesRun3.nuWroFileName, 1.f);
+//         }
+//         else throw std::logic_error("PlotEventSelectionCuts - Invalid run number");
+//     }
 
     //
     // Get the selection
     //
-    auto selection = SelectionHelper::GetSelection(config.global.selection);
+    auto selection = SelectionHelper::GetDefaultSelection(true);
     const auto allCuts = selection.GetCuts();
 
     const auto protonBDTCut = selection.GetCutValue("2NonProtons");
@@ -139,33 +139,44 @@ std::cout<<"##########################################\nUSING NUWRO AS DATA & On
     };
 
     // Loop over the events
-    for (const auto [sampleType, fileName, normalisation] : inputData)
+    for (const auto &[run, normalisation, sampleType, useThisFile, filePath] : config.input.files)
     {
-        std::cout << "Reading input file: " << fileName << std::endl;
+        if(!useThisFile) continue;
+        std::cout << "Processing file - " << filePath << std::endl;
+        const auto isMC = (sampleType != AnalysisHelper::DataEXT && sampleType != AnalysisHelper::DataBNB);
+        FileReader<EventPeLEE, SubrunPeLEE> readerPeLEE(filePath, isMC);
+        if (isMC) readerPeLEE.EnableSystematicBranches(); // Todo: Is this correct/optimal?
+        const auto nEvents = readerPeLEE.GetNumberOfEvents();
+        const auto pEventPeLEE = readerPeLEE.GetBoundEventAddress();
 
-        FileReader reader(fileName);
-        auto pEvent = reader.GetBoundEventAddress();
-
-        const auto nEvents = reader.GetNumberOfEvents();
-        for (unsigned int i = 0; i < nEvents; ++i)
+        // Loop over the events
+        std::cout << "### Only processing 0.1\% of events ###" << std::endl;
+        for (unsigned int i = 0; i < nEvents/1000; i++) //nEvents; i++) // Todo: Remove!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         {
             AnalysisHelper::PrintLoadingBar(i, nEvents);
-            reader.LoadEvent(i);
+
+            readerPeLEE.LoadEvent(i);
+            Event event(*pEventPeLEE);
+            const auto pEvent = std::make_shared<Event>(event);
 
             // For brevity assign the particles a variable
             const auto &truthParticles = pEvent->truth.particles;
             const auto &recoParticles = pEvent->reco.particles;
 
             // Run the event selection and store which cuts are passed
+            std::cout<<"DEBUG Point 0"<<std::endl;
             const auto &[passesGoldenPionSelection, cutsPassed, assignedPdgCodes] = selection.Execute(pEvent);
+            std::cout<<"DEBUG Point 1"<<std::endl;
 
             // Get the plot style of the event
             const auto weight = AnalysisHelper::GetNominalEventWeight(pEvent) * normalisation;
             const auto plotStyleEvent = PlottingHelper::GetPlotStyle(sampleType, pEvent, config.global.useAbsPdg);
+            std::cout<<"DEBUG Point 2"<<std::endl;
 
             // if(PlottingHelper::PlotStyle::NumuCC0Pi != plotStyleEvent) continue;
-            const auto isTrueCC0Pi = AnalysisHelper::IsTrueCC0Pi(pEvent, config.global.useAbsPdg, config.global.protonMomentumThreshold); // todo remove this
-            if(!isTrueCC0Pi) continue;
+
+            // const auto isTrueCC0Pi = AnalysisHelper::IsTrueCC0Pi(pEvent, config.global.useAbsPdg, config.global.protonMomentumThreshold); // todo remove this
+            // if(!isTrueCC0Pi) continue;
 
             // std::cout<<"truthParticles:"<<std::endl;
             // for(const auto &particle: truthParticles)
@@ -189,11 +200,14 @@ std::cout<<"##########################################\nUSING NUWRO AS DATA & On
                 nTracksPlot.Fill(static_cast<float>(nTracks), plotStyleEvent, weight);
             }
 
+            std::cout<<"DEBUG Point 3"<<std::endl;
+
             if (wasInputToCut("max1Uncontained", cutsPassed))
             {
                 unsigned int nUncontained = 0u;
                 for (const auto &recoParticle : recoParticles)
                 {
+                    std::cout<<"DEBUG Point 3.1"<<std::endl;
                     if (!AnalysisHelper::HasTrackFit(recoParticle))
                         continue;
 
@@ -203,6 +217,7 @@ std::cout<<"##########################################\nUSING NUWRO AS DATA & On
                     const auto plotStyleParticle = PlottingHelper::GetPlotStyle(recoParticle, sampleType, truthParticles, false, config.global.useAbsPdg);
                     isContainedPlot.Fill(isContained ? 1.f : 0.f, plotStyleParticle, weight);
 
+                    std::cout<<"DEBUG Point 3.2"<<std::endl;
                     if (!isContained)
                     {
                         const TVector3 start(recoParticle.startX(), recoParticle.startY(), recoParticle.startZ());
@@ -217,13 +232,17 @@ std::cout<<"##########################################\nUSING NUWRO AS DATA & On
                 nUncontainedPlot.Fill(static_cast<float>(nUncontained), plotStyleEvent, weight);
             }
 
+            std::cout<<"DEBUG Point 3.3"<<std::endl;
+
             if (wasInputToCut("2NonProtons", cutsPassed))
             {
                 const auto muonIndex = SelectionHelper::GetMuonCandidateIndex(recoParticles, muonFeatureNames, muonBDT);
+                // const auto muonIndex = SelectionHelper::GetAssignedPDGCodes()
                 unsigned int nNonProtons = 0u;
 
                 for (unsigned int index = 0; index < recoParticles.size(); ++index)
                 {
+                    std::cout<<"DEBUG Point 3.4"<<std::endl;
                     if (index == muonIndex)
                     {
                         nNonProtons++;
@@ -244,19 +263,26 @@ std::cout<<"##########################################\nUSING NUWRO AS DATA & On
 
                     if (protonBDTResponse < protonBDTCut)
                         nNonProtons++;
-
+                    
+                    std::cout<<"DEBUG Point 3.5"<<std::endl;
                     const auto plotStyleParticle = PlottingHelper::GetPlotStyle(particle, sampleType, truthParticles, false, config.global.useAbsPdg);
                     protonBDTResponsePlot.Fill(protonBDTResponse, plotStyleParticle, weight);
                     recoProtonMomentumPlot.Fill(AnalysisHelper::GetProtonMomentumFromRange(particle.range()), plotStyleParticle, weight);
+                    std::cout<<"DEBUG Point 3.6"<<std::endl;
                 }
 
+                std::cout<<"DEBUG Point 3.7"<<std::endl;
                 // const auto recoData = AnalysisHelper::GetRecoAnalysisDataCC0Pi(pEvent->reco, assignedPdgCodes);
                 const auto truthData = AnalysisHelper::GetTruthAnalysisDataCC0Pi(pEvent->truth, config.global.useAbsPdg, config.global.protonMomentumThreshold);
                 // recoProtonMomentumPlot.Fill(recoData.protonMomentum, plotStyleEvent, weight);
                 trueProtonMomentumPlot.Fill(truthData.protonMomentum, plotStyleEvent, weight);
+                std::cout<<"DEBUG Point 3.8"<<std::endl;
 
                 nNonProtonsPlot.Fill(static_cast<float>(nNonProtons), plotStyleEvent, weight);
+                std::cout<<"DEBUG Point 3.9"<<std::endl;
             }
+
+            std::cout<<"DEBUG Point 4"<<std::endl;
 
             if(wasInputToCut("pionHasValiddEdx", cutsPassed))
             {
@@ -290,6 +316,8 @@ std::cout<<"##########################################\nUSING NUWRO AS DATA & On
             {
                 topologicalScorePlot.Fill(pEvent->reco.selectedTopologicalScore(), plotStyleEvent, weight);
             }
+
+            std::cout<<"DEBUG Point 5"<<std::endl;
 
             if (wasInputToCut("startNearVertex", cutsPassed))
             {
@@ -334,9 +362,12 @@ std::cout<<"##########################################\nUSING NUWRO AS DATA & On
                 likelyGoldenPionParticlePlot.Fill(goldenPionBDTResponse, plotStyleParticle, weight);
                 likelyGoldenPionEventPlot.Fill(goldenPionBDTResponse, plotStyleEvent, weight);
             }
+
+            std::cout<<"DEBUG Point 6"<<std::endl;
         }
     }
-    const std::string prefix = "CC0pi";
+
+    const std::string prefix = "CC1pi";//"CC0pi";
     nTracksPlot.SaveAsStacked("plotEventSelectionCuts_" + prefix + "_min2Tracks_nTracks");
     isContainedPlot.SaveAsStacked("plotEventSelectionCuts_" + prefix + "_max1Uncontained_isContained");
     uncontainedVertexDistPlot.SaveAsStacked("plotEventSelectionCuts_" + prefix + "_max1Uncontained_vertexDist_uncontainedParticles", true);

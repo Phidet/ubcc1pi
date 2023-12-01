@@ -72,34 +72,25 @@ Event::Event(const EventPeLEE& eventPeLEE, const bool excludeGranddaughterPartic
         // ************* EVENT TRUTH PARTICLE *************
         unsigned int nTruthParticles = eventPeLEE.truth.particles.size();
 
-        // std::cout<<"DEBUG Event.cxx Point 4"<<std::endl;
         unsigned int nTruthParticlesToSkip = 0u;
         // for (unsigned int i = 0; i < nTruthParticles; ++i) {
         //     if (!eventPeLEE.truth.particles.at(i).mc_nu_truth())
         //     {
-        //         // std::cout<<"DEBUG Event.cxx Point 4 Skipped !!!!!!!!!! i: "<<i<<std::endl;
         //         nTruthParticlesToSkip++; // Count mcParticles that do not originate from right mcTruth
         //     }
         // }
 
-        // std::cout<<"DEBUG Event.cxx Point 5"<<std::endl;
         truth.particles.resize(nTruthParticles - nTruthParticlesToSkip);
         auto truthTargetIndex = 0u;
-        // std::cout<<"DEBUG Event.cxx Point 6: "<<nTruthParticles<<" - "<<nTruthParticlesToSkip<<std::endl;
         for(unsigned int i = 0; i<nTruthParticles; ++i)
         {
-            // std::cout<<"DEBUG Event.cxx Point 6.2"<<std::endl;
             const auto pParticlePeLEE = &eventPeLEE.truth.particles.at(i);
-            // std::cout<<"DEBUG Event.cxx Point 7"<<std::endl;
             // if (!pParticlePeLEE->mc_nu_truth())
             // {
-            //     // std::cout<<"DEBUG Event.cxx Point 7.1 Skipped !!!!!!!!!!!!!!!!!"<<std::endl;
             //     continue; // Skip mcParticles that do not originate from right mcTruth
             // }
-            // std::cout<<"DEBUG Event.cxx Point 6.1: "<<i<<" vs "<<truthTargetIndex<<"/"<<nTruthParticles<<std::endl;
             const auto pParticle = &truth.particles.at(truthTargetIndex);
             truthTargetIndex++;
-            // std::cout<<"DEBUG Event.cxx Point 8"<<std::endl;
 
             if(pParticlePeLEE->mc_pdg() != intMinValue) pParticle->pdgCode.Set(pParticlePeLEE->mc_pdg());
             if(pParticlePeLEE->mc_vx() != floatMinValue) pParticle->startX.Set(pParticlePeLEE->mc_vx());
@@ -119,7 +110,6 @@ Event::Event(const EventPeLEE& eventPeLEE, const bool excludeGranddaughterPartic
             if(pParticlePeLEE->mc_n_elastic() != intMinValue) pParticle->nElasticScatters.Set(pParticlePeLEE->mc_n_elastic());
             if(pParticlePeLEE->mc_n_inelastic() != intMinValue) pParticle->nInelasticScatters.Set(pParticlePeLEE->mc_n_inelastic());
 
-            // std::cout<<"DEBUG Event.cxx Point 9"<<std::endl;
             // pParticle->mass.Set(pParticlePeLEE->());
             // pParticle->hitWeightU.Set(pParticlePeLEE->());
             // pParticle->hitWeightV.Set(pParticlePeLEE->());
@@ -137,7 +127,6 @@ Event::Event(const EventPeLEE& eventPeLEE, const bool excludeGranddaughterPartic
     
 
     // ************* EVENT RECO *************
-    // std::cout<<"DEBUG Event.cxx Point 10"<<std::endl;
     reco.passesCCInclusive.Set(eventPeLEE.reco.filter_ccinclusive());
     // if(eventPeLEE.reco.nslice() != intMinValue) reco.nSlices.Set(eventPeLEE.reco.nslice());
     // reco.hasSelectedSlice.Set(eventPeLEE.reco..());
@@ -161,7 +150,6 @@ Event::Event(const EventPeLEE& eventPeLEE, const bool excludeGranddaughterPartic
 
 
     // ************* EVENT RECO PARTICLE *************
-    // std::cout<<"DEBUG Event.cxx Point 11"<<std::endl;
     unsigned int nRecoParticles = eventPeLEE.reco.particles.size();
 
     unsigned int nRecoParticlesToSkip = 0u;
@@ -174,6 +162,10 @@ Event::Event(const EventPeLEE& eventPeLEE, const bool excludeGranddaughterPartic
         }
     }
     reco.particles.resize(nRecoParticles - nRecoParticlesToSkip);
+
+    const auto nBacktrackedParticles = eventPeLEE.backtracked.particles.size();
+    const auto hasBacktrackedInfo = nBacktrackedParticles > 0u;
+    if(hasBacktrackedInfo && nBacktrackedParticles != nRecoParticles) throw std::logic_error("EventPeLEE::EventPeLEE - The number of reco particles does not match the number of backtracked particles");
 
     auto recoTargetIndex = 0u;
     for (unsigned int i = 0; i < nRecoParticles; ++i)
@@ -204,6 +196,7 @@ Event::Event(const EventPeLEE& eventPeLEE, const bool excludeGranddaughterPartic
         if(pParticlePeLEE->trk_dir_x_v() != floatMinValue) pParticle->directionX.Set(pParticlePeLEE->trk_dir_x_v());
         if(pParticlePeLEE->trk_dir_y_v() != floatMinValue) pParticle->directionY.Set(pParticlePeLEE->trk_dir_y_v());
         if(pParticlePeLEE->trk_dir_z_v() != floatMinValue) pParticle->directionZ.Set(pParticlePeLEE->trk_dir_z_v());
+        // else std::cout<<"DEBUG Event.cxx directionZ: "<<pParticlePeLEE->trk_dir_z_v()<<std::endl;
         if(pParticlePeLEE->trk_dir_z_v() != floatMinValue && pParticlePeLEE->trk_dir_y_v() != floatMinValue) pParticle->yzAngle.Set(std::atan2(pParticlePeLEE->trk_dir_z_v(), pParticlePeLEE->trk_dir_y_v()));
         if(pParticlePeLEE->trk_dir_y_v()!= floatMinValue && pParticlePeLEE->trk_dir_x_v() != floatMinValue) pParticle->xyAngle.Set(std::atan2(pParticlePeLEE->trk_dir_y_v(), pParticlePeLEE->trk_dir_x_v()));
         if(pParticlePeLEE->trk_dir_z_v()!= floatMinValue && pParticlePeLEE->trk_dir_x_v() != floatMinValue) pParticle->xzAngle.Set(std::atan2(pParticlePeLEE->trk_dir_z_v(), pParticlePeLEE->trk_dir_x_v()));
@@ -371,11 +364,20 @@ Event::Event(const EventPeLEE& eventPeLEE, const bool excludeGranddaughterPartic
         // if(pParticlePeLEE->dvtx_y_boundary() != doubleMinValue) pParticle->vertexDistanceToYBoundary.Set(pParticlePeLEE->dvtx_y_boundary());
         // if(pParticlePeLEE->dvtx_z_boundary() != doubleMinValue) pParticle->vertexDistanceToZBoundary.Set(pParticlePeLEE->dvtx_z_boundary());
 
-        // std::cout<<"DEBUG pfp_vtx point 0"<<std::endl;
         if(pParticlePeLEE->pfp_vtx_x_v() != floatMinValue) pParticle->vertexX.Set(pParticlePeLEE->pfp_vtx_x_v());
         if(pParticlePeLEE->pfp_vtx_y_v() != floatMinValue) pParticle->vertexY.Set(pParticlePeLEE->pfp_vtx_y_v());
         if(pParticlePeLEE->pfp_vtx_z_v() != floatMinValue) pParticle->vertexZ.Set(pParticlePeLEE->pfp_vtx_z_v());
-        // std::cout<<"DEBUG pfp_vtx point 1"<<std::endl;
+
+        if(hasBacktrackedInfo)
+        {
+            const auto pBacktrackedParticlePeLEE = &eventPeLEE.backtracked.particles.at(i);
+            if(pBacktrackedParticlePeLEE->backtracked_pdg() != 0) pParticle->pdgBacktracked.Set(pBacktrackedParticlePeLEE->backtracked_pdg());
+            if(pBacktrackedParticlePeLEE->backtracked_purity() != floatMinValue) pParticle->purityBacktracked.Set(pBacktrackedParticlePeLEE->backtracked_purity());
+            if(pBacktrackedParticlePeLEE->backtracked_completeness() != floatMinValue) pParticle->completenessBacktracked.Set(pBacktrackedParticlePeLEE->backtracked_completeness());
+            if(pBacktrackedParticlePeLEE->backtracked_px() != floatMinValue) pParticle->momentumXBacktracked.Set(pBacktrackedParticlePeLEE->backtracked_px());
+            if(pBacktrackedParticlePeLEE->backtracked_py() != floatMinValue) pParticle->momentumYBacktracked.Set(pBacktrackedParticlePeLEE->backtracked_py());
+            if(pBacktrackedParticlePeLEE->backtracked_pz() != floatMinValue) pParticle->momentumZBacktracked.Set(pBacktrackedParticlePeLEE->backtracked_pz());
+        }
 
         // if(pParticlePeLEE->pfpdg() == 11)
         // {
@@ -392,7 +394,6 @@ Event::Event(const EventPeLEE& eventPeLEE, const bool excludeGranddaughterPartic
         //     // if(pParticlePeLEE->shr_start_z_v() != floatMinValue) pParticle->vertexZ.Set(pParticlePeLEE->shr_start_z_v());
         //     // else if(pParticlePeLEE->trk_start_z_v() != floatMinValue) pParticle->vertexZ.Set(pParticlePeLEE->trk_start_z_v());
 
-        //     std::cout<<"DEBUG shr_start:     ";
         //     if(pParticlePeLEE->shr_start_x_v() != floatMinValue) std::cout<<"shr x: "<<pParticlePeLEE->shr_start_x_v()<<", ";
         //     if(pParticlePeLEE->shr_start_y_v() != floatMinValue) std::cout<<"shr y: "<<pParticlePeLEE->shr_start_y_v()<<", ";
         //     if(pParticlePeLEE->shr_start_z_v() != floatMinValue) std::cout<<"shr z: "<<pParticlePeLEE->shr_start_z_v()<<", ";
