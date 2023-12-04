@@ -41,8 +41,9 @@ Event::Event(const EventPeLEE& eventPeLEE, const bool excludeGranddaughterPartic
     if(hasTruthInfo)
     {
         // ************* EVENT TRUTH *************
-        // if(eventPeLEE.truth.weightSpline() != floatMinValue) truth.splineEventWeight.Set(eventPeLEE.truth.weightSpline());
-        // if(eventPeLEE.truth.weightSplineTimesTune() != floatMinValue) truth.genieTuneEventWeight.Set(eventPeLEE.truth.weightSplineTimesTune());
+        if(eventPeLEE.truth.weightSpline() != floatMinValue) truth.splineEventWeight.Set(eventPeLEE.truth.weightSpline());
+        if(eventPeLEE.truth.weightTune() != floatMinValue) truth.genieTuneEventWeight.Set(eventPeLEE.truth.weightTune());
+        // std::cout<<"DEBUG Event.cxx: weightSpline: "<<eventPeLEE.truth.weightSpline()<<" weightTune: "<<eventPeLEE.truth.weightTune()<<std::endl;
 
         std::vector<std::string> systParamNames;
         std::vector<int> systParamFirstValueIndex;

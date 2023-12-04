@@ -159,18 +159,18 @@ void Analyzer(const Config &config)
         float cc0pi_reco_muonMomentum;
         float cc0pi_reco_muonCosTheta;
         float cc0pi_reco_muonPhi;
-        float cc0pi_reco_pionMomentum;
-        float cc0pi_reco_pionCosTheta;
-        float cc0pi_reco_pionPhi;
-        float cc0pi_reco_muonPionAngle;
+        float cc0pi_reco_protonMomentum;
+        float cc0pi_reco_protonCosTheta;
+        float cc0pi_reco_protonPhi;
+        float cc0pi_reco_muonProtonAngle;
         int   cc0pi_reco_nProtons;
         treeWriter.SetOutputBranchAddress("cc0pi_reco_muonMomentum", (void*)&cc0pi_reco_muonMomentum, "cc0pi_reco_muonMomentum/F" );
         treeWriter.SetOutputBranchAddress("cc0pi_reco_muonCosTheta", (void*)&cc0pi_reco_muonCosTheta, "cc0pi_reco_muonCosTheta/F" );
         treeWriter.SetOutputBranchAddress("cc0pi_reco_muonPhi", (void*)&cc0pi_reco_muonPhi, "cc0pi_reco_muonPhi/F" );
-        treeWriter.SetOutputBranchAddress("cc0pi_reco_pionMomentum", (void*)&cc0pi_reco_pionMomentum, "cc0pi_reco_pionMomentum/F" );
-        treeWriter.SetOutputBranchAddress("cc0pi_reco_pionCosTheta", (void*)&cc0pi_reco_pionCosTheta, "cc0pi_reco_pionCosTheta/F" );
-        treeWriter.SetOutputBranchAddress("cc0pi_reco_pionPhi", (void*)&cc0pi_reco_pionPhi, "cc0pi_reco_pionPhi/F" );
-        treeWriter.SetOutputBranchAddress("cc0pi_reco_muonPionAngle", (void*)&cc0pi_reco_muonPionAngle, "cc0pi_reco_muonPionAngle/F" );
+        treeWriter.SetOutputBranchAddress("cc0pi_reco_protonMomentum", (void*)&cc0pi_reco_protonMomentum, "cc0pi_reco_protonMomentum/F" );
+        treeWriter.SetOutputBranchAddress("cc0pi_reco_protonCosTheta", (void*)&cc0pi_reco_protonCosTheta, "cc0pi_reco_protonCosTheta/F" );
+        treeWriter.SetOutputBranchAddress("cc0pi_reco_protonPhi", (void*)&cc0pi_reco_protonPhi, "cc0pi_reco_protonPhi/F" );
+        treeWriter.SetOutputBranchAddress("cc0pi_reco_muonProtonAngle", (void*)&cc0pi_reco_muonProtonAngle, "cc0pi_reco_muonProtonAngle/F" );
         treeWriter.SetOutputBranchAddress("cc0pi_reco_nProtons", (void*)&cc0pi_reco_nProtons, "cc0pi_reco_nProtons/I" );
 
         bool passed_particleTrackScore;
@@ -184,6 +184,7 @@ void Analyzer(const Config &config)
         bool passed_daughterVerticesContained;
         bool passed_nuVertexFiducial;
         bool passed_topologicalOrFlashMatch;
+        bool passed_topologicalScoreCC;
         bool passed_min2Tracks;
         bool passed_max1Uncontained;
         bool passed_2NonProtons;
@@ -205,6 +206,7 @@ void Analyzer(const Config &config)
         treeWriter.SetOutputBranchAddress("passed_daughterVerticesContained", (void*)&passed_daughterVerticesContained, "passed_daughterVerticesContained/O" );
         treeWriter.SetOutputBranchAddress("passed_nuVertexFiducial", (void*)&passed_nuVertexFiducial, "passed_nuVertexFiducial/O" );
         treeWriter.SetOutputBranchAddress("passed_topologicalOrFlashMatch", (void*)&passed_topologicalOrFlashMatch, "passed_topologicalOrFlashMatch/O" );
+        treeWriter.SetOutputBranchAddress("passed_topologicalScoreCC", (void*)&passed_topologicalScoreCC, "passed_topologicalScoreCC/O" );
         treeWriter.SetOutputBranchAddress("passed_min2Tracks", (void*)&passed_min2Tracks, "passed_min2Tracks/O" );
         treeWriter.SetOutputBranchAddress("passed_max1Uncontained", (void*)&passed_max1Uncontained, "passed_max1Uncontained/O" );
         treeWriter.SetOutputBranchAddress("passed_2NonProtons", (void*)&passed_2NonProtons, "passed_2NonProtons/O" );
@@ -295,18 +297,18 @@ void Analyzer(const Config &config)
         float truthCC0PiMuonMomentum;
         float truthCC0PiMuonCosTheta;
         float truthCC0PiMuonPhi;
-        float truthCC0PiPionMomentum;
-        float truthCC0PiPionCosTheta;
-        float truthCC0PiPionPhi;
-        float truthCC0PiMuonPionAngle;
+        float truthCC0PiProtonMomentum;
+        float truthCC0PiProtonCosTheta;
+        float truthCC0PiProtonPhi;
+        float truthCC0PiMuonProtonAngle;
         int   truthCC0PiNProtons;
         treeWriter.SetOutputBranchAddress("cc0pi_truth_muonMomentum", (void*)&truthCC0PiMuonMomentum, "cc0pi_truth_muonMomentum/F" );
         treeWriter.SetOutputBranchAddress("cc0pi_truth_muonCosTheta", (void*)&truthCC0PiMuonCosTheta, "cc0pi_truth_muonCosTheta/F" );
         treeWriter.SetOutputBranchAddress("cc0pi_truth_muonPhi", (void*)&truthCC0PiMuonPhi, "cc0pi_truth_muonPhi/F" );
-        treeWriter.SetOutputBranchAddress("cc0pi_truth_pionMomentum", (void*)&truthCC0PiPionMomentum, "cc0pi_truth_pionMomentum/F" );
-        treeWriter.SetOutputBranchAddress("cc0pi_truth_pionCosTheta", (void*)&truthCC0PiPionCosTheta, "cc0pi_truth_pionCosTheta/F" );
-        treeWriter.SetOutputBranchAddress("cc0pi_truth_pionPhi", (void*)&truthCC0PiPionPhi, "cc0pi_truth_pionPhi/F" );
-        treeWriter.SetOutputBranchAddress("cc0pi_truth_muonPionAngle", (void*)&truthCC0PiMuonPionAngle, "cc0pi_truth_muonPionAngle/F" );
+        treeWriter.SetOutputBranchAddress("cc0pi_truth_protonMomentum", (void*)&truthCC0PiProtonMomentum, "cc0pi_truth_protonMomentum/F" );
+        treeWriter.SetOutputBranchAddress("cc0pi_truth_protonCosTheta", (void*)&truthCC0PiProtonCosTheta, "cc0pi_truth_protonCosTheta/F" );
+        treeWriter.SetOutputBranchAddress("cc0pi_truth_protonPhi", (void*)&truthCC0PiProtonPhi, "cc0pi_truth_protonPhi/F" );
+        treeWriter.SetOutputBranchAddress("cc0pi_truth_muonProtonAngle", (void*)&truthCC0PiMuonProtonAngle, "cc0pi_truth_muonProtonAngle/F" );
         treeWriter.SetOutputBranchAddress("cc0pi_truth_nProtons", (void*)&truthCC0PiNProtons, "cc0pi_truth_nProtons/I" );
 
         std::vector<int> bestMatchedTruthPDGs;
@@ -336,8 +338,8 @@ void Analyzer(const Config &config)
         // Loop over the events in the file
         const auto nEvents = readerPeLEE.GetNumberOfEvents();
         const auto pEventPeLEE = readerPeLEE.GetBoundEventAddress();
-        // std::cout << "### Only processing 1\% of events (out of "<<nEvents<<") ###" << std::endl;
-        for (unsigned int i = 0; i < nEvents; i++) // Todo: Remove!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        std::cout << "### Only processing 5\% of events (out of "<<nEvents<<") ###" << std::endl;
+        for (unsigned int i = 0; i < nEvents/20; i++) // Todo: Remove!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         {
             AnalysisHelper::PrintLoadingBar(i, nEvents);
             readerPeLEE.LoadEvent(i);
@@ -347,7 +349,7 @@ void Analyzer(const Config &config)
             // if(!isGoodRun) continue;
             if(!isGoodRun)
             {
-                std::cout << "DEBUG - bad run: "<<run<<std::endl;
+                // std::cout << "DEBUG - bad run: "<<run<<std::endl;
                 continue;
             }
             // else
@@ -380,10 +382,10 @@ void Analyzer(const Config &config)
             cc0pi_reco_muonMomentum = recoDataCC0Pi.muonMomentum;
             cc0pi_reco_muonCosTheta = recoDataCC0Pi.muonCosTheta;
             cc0pi_reco_muonPhi = recoDataCC0Pi.muonPhi;
-            cc0pi_reco_pionMomentum = recoDataCC0Pi.pionMomentum;
-            cc0pi_reco_pionCosTheta = recoDataCC0Pi.pionCosTheta;
-            cc0pi_reco_pionPhi = recoDataCC0Pi.pionPhi;
-            cc0pi_reco_muonPionAngle = recoDataCC0Pi.muonPionAngle;
+            cc0pi_reco_protonMomentum = recoDataCC0Pi.protonMomentum;
+            cc0pi_reco_protonCosTheta = recoDataCC0Pi.protonCosTheta;
+            cc0pi_reco_protonPhi = recoDataCC0Pi.protonPhi;
+            cc0pi_reco_muonProtonAngle = recoDataCC0Pi.muonProtonAngle;
             cc0pi_reco_nProtons = recoDataCC0Pi.nProtons;
 
             // std::cout << "DEBUG Point Y10" << std::endl;
@@ -475,6 +477,7 @@ void Analyzer(const Config &config)
             passed_daughterVerticesContained = SelectionHelper::IsCutPassed(cutsPassedCC1Pi, "daughterVerticesContained");
             passed_nuVertexFiducial = SelectionHelper::IsCutPassed(cutsPassedCC1Pi, "nuVertexFiducial");
             passed_topologicalOrFlashMatch = SelectionHelper::IsCutPassed(cutsPassedCC1Pi, "topologicalOrFlashMatch");
+            passed_topologicalScoreCC = SelectionHelper::IsCutPassed(cutsPassedCC1Pi, "topologicalScoreCC");
             passed_min2Tracks = SelectionHelper::IsCutPassed(cutsPassedCC1Pi, "min2Tracks");
             passed_max1Uncontained = SelectionHelper::IsCutPassed(cutsPassedCC1Pi, "max1Uncontained");
             passed_2NonProtons = SelectionHelper::IsCutPassed(cutsPassedCC1Pi, "2NonProtons");
@@ -626,10 +629,10 @@ void Analyzer(const Config &config)
             truthCC0PiMuonMomentum = -std::numeric_limits<float>::max();
             truthCC0PiMuonCosTheta = -std::numeric_limits<float>::max();
             truthCC0PiMuonPhi = -std::numeric_limits<float>::max();
-            truthCC0PiPionMomentum = -std::numeric_limits<float>::max();
-            truthCC0PiPionCosTheta = -std::numeric_limits<float>::max();
-            truthCC0PiPionPhi = -std::numeric_limits<float>::max();
-            truthCC0PiMuonPionAngle = -std::numeric_limits<float>::max();
+            truthCC0PiProtonMomentum = -std::numeric_limits<float>::max();
+            truthCC0PiProtonCosTheta = -std::numeric_limits<float>::max();
+            truthCC0PiProtonPhi = -std::numeric_limits<float>::max();
+            truthCC0PiMuonProtonAngle = -std::numeric_limits<float>::max();
             truthCC0PiNProtons = -std::numeric_limits<int>::max();
 
             mcNuPdg = -std::numeric_limits<int>::max();
@@ -722,10 +725,10 @@ void Analyzer(const Config &config)
                 truthCC0PiMuonMomentum = truthDataCC0Pi.muonMomentum;
                 truthCC0PiMuonCosTheta = truthDataCC0Pi.muonCosTheta;
                 truthCC0PiMuonPhi = truthDataCC0Pi.muonPhi;
-                truthCC0PiPionMomentum = truthDataCC0Pi.pionMomentum;
-                truthCC0PiPionCosTheta = truthDataCC0Pi.pionCosTheta;
-                truthCC0PiPionPhi = truthDataCC0Pi.pionPhi;
-                truthCC0PiMuonPionAngle = truthDataCC0Pi.muonPionAngle;
+                truthCC0PiProtonMomentum = truthDataCC0Pi.protonMomentum;
+                truthCC0PiProtonCosTheta = truthDataCC0Pi.protonCosTheta;
+                truthCC0PiProtonPhi = truthDataCC0Pi.protonPhi;
+                truthCC0PiMuonProtonAngle = truthDataCC0Pi.muonProtonAngle;
                 truthCC0PiNProtons = truthDataCC0Pi.nProtons;
 
                 mcNuPdg = pEvent->truth.nuPdgCode();
@@ -788,7 +791,7 @@ void Analyzer(const Config &config)
                     category = 7;
                     break;
                 case PlottingHelper::PlotStyle::NumuCC0Pi:
-                    category = 8;
+                    category = isCC0PiSignal ? 12 : 8; // Here 8 is CC0pi events not selected by CC0pi selection
                     break;
                 case PlottingHelper::PlotStyle::NumuCC1PiZero:
                     category = 9;
@@ -797,6 +800,7 @@ void Analyzer(const Config &config)
                     category = 10;
                     break;
                 // category 11: CC1pi events outside phase space   
+                // category 12: Selected CC0pi events   
                 default:
                     throw std::invalid_argument("Invalid type encountered");
             }
