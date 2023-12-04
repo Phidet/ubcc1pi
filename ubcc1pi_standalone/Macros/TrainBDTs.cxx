@@ -37,8 +37,8 @@ void TrainBDTs(const Config &config)
         std::cout << "DEBUG Point 2" << std::endl;
         std::cout<<"Using file: "<<filePath<<std::endl;
         FileReader<EventPeLEE, SubrunPeLEE> readerPeLEE(filePath, true);
-        // std::cout<<"WARNING: Only using 3\% of events!"<<std::endl; // TODO: Remove this line
-        const auto nEvents = readerPeLEE.GetNumberOfEvents();
+        std::cout<<"WARNING: Only using 5\% of events!"<<std::endl; // TODO: Remove this line
+        const auto nEvents = readerPeLEE.GetNumberOfEvents()/20;
         std::cout << "DEBUG Point 3" << std::endl;
         const auto pEventPeLEE = readerPeLEE.GetBoundEventAddress();
         std::cout << "DEBUG Point 4" << std::endl;
@@ -103,7 +103,7 @@ void TrainBDTs(const Config &config)
             const auto eventIndex = cc1PiEventIndices.at(i).second;
             const auto isTrainingEvent = shuffler.IsTrainingEvent(i);
             readerPeLEE.LoadEvent(i);
-            Event event(*pEventPeLEE, true);// true or false decides wether to cut generation!=2 particles
+            Event event(*pEventPeLEE, true); // true or false decides wether to cut generation!=2 particles
             const auto pEvent = std::make_shared<Event>(event);
 
             const auto truthParticles = pEvent->truth.particles;
@@ -112,6 +112,8 @@ void TrainBDTs(const Config &config)
 
             for (const auto &recoParticle : recoParticles)
             {
+                if(recoParticle.generation() > 2) throw std::runtime_error("Found reco particle with generation > 2");
+
                 // Only use contained particles for training
                 if (!AnalysisHelper::HasTrackFit(recoParticle) || !AnalysisHelper::IsContained(recoParticle))
                     continue;
@@ -160,13 +162,13 @@ void TrainBDTs(const Config &config)
 
                 // Extract the features
                 std::vector<float> goldenPionFeatures;
-                const auto areAllFeaturesAvailableGoldenPion = BDTHelper::GetBDTFeatures(recoParticle, goldenPionFeatureNames, goldenPionFeatures);
+                const auto areAllFeaturesAvailableGoldenPion = BDTHelper::GetBDTFeatures(recoParticle, goldenPionFeatureNames, goldenPionFeatures, true); // true for debugging
 
                 std::vector<float> protonFeatures;
-                const auto areAllFeaturesAvailableProton = BDTHelper::GetBDTFeatures(recoParticle, protonFeatureNames, protonFeatures);
+                const auto areAllFeaturesAvailableProton = BDTHelper::GetBDTFeatures(recoParticle, protonFeatureNames, protonFeatures, true); // true for debugging
 
                 std::vector<float> muonFeatures;
-                const auto areAllFeaturesAvailableMuon = BDTHelper::GetBDTFeatures(recoParticle, muonFeatureNames, muonFeatures);
+                const auto areAllFeaturesAvailableMuon = BDTHelper::GetBDTFeatures(recoParticle, muonFeatureNames, muonFeatures, true); // true for debugging
 
                 // Define the weight
                 const auto completenessWeight = (config.trainBDTs.weightByCompleteness ? (isExternal ? 1.f : completeness) : 1.f);
@@ -179,6 +181,10 @@ void TrainBDTs(const Config &config)
                     std::cout<<"DEBUG Added golden pion entry - isGoldenPion: "<<isGoldenPion<<" !isExternal: "<<!isExternal<<" truePdgCode: "<<truePdgCode<<" trueIsGolden: "<<trueIsGolden<<std::endl;
                     goldenPionBDTFactory.AddEntry(goldenPionFeatures, isGoldenPion, isTrainingEvent, weight);
                 }
+                else
+                {
+                    std::cout<<"DEBUG Failed to add golden pion entry with true pdg code: "<<truePdgCode<<std::endl;
+                }
 
                 if (areAllFeaturesAvailableProton)
                 {
@@ -186,12 +192,20 @@ void TrainBDTs(const Config &config)
                     std::cout<<"DEBUG Added proton entry - isProton: "<<isProton<<" !isExternal: "<<!isExternal<<" truePdgCode: "<<truePdgCode<<std::endl;
                     protonBDTFactory.AddEntry(protonFeatures, isProton, isTrainingEvent, weight);
                 }
+                else
+                {
+                    std::cout<<"DEBUG Failed to add proton entry with true pdg code: "<<truePdgCode<<std::endl;
+                }
 
                 if (areAllFeaturesAvailableMuon)
                 {
                     const bool isMuon = !isExternal && truePdgCode == 13;
                     std::cout<<"DEBUG Added muon entry - isMuon: "<<isMuon<<" !isExternal: "<<!isExternal<<" truePdgCode: "<<truePdgCode<<std::endl;
                     muonBDTFactory.AddEntry(muonFeatures, isMuon, isTrainingEvent, weight);
+                }
+                else
+                {
+                    std::cout<<"DEBUG Failed to add muon entry with true pdg code: "<<truePdgCode<<std::endl;
                 }
             }
         }

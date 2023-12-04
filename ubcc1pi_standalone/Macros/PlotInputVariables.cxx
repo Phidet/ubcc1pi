@@ -13,6 +13,8 @@
 #include "ubcc1pi_standalone/Helpers/AnalysisHelper.h"
 #include "ubcc1pi_standalone/Helpers/NormalisationHelper.h"
 
+#include "ubcc1pi_standalone/Helpers/SelectionHelper.h"
+
 #include <TH2F.h>
 
 using namespace ubcc1pi;
@@ -22,68 +24,7 @@ namespace ubcc1pi_macros
 
 void PlotInputVariables(const Config &config)
 {
-    //
-    // Setup the input files
-    //
-    std::vector< std::tuple<AnalysisHelper::SampleType, std::string, float> > inputData;
-
-    // -------------------------------------------------------------------------------------------------------------------------------------
-    // Setup the input files
-    // -------------------------------------------------------------------------------------------------------------------------------------
-    // Here we define a vector of tuples with 4 entries
-    //   - First, the sample type (e.g. overlay)
-    //   - Second, a string which is used to identify a given detector variation sample (for other sample type, this is unused)
-    //   - Third, the path to the input file
-    //   - Fourth, the normalisation factor to apply to all events in that file
-    std::cout<<"##########################################\nUSING NUWRO AS DATA & Only CC0pi!\n##########################################"<<std::endl;
-    for (const auto run: config.global.runs)
-    {
-        if(run == 1)
-        {
-            inputData.emplace_back(AnalysisHelper::Overlay, config.filesRun1.overlaysFileName, NormalisationHelper::GetOverlaysNormalisationToNuWro(config, 1));
-            inputData.emplace_back(AnalysisHelper::DataBNB, config.filesRun1.nuWroFileName, 1.f);
-        }
-        else if(run == 2)
-        {
-            inputData.emplace_back(AnalysisHelper::Overlay, config.filesRun2.overlaysFileName, NormalisationHelper::GetOverlaysNormalisationToNuWro(config, 2));
-            inputData.emplace_back(AnalysisHelper::DataBNB, config.filesRun2.nuWroFileName, 1.f);
-        }
-        else if(run == 3)
-        {
-            inputData.emplace_back(AnalysisHelper::Overlay, config.filesRun3.overlaysFileName, NormalisationHelper::GetOverlaysNormalisationToNuWro(config, 3));
-            inputData.emplace_back(AnalysisHelper::DataBNB, config.filesRun3.nuWroFileName, 1.f);
-        }
-        else throw std::logic_error("PlotEventSelectionCuts - Invalid run number");
-    }
-
-
-    // for (const auto run: config.global.runs)
-    // {
-    //     if(run == 1)
-    //     {
-    //         inputData.emplace_back(AnalysisHelper::Overlay, config.filesRun1.overlaysFileName, NormalisationHelper::GetOverlaysNormalisation(config, 1));
-    //         inputData.emplace_back(AnalysisHelper::Dirt,    config.filesRun1.dirtFileName, NormalisationHelper::GetDirtNormalisation(config, 1));
-    //         inputData.emplace_back(AnalysisHelper::DataEXT, config.filesRun1.dataEXTFileName, NormalisationHelper::GetDataEXTNormalisation(config, 1));
-    //         inputData.emplace_back(AnalysisHelper::DataBNB, config.filesRun1.dataBNBFileName, 1.f);
-    //     }
-    //     else if(run == 2)
-    //     {
-    //         inputData.emplace_back(AnalysisHelper::Overlay, config.filesRun2.overlaysFileName, NormalisationHelper::GetOverlaysNormalisation(config, 2));
-    //         inputData.emplace_back(AnalysisHelper::Dirt,    config.filesRun2.dirtFileName, NormalisationHelper::GetDirtNormalisation(config, 2));
-    //         inputData.emplace_back(AnalysisHelper::DataEXT, config.filesRun2.dataEXTFileName, NormalisationHelper::GetDataEXTNormalisation(config, 2));
-    //         inputData.emplace_back(AnalysisHelper::DataBNB, config.filesRun2.dataBNBFileName, 1.f);
-    //     }
-    //     else if(run == 3)
-    //     {
-    //         inputData.emplace_back(AnalysisHelper::Overlay, config.filesRun3.overlaysFileName, NormalisationHelper::GetOverlaysNormalisation(config, 3));
-    //         inputData.emplace_back(AnalysisHelper::Dirt,    config.filesRun3.dirtFileName, NormalisationHelper::GetDirtNormalisation(config, 3));
-    //         inputData.emplace_back(AnalysisHelper::DataEXT, config.filesRun3.dataEXTFileName, NormalisationHelper::GetDataEXTNormalisation(config, 3));
-    //         inputData.emplace_back(AnalysisHelper::DataBNB, config.filesRun3.dataBNBFileName, 1.f);
-    //     }
-    //     else throw std::logic_error("ExtractSidebandFit - Invalid run number");
-    // }
-
-
+    auto ccInclusiveSelection = SelectionHelper::GetCCInclusiveSelection2(true);
     //
     // Set up the plots for each BDT feature
     //
@@ -195,28 +136,39 @@ void PlotInputVariables(const Config &config)
     //
     // Fill the plots
     //
-    for (const auto [sampleType, fileName, normalisation] : inputData)
+    for (const auto &[fileRun, normalisation, sampleType, useThisFile, filePath] : config.input.files)
     {
-        std::cout << "Reading input file: " << fileName << std::endl;
+        if(!useThisFile) continue;
+        if(sampleType != AnalysisHelper::Overlay && sampleType != AnalysisHelper::Dirt && sampleType != AnalysisHelper::DataBNB && sampleType != AnalysisHelper::DataEXT) continue;
+        std::cout << "Reading input file: " << filePath << std::endl;
 
-        FileReader reader(fileName);
-        auto pEvent = reader.GetBoundEventAddress();
+        const auto isMC = (sampleType != AnalysisHelper::DataBNB) && (sampleType != AnalysisHelper::DataEXT);
 
-        const auto nEvents = reader.GetNumberOfEvents();
-        for (unsigned int i = 0; i < nEvents; ++i)
+        FileReader<EventPeLEE, SubrunPeLEE> readerPeLEE(filePath, isMC);
+        const auto pEventPeLEE = readerPeLEE.GetBoundEventAddress();
+        const auto nEvents = readerPeLEE.GetNumberOfEvents();
+        std::cout<<"WARNING: Only using 1\%"<<std::endl;
+        for (unsigned int i = 0; i < nEvents/100; ++i)
         {
             AnalysisHelper::PrintLoadingBar(i, nEvents);
 
-            reader.LoadEvent(i);
+            readerPeLEE.LoadEvent(i);
+            Event event(*pEventPeLEE, true); // true or false decides wether to cut generation!=2 particles
+            const auto pEvent = std::make_shared<Event>(event);
 
-            const auto isTrueCC0Pi = AnalysisHelper::IsTrueCC0Pi(pEvent, config.global.useAbsPdg, config.global.protonMomentumThreshold); // todo remove this
-            if(!isTrueCC0Pi) continue;
+            // const auto isTrueCC0Pi = AnalysisHelper::IsTrueCC0Pi(pEvent, config.global.useAbsPdg, config.global.protonMomentumThreshold); // todo remove this
+            // if(!isTrueCC0Pi) continue;
 
             // Only use events passing the CC inclusive selection
-            if (!pEvent->reco.passesCCInclusive())
+            // if (!pEvent->reco.passesCCInclusive())
+            //     continue;
+            const auto &[passesCCInclusive, cutsPassed, assignedPdgCodes] = ccInclusiveSelection.Execute(pEvent);
+            if (!passesCCInclusive)
                 continue;
 
-            const auto weight = normalisation * AnalysisHelper::GetNominalEventWeight(pEvent);
+            const auto nominalEventWeight = AnalysisHelper::GetNominalEventWeight(pEvent);
+            // std::cout << "nominalEventWeight: " << nominalEventWeight << std::endl;
+            const auto weight = normalisation * nominalEventWeight;
             const auto recoParticles = pEvent->reco.particles;
 
             const auto truthParticles = pEvent->truth.particles; // This will be empty for non MC events
@@ -227,11 +179,17 @@ void PlotInputVariables(const Config &config)
                 const auto &particle = recoParticles.at(index);
 
                 // Get the plot style
-                const auto particleStyle = PlottingHelper::GetPlotStyle(particle, sampleType, truthParticles, false, config.global.useAbsPdg);
+                auto particleStyle = PlottingHelper::GetPlotStyle(particle, sampleType, truthParticles, false, config.global.useAbsPdg, true);
 
                 // Insist the particle has a fitted track
                 if (!AnalysisHelper::HasTrackFit(particle))
                     continue;
+
+                if(particleStyle==PlottingHelper::Photon || 
+                    particleStyle==PlottingHelper::Electron || 
+                        particleStyle==PlottingHelper::Dirt) {
+                    particleStyle=PlottingHelper::External;
+                }
 
                 // Fill the angle plots
                 const auto dir = TVector3(particle.directionX(), particle.directionY(), particle.directionZ()).Unit();
@@ -335,7 +293,7 @@ void PlotInputVariables(const Config &config)
     }
 
     // Save the plots
-    const std::string prefix = "CC0pi";
+    const std::string prefix = "CC1pi";
     for (unsigned int iFeature = 0; iFeature < featureNames.size(); ++iFeature)
     {
         const auto &featureName = featureNames.at(iFeature);

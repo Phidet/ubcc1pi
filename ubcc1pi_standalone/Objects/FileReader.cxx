@@ -18,50 +18,53 @@ FileReader<T, U>::FileReader(const std::string &inputFile, const bool hasTruthIn
     std::cout << "DEBUG: Input file set to: " << m_inputFile << std::endl;
 
     m_pFile = TFile::Open(m_inputFile.c_str());
-    std::cout << "DEBUG: File opened: " << m_inputFile << std::endl;
+
+    if (!m_pFile) {
+        throw std::runtime_error("Failed to open input file: " + m_inputFile);
+    }
 
     std::string eventTreeName = "events";
     if constexpr (std::is_same_v<T, EventPeLEE>) eventTreeName = "nuselection/NeutrinoSelectionFilter";
     else if constexpr (std::is_same_v<T, EventXSec>) eventTreeName = "stv_tree";
-    std::cout << "DEBUG: Event tree name set to: " << eventTreeName << std::endl;
+    // std::cout << "DEBUG: Event tree name set to: " << eventTreeName << std::endl;
 
     m_pEventTree = static_cast<TTree*>(m_pFile->Get(eventTreeName.c_str()));
-    std::cout << "DEBUG: Event tree obtained from file" << std::endl;
+    // std::cout << "DEBUG: Event tree obtained from file" << std::endl;
 
     std::string subrunTreeName = "subruns";
     if constexpr (std::is_same_v<U, SubrunPeLEE>) subrunTreeName = "nuselection/SubRun";
     else if constexpr (std::is_same_v<U, SubrunXSec>) subrunTreeName = "stv_tree/nuselection/SubRun";
-    std::cout << "DEBUG: Subrun tree name set to: " << subrunTreeName << std::endl;
+    // std::cout << "DEBUG: Subrun tree name set to: " << subrunTreeName << std::endl;
 
     m_pSubrunTree = static_cast<TTree*>(m_pFile->Get(subrunTreeName.c_str()));
-    std::cout << "DEBUG: Subrun tree obtained from file" << std::endl;
+    // std::cout << "DEBUG: Subrun tree obtained from file" << std::endl;
 
-    std::cout << "DEBUG: Event and Subrun trees initialized" << std::endl;
+    // std::cout << "DEBUG: Event and Subrun trees initialized" << std::endl;
 
     m_pEvent = std::make_shared<T>(hasTruthInfo);
     m_pSubrun = std::make_shared<U>(hasTruthInfo);
 
-    std::cout << "DEBUG: Event and Subrun objects created" << std::endl;
+    // std::cout << "DEBUG: Event and Subrun objects created" << std::endl;
 
     this->BindEventToTree();
     this->BindSubrunToTree();
 
-    std::cout << "DEBUG: Event and Subrun objects bound to trees" << std::endl;
+    // std::cout << "DEBUG: Event and Subrun objects bound to trees" << std::endl;
 
     if (this->GetNumberOfEvents() == 0)
         std::cout << "ubcc1pi::FileReader: Warning, input file has no entries" << std::endl;
 
-    std::cout << "DEBUG: Number of events: " << this->GetNumberOfEvents() << std::endl;
+    // std::cout << "DEBUG: Number of events: " << this->GetNumberOfEvents() << std::endl;
 
     if (this->GetNumberOfSubruns() == 0)
         std::cout << "ubcc1pi::FileReader: Warning, input file has no subruns" << std::endl;
 
-    std::cout << "DEBUG: Number of subruns: " << this->GetNumberOfSubruns() << std::endl;
+    // std::cout << "DEBUG: Number of subruns: " << this->GetNumberOfSubruns() << std::endl;
 
     // By default, disable the branches that hold the event weights as these are large and only needed in a few cases
     this->DisableSystematicBranches();
 
-    std::cout << "DEBUG: Exiting FileReader constructor" << std::endl;
+    // std::cout << "DEBUG: Exiting FileReader constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
@@ -110,11 +113,11 @@ std::shared_ptr<U> FileReader<T, U>::GetBoundSubrunAddress()
 template <class T, class U>
 void FileReader<T, U>::DisableSystematicBranches()
 {
-    std::cout << "DEBUG: Disabling systematic branches" << std::endl;
+    // std::cout << "DEBUG: Disabling systematic branches" << std::endl;
     std::string weightBranches = "truth_systParam*";
     if constexpr (std::is_same_v<T, EventPeLEE>) weightBranches = "weights*";
     if constexpr (!std::is_same_v<T, EventXSec>) m_pEventTree->SetBranchStatus(weightBranches.c_str(), false);
-    std::cout << "DEBUG: Disabling systematic branches" << std::endl;
+    // std::cout << "DEBUG: Disabling systematic branches" << std::endl;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
@@ -122,11 +125,11 @@ void FileReader<T, U>::DisableSystematicBranches()
 template <class T, class U>
 void FileReader<T, U>::EnableSystematicBranches()
 {
-    std::cout << "DEBUG: Enabling systematic branches" << std::endl;
+    // std::cout << "DEBUG: Enabling systematic branches" << std::endl;
     std::string weightBranches = "truth_systParam*";
     if constexpr (std::is_same_v<T, EventPeLEE>) weightBranches = "weights*";
     if constexpr (!std::is_same_v<T, EventXSec>) m_pEventTree->SetBranchStatus(weightBranches.c_str(), true);
-    std::cout << "DEBUG: Enabling systematic branches" << std::endl;
+    // std::cout << "DEBUG: Enabling systematic branches" << std::endl;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------

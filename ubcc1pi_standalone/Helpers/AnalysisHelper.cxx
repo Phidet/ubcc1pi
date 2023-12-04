@@ -461,6 +461,9 @@ float AnalysisHelper::GetNominalEventWeight(const std::shared_ptr<Event> &pEvent
     if (truth.genieTuneEventWeight.IsSet() && std::abs(truth.genieTuneEventWeight()) < std::numeric_limits<float>::max())
         weight *= truth.genieTuneEventWeight();
 
+    // if(!truth.splineEventWeight.IsSet() || !truth.genieTuneEventWeight.IsSet())
+    //     std::cout << "DEBUG: splineEventWeight = " << truth.splineEventWeight.IsSet() << ", genieTuneEventWeight = " << truth.genieTuneEventWeight.IsSet() << std::endl;
+
     return weight;
 }
 
@@ -902,7 +905,7 @@ unsigned int AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE(const Event::
     {
         if (applyVisibilityThreshold && !AnalysisHelper::PassesVisibilityThreshold(truthParticles.at(i)))
         {
-            std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - truth particle with pdg "<<truthParticles.at(i).pdgCode()<<" doesn't pass visibility threshold"<<std::endl;
+            // std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - truth particle with pdg "<<truthParticles.at(i).pdgCode()<<" doesn't pass visibility threshold"<<std::endl;
             continue;
         }
 
@@ -920,7 +923,7 @@ unsigned int AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE(const Event::
         }
         else
         {
-            std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - truth particle momentum doesn't match. Backtracked: "<<backtrackedMomentum<<" vs Truth particle: "<<truthParticles.at(i).momentum()<<std::endl;
+            // std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - truth particle momentum doesn't match. Backtracked: "<<backtrackedMomentum<<" vs Truth particle: "<<truthParticles.at(i).momentum()<<std::endl;
         }
     }
 
@@ -928,7 +931,7 @@ unsigned int AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE(const Event::
         throw std::logic_error("AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - input reco particle with pdg: "+std::to_string(backtrackedPDG)+" has no matched truth particle");
 
 
-    std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - successfully matched reco to truth particle"<<std::endl;
+    // std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - successfully matched reco to truth particle"<<std::endl;
     return bestMatchedParticleId;
 }
 

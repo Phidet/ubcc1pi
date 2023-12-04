@@ -75,7 +75,7 @@
         // "Macros/CCInclusiveMuonPIDStudy.cxx",
         // "Macros/MultiPlanePIDDemo.cxx",
         // "Macros/PlotPionInputVariables.cxx",
-        // "Macros/PlotInputVariables.cxx",
+        "Macros/PlotInputVariables.cxx",
         // "Macros/GetCorrelationPlots.cxx",
         "Macros/TrainBDTs.cxx",
         // // "Macros/NMinusOneBDTStudy.cxx",

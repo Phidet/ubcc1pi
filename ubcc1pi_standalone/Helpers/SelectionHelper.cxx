@@ -636,7 +636,7 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection(const bool 
         // Flash χ2 < 10 OR topological score > 0.25
         {"topologicalOrFlashMatch"},
         // Topological score > 0.06
-        // {"topologicalScoreCC", 0.06f},
+        {"topologicalScoreCC", 0.06f},
 
         // {"passesCCInclusive"},
         {"min2Tracks"},
@@ -908,10 +908,11 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection(const bool 
             if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1 && pEvent->reco.flashChi2.IsSet() && pEvent->reco.flashChi2() >= maxFlashMatchScore)
                 return false;
         }
-        // else
-        // {
-        //     std::cout<<"Warning: skipping topologicalOrFlashMatch cut"<<std::endl;
-        // }
+        else
+        {
+            if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1)
+                return false;
+        }
 
         // Mark the cut "topologicalOrFlashMatch" as passed
         cutTracker.MarkCutAsPassed("topologicalOrFlashMatch");
@@ -920,15 +921,15 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection(const bool 
         // topologicalScoreCC
         // ----------------------------------------------------------------------------------
 
-        // // Get the topological score cut value
-        // const auto minTopologicalScoreCC2 = cutTracker.GetCutValue("topologicalScoreCC");
+        // Get the topological score cut value
+        const auto minTopologicalScoreCC2 = cutTracker.GetCutValue("topologicalScoreCC");
 
-        // // Insist that the topological score is above the cut value
-        // if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC2)
-        //     return false;
+        // Insist that the topological score is above the cut value
+        if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC2)
+            return false;
 
-        // // Mark the cut "topologicalScoreCC" as passed
-        // cutTracker.MarkCutAsPassed("topologicalScoreCC");
+        // Mark the cut "topologicalScoreCC" as passed
+        cutTracker.MarkCutAsPassed("topologicalScoreCC");
 
         // ##################################################################################
         // Start of pion selection
@@ -1256,7 +1257,7 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection2(const bool
         // Flash χ2 < 10 OR topological score > 0.25
         {"topologicalOrFlashMatch"},
         // Topological score > 0.06
-        // {"topologicalScoreCC", 0.06f},
+        {"topologicalScoreCC", 0.06f},
 
         // {"passesCCInclusive"},
         {"min2Tracks"},
@@ -1536,6 +1537,11 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection2(const bool
             if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1 && pEvent->reco.flashChi2.IsSet() && pEvent->reco.flashChi2() >= maxFlashMatchScore)
                 return false;
         }
+        else
+        {
+            if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1)
+                return false;
+        }
         // else
         // {
         //     std::cout<<"Warning: skipping topologicalOrFlashMatch cut"<<std::endl;
@@ -1548,15 +1554,15 @@ SelectionHelper::EventSelection SelectionHelper::GetDefaultSelection2(const bool
         // topologicalScoreCC
         // ----------------------------------------------------------------------------------
 
-        // // Get the topological score cut value
-        // const auto minTopologicalScoreCC2 = cutTracker.GetCutValue("topologicalScoreCC");
+        // Get the topological score cut value
+        const auto minTopologicalScoreCC2 = cutTracker.GetCutValue("topologicalScoreCC");
 
-        // // Insist that the topological score is above the cut value
-        // if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC2)
-        //     return false;
+        // Insist that the topological score is above the cut value
+        if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC2)
+            return false;
 
-        // // Mark the cut "topologicalScoreCC" as passed
-        // cutTracker.MarkCutAsPassed("topologicalScoreCC");
+        // Mark the cut "topologicalScoreCC" as passed
+        cutTracker.MarkCutAsPassed("topologicalScoreCC");
 
         // ##################################################################################
         // Start of pion selection
@@ -1909,7 +1915,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCCInclusiveSelection2(const 
         // Flash χ2 < 10 OR topological score > 0.25
         {"topologicalOrFlashMatch"},
         // Topological score > 0.06
-        // {"topologicalScoreCC", 0.06f},
+        {"topologicalScoreCC", 0.06f},
     };
 
     // Load up the BDTs and store them in a map
@@ -2173,13 +2179,28 @@ SelectionHelper::EventSelection SelectionHelper::GetCCInclusiveSelection2(const 
             if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1 && pEvent->reco.flashChi2.IsSet() && pEvent->reco.flashChi2() >= maxFlashMatchScore)
                 return false;
         }
-        // else
-        // {
-        //     std::cout<<"Warning: skipping topologicalOrFlashMatch cut"<<std::endl;
-        // }
+        else
+        {
+            if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1)
+                return false;
+        }
 
         // Mark the cut "topologicalOrFlashMatch" as passed
         cutTracker.MarkCutAsPassed("topologicalOrFlashMatch");
+
+        // ----------------------------------------------------------------------------------
+        // topologicalScoreCC
+        // ----------------------------------------------------------------------------------
+
+        // Get the topological score cut value
+        const auto minTopologicalScoreCC2 = cutTracker.GetCutValue("topologicalScoreCC");
+
+        // Insist that the topological score is above the cut value
+        if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC2)
+            return false;
+
+        // Mark the cut "topologicalScoreCC" as passed
+        cutTracker.MarkCutAsPassed("topologicalScoreCC");
 
         // We passed all cuts!
         return true;
@@ -2193,7 +2214,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCCInclusiveSelection2(const 
 
 SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(const float muonLikeProtonValue /*= -0.4f*/, const float barelyResemblingProtonValue /*= 0.1f*/, const bool skipOldCuts /*= false*/)
 {
-    // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 0\n";
+    // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 0\n";
     // Define the cuts
     const std::vector<EventSelection::Cut> cuts = {
         // ########### CC inclusive selection starting from sliceID cuts; all conditions need to be met by at least one particle ###########
@@ -2224,7 +2245,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // Flash χ2 < 10 OR topological score > 0.25
         {"topologicalOrFlashMatch"},
         // Topological score > 0.06
-        // {"topologicalScoreCC", 0.06f},
+        {"topologicalScoreCC", 0.06f},
 
         // {"passesCCInclusive"},
         {"min2Tracks"},
@@ -2425,12 +2446,12 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
 
         if(!skipOldCuts)
         {
-        // Get the pandora neutrino PDG
-        const auto pandoraNuPDGIsNumu = pEvent->reco.nuPdgCode();
+            // Get the pandora neutrino PDG
+            const auto pandoraNuPDGIsNumu = pEvent->reco.nuPdgCode();
 
-        // Insist that the pandora PDG is a muon neutrino
-        if (pandoraNuPDGIsNumu != 14)
-            return false;
+            // Insist that the pandora PDG is a muon neutrino
+            if (pandoraNuPDGIsNumu != 14)
+                return false;
         }
         // else
         // {
@@ -2507,10 +2528,11 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
             if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1 && pEvent->reco.flashChi2.IsSet() && pEvent->reco.flashChi2() >= maxFlashMatchScore)
                 return false;
         }
-        // else
-        // {
-        //     std::cout<<"Warning: skipping topologicalOrFlashMatch cut"<<std::endl;
-        // }
+        else
+        {
+            if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC1)
+                return false;
+        }
 
         // Mark the cut "topologicalOrFlashMatch" as passed
         cutTracker.MarkCutAsPassed("topologicalOrFlashMatch");
@@ -2519,15 +2541,15 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // topologicalScoreCC
         // ----------------------------------------------------------------------------------
 
-        // // Get the topological score cut value
-        // const auto minTopologicalScoreCC2 = cutTracker.GetCutValue("topologicalScoreCC");
+        // Get the topological score cut value
+        const auto minTopologicalScoreCC2 = cutTracker.GetCutValue("topologicalScoreCC");
 
-        // // Insist that the topological score is above the cut value
-        // if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC2)
-        //     return false;
+        // Insist that the topological score is above the cut value
+        if (pEvent->reco.selectedTopologicalScore() <= minTopologicalScoreCC2)
+            return false;
 
         // Mark the cut "topologicalScoreCC" as passed
-        // cutTracker.MarkCutAsPassed("topologicalScoreCC");
+        cutTracker.MarkCutAsPassed("topologicalScoreCC");
 
         // ##################################################################################
         // Start of pion selection
@@ -2545,7 +2567,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // cutTracker.MarkCutAsPassed("passesCCInclusive");
         // //std::cout<<"CC0pi: passesCCInclusive"<<std::endl;
 
-        std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 3\n";
+        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 3\n";
         // ----------------------------------------------------------------------------------
         // min2Tracks
         // ----------------------------------------------------------------------------------
@@ -2575,7 +2597,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         cutTracker.MarkCutAsPassed("min2Tracks");
         //std::cout<<"CC0pi: min2Tracks"<<std::endl;
 
-        std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 4\n";
+        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 4\n";
         // ----------------------------------------------------------------------------------
         // max1Uncontained
         // ----------------------------------------------------------------------------------
@@ -2596,7 +2618,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // Assign the muon candidate a muon PDG code
         cutTracker.AssignPDGCode(muonIndex, 13);
 
-        std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 5\n";
+        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 5\n";
         // ----------------------------------------------------------------------------------
         // 1NonProton
         // ----------------------------------------------------------------------------------
@@ -2726,7 +2748,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         //std::cout<<"CC0pi: muonLikeProton"<<std::endl;
 
 
-        std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 7\n";
+        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 7\n";
         // ----------------------------------------------------------------------------------
         // barelyResemblingProton
         // ----------------------------------------------------------------------------------
@@ -2795,7 +2817,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         cutTracker.MarkCutAsPassed("protonHasValiddEdx");
         //std::cout<<"CC0pi: protonHasValiddEdx"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 8\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 8\n";
         // ----------------------------------------------------------------------------------
         // muonNotInGap
         // ----------------------------------------------------------------------------------
@@ -2811,7 +2833,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         cutTracker.MarkCutAsPassed("muonNotInGap");
         //std::cout<<"CC0pi: muonNotInGap"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 9\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 9\n";
         // ----------------------------------------------------------------------------------
         // protonNotInGap
         // ----------------------------------------------------------------------------------
@@ -2834,7 +2856,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         cutTracker.MarkCutAsPassed("protonNotInGap");
         //std::cout<<"CC0pi: protonNotInGap"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 10\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 10\n";
         // ----------------------------------------------------------------------------------
         // openingAngle
         // ----------------------------------------------------------------------------------
@@ -2854,7 +2876,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         cutTracker.MarkCutAsPassed("openingAngle");
         //std::cout<<"CC0pi: openingAngle"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 11\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 11\n";
         // ----------------------------------------------------------------------------------
         // topologicalScore
         // ----------------------------------------------------------------------------------
@@ -2869,7 +2891,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         cutTracker.MarkCutAsPassed("topologicalScore");
         //std::cout<<"CC0pi: topologicalScore"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 12\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 12\n";
         // ----------------------------------------------------------------------------------
         // startNearVertex
         // ----------------------------------------------------------------------------------
@@ -2922,7 +2944,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
         // Mark the cut "likelyGoldenProton" as passed
         cutTracker.MarkCutAsPassed("likelyGoldenProton");
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 13\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 13\n";
         // We passed all cuts!
         return true;
     };
@@ -2934,7 +2956,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPeLEE(
 
 SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
 {
-    // std::cout<<"SelectionHelper::GetCC0piSelection - Point 0\n";
+    // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 0\n";
     // Define the cuts
     const std::vector<EventSelection::Cut> cuts = {
         {"passesCCInclusive"},
@@ -2959,7 +2981,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
     // Define the actual selection logic
     const auto logic = [](const auto &pEvent, auto &bdtMap, auto &cutTracker)
     {
-        // std::cout<<"SelectionHelper::GetCC0piSelection - Point 2\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 2\n";
         // ----------------------------------------------------------------------------------
         // passesCCInclusive
         // ----------------------------------------------------------------------------------
@@ -2971,7 +2993,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
         cutTracker.MarkCutAsPassed("passesCCInclusive");
         //std::cout<<"CC0pi: passesCCInclusive"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelection - Point 3\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 3\n";
         // ----------------------------------------------------------------------------------
         // min2Tracks
         // ----------------------------------------------------------------------------------
@@ -3002,7 +3024,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
         cutTracker.MarkCutAsPassed("min2Tracks");
         //std::cout<<"CC0pi: min2Tracks"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelection - Point 4\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 4\n";
         // ----------------------------------------------------------------------------------
         // max1Uncontained
         // ----------------------------------------------------------------------------------
@@ -3022,7 +3044,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
         // Assign the muon candidate a muon PDG code
         cutTracker.AssignPDGCode(muonIndex, 13);
 
-        // std::cout<<"SelectionHelper::GetCC0piSelection - Point 5\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 5\n";
         // ----------------------------------------------------------------------------------
         // 1NonProton
         // ----------------------------------------------------------------------------------
@@ -3123,7 +3145,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
         cutTracker.MarkCutAsPassed("atLeast1Proton");
         //std::cout<<"CC0pi: atLeast1Proton"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelection - Point 6\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 6\n";
         // ----------------------------------------------------------------------------------
         // muonLikeProton
         // ----------------------------------------------------------------------------------
@@ -3154,7 +3176,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
         //std::cout<<"CC0pi: muonLikeProton"<<std::endl;
 
 
-        // std::cout<<"SelectionHelper::GetCC0piSelection - Point 7\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 7\n";
         // ----------------------------------------------------------------------------------
         // protonHasValiddEdx
         // ----------------------------------------------------------------------------------
@@ -3169,7 +3191,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
         cutTracker.MarkCutAsPassed("protonHasValiddEdx");
         //std::cout<<"CC0pi: protonHasValiddEdx"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelection - Point 8\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 8\n";
         // ----------------------------------------------------------------------------------
         // muonNotInGap
         // ----------------------------------------------------------------------------------
@@ -3185,7 +3207,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
         cutTracker.MarkCutAsPassed("muonNotInGap");
         //std::cout<<"CC0pi: muonNotInGap"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelection - Point 9\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 9\n";
         // ----------------------------------------------------------------------------------
         // protonNotInGap
         // ----------------------------------------------------------------------------------
@@ -3208,7 +3230,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
         cutTracker.MarkCutAsPassed("protonNotInGap");
         //std::cout<<"CC0pi: protonNotInGap"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelection - Point 10\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 10\n";
         // ----------------------------------------------------------------------------------
         // openingAngle
         // ----------------------------------------------------------------------------------
@@ -3228,7 +3250,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
         cutTracker.MarkCutAsPassed("openingAngle");
         //std::cout<<"CC0pi: openingAngle"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelection - Point 11\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 11\n";
         // ----------------------------------------------------------------------------------
         // topologicalScore
         // ----------------------------------------------------------------------------------
@@ -3243,7 +3265,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
         cutTracker.MarkCutAsPassed("topologicalScore");
         //std::cout<<"CC0pi: topologicalScore"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelection - Point 12\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 12\n";
         // ----------------------------------------------------------------------------------
         // startNearVertex
         // ----------------------------------------------------------------------------------
@@ -3272,7 +3294,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
         cutTracker.MarkCutAsPassed("startNearVertex");
         //std::cout<<"CC0pi: startNearVertex"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelection - Point 13\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelection - Point 13\n";
         // We passed all cuts!
         return true;
     };
@@ -3284,7 +3306,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelection()
 
 SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const float muonLikeProtonValue /*= -0.4f*/, const float barelyResemblingProtonValue /*= 0.1f*/)
 {
-    // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 0\n";
+    // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 0\n";
     // Define the cuts
     const std::vector<EventSelection::Cut> cuts = {
         {"passesCCInclusive"},
@@ -3312,7 +3334,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
     // Define the actual selection logic
     const auto logic = [](const auto &pEvent, auto &bdtMap, auto &cutTracker)
     {
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 2\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 2\n";
         // ----------------------------------------------------------------------------------
         // passesCCInclusive
         // ----------------------------------------------------------------------------------
@@ -3324,7 +3346,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
         cutTracker.MarkCutAsPassed("passesCCInclusive");
         //std::cout<<"CC0pi: passesCCInclusive"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 3\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 3\n";
         // ----------------------------------------------------------------------------------
         // min2Tracks
         // ----------------------------------------------------------------------------------
@@ -3355,7 +3377,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
         cutTracker.MarkCutAsPassed("min2Tracks");
         //std::cout<<"CC0pi: min2Tracks"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 4\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 4\n";
         // ----------------------------------------------------------------------------------
         // max1Uncontained
         // ----------------------------------------------------------------------------------
@@ -3375,7 +3397,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
         // Assign the muon candidate a muon PDG code
         cutTracker.AssignPDGCode(muonIndex, 13);
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 5\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 5\n";
         // ----------------------------------------------------------------------------------
         // 1NonProton
         // ----------------------------------------------------------------------------------
@@ -3505,7 +3527,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
         //std::cout<<"CC0pi: muonLikeProton"<<std::endl;
 
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 7\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 7\n";
         // ----------------------------------------------------------------------------------
         // barelyResemblingProton
         // ----------------------------------------------------------------------------------
@@ -3574,7 +3596,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
         cutTracker.MarkCutAsPassed("protonHasValiddEdx");
         //std::cout<<"CC0pi: protonHasValiddEdx"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 8\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 8\n";
         // ----------------------------------------------------------------------------------
         // muonNotInGap
         // ----------------------------------------------------------------------------------
@@ -3590,7 +3612,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
         cutTracker.MarkCutAsPassed("muonNotInGap");
         //std::cout<<"CC0pi: muonNotInGap"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 9\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 9\n";
         // ----------------------------------------------------------------------------------
         // protonNotInGap
         // ----------------------------------------------------------------------------------
@@ -3613,7 +3635,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
         cutTracker.MarkCutAsPassed("protonNotInGap");
         //std::cout<<"CC0pi: protonNotInGap"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 10\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 10\n";
         // ----------------------------------------------------------------------------------
         // openingAngle
         // ----------------------------------------------------------------------------------
@@ -3633,7 +3655,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
         cutTracker.MarkCutAsPassed("openingAngle");
         //std::cout<<"CC0pi: openingAngle"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 11\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 11\n";
         // ----------------------------------------------------------------------------------
         // topologicalScore
         // ----------------------------------------------------------------------------------
@@ -3648,7 +3670,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
         cutTracker.MarkCutAsPassed("topologicalScore");
         //std::cout<<"CC0pi: topologicalScore"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 12\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 12\n";
         // ----------------------------------------------------------------------------------
         // startNearVertex
         // ----------------------------------------------------------------------------------
@@ -3700,7 +3722,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
         // Mark the cut "likelyGoldenProton" as passed
         cutTracker.MarkCutAsPassed("likelyGoldenProton");
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 13\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 13\n";
         // We passed all cuts!
         return true;
     };
@@ -3712,7 +3734,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModified(const
 
 SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1()
 {
-    // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 0\n";
+    // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 0\n";
     // Define the cuts
     const std::vector<EventSelection::Cut> cuts = {
         {"passesCCInclusive"},
@@ -3738,7 +3760,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
     // Define the actual selection logic
     const auto logic = [](const auto &pEvent, auto &bdtMap, auto &cutTracker)
     {
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 2\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 2\n";
         // ----------------------------------------------------------------------------------
         // passesCCInclusive
         // ----------------------------------------------------------------------------------
@@ -3750,7 +3772,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
         cutTracker.MarkCutAsPassed("passesCCInclusive");
         //std::cout<<"CC0pi: passesCCInclusive"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 3\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 3\n";
         // ----------------------------------------------------------------------------------
         // min2Tracks
         // ----------------------------------------------------------------------------------
@@ -3781,7 +3803,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
         cutTracker.MarkCutAsPassed("min2Tracks");
         //std::cout<<"CC0pi: min2Tracks"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 4\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 4\n";
         // ----------------------------------------------------------------------------------
         // max1Uncontained
         // ----------------------------------------------------------------------------------
@@ -3801,7 +3823,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
         // Assign the muon candidate a muon PDG code
         cutTracker.AssignPDGCode(muonIndex, 13);
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 5\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 5\n";
         // ----------------------------------------------------------------------------------
         // 1NonProton
         // ----------------------------------------------------------------------------------
@@ -3916,7 +3938,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
         cutTracker.MarkCutAsPassed("protonHasValiddEdx");
         //std::cout<<"CC0pi: protonHasValiddEdx"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 8\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 8\n";
         // ----------------------------------------------------------------------------------
         // muonNotInGap
         // ----------------------------------------------------------------------------------
@@ -3932,7 +3954,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
         cutTracker.MarkCutAsPassed("muonNotInGap");
         //std::cout<<"CC0pi: muonNotInGap"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 9\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 9\n";
         // ----------------------------------------------------------------------------------
         // protonNotInGap
         // ----------------------------------------------------------------------------------
@@ -3955,7 +3977,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
         cutTracker.MarkCutAsPassed("protonNotInGap");
         //std::cout<<"CC0pi: protonNotInGap"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 10\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 10\n";
         // ----------------------------------------------------------------------------------
         // openingAngle
         // ----------------------------------------------------------------------------------
@@ -3975,7 +3997,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
         cutTracker.MarkCutAsPassed("openingAngle");
         //std::cout<<"CC0pi: openingAngle"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 11\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 11\n";
         // ----------------------------------------------------------------------------------
         // topologicalScore
         // ----------------------------------------------------------------------------------
@@ -3990,7 +4012,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
         cutTracker.MarkCutAsPassed("topologicalScore");
         //std::cout<<"CC0pi: topologicalScore"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 12\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 12\n";
         // ----------------------------------------------------------------------------------
         // startNearVertex
         // ----------------------------------------------------------------------------------
@@ -4019,7 +4041,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
         cutTracker.MarkCutAsPassed("startNearVertex");
         //std::cout<<"CC0pi: startNearVertex"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 13\n";
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 13\n";
         // We passed all cuts!
         return true;
     };
@@ -4031,8 +4053,8 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart1(
 
 SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart2(const float muonLikeProtonValue /*= -0.4f*/, const float barelyResemblingProtonValue /*= 0.1f*/)
 {
-    // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point -1"<<std::endl;
-    // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 0\n";
+    // // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point -1"<<std::endl;
+    // // std::cout<<"SelectionHelper::GetCC0piSelectionModified - Point 0\n";
     // Define the cuts
     const std::vector<EventSelection::Cut> cuts = {
         {"1NonProton", -0.06f},// only for cut value
@@ -4048,7 +4070,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart2(
     // Define the actual selection logic
     const auto logic = [](const auto &pEvent, auto &bdtMap, auto &cutTracker)
     {
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 0"<<std::endl;
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 0"<<std::endl;
         const auto &recoParticles = pEvent->reco.particles;
         // Identify the muon candidate
         auto &pMuonBDT = bdtMap.at("muon");
@@ -4057,7 +4079,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart2(
         // Assign the muon candidate a muon PDG code
         cutTracker.AssignPDGCode(muonIndex, 13);
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 1"<<std::endl;
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 1"<<std::endl;
         // ----------------------------------------------------------------------------------
         // 1NonProton
         // ----------------------------------------------------------------------------------
@@ -4070,7 +4092,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart2(
         float leadingProtonMom = 0;
         std::vector<unsigned int> protonIndices;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 2"<<std::endl;
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 2"<<std::endl;
         for (unsigned int i = 0; i < recoParticles.size(); ++i)
         {
             const auto &particle = recoParticles.at(i);
@@ -4118,17 +4140,17 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart2(
         }
         cutTracker.MarkCutAsPassed("1NonProton");
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 3"<<std::endl;
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 3"<<std::endl;
         // ----------------------------------------------------------------------------------
         // muonLikeProton
         // ----------------------------------------------------------------------------------
         const auto muonBDTThreshold = cutTracker.GetCutValue("muonLikeProton");
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 3.01"<<std::endl;
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 3.01"<<std::endl;
         // Leading proton must have a muon-like muon BDT score
         // Get the leading proton reco particle
         const auto &leadingproton = recoParticles.at(leadingProtonIndex);
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 3.1"<<std::endl;
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 3.1"<<std::endl;
         // Get run the muon BDT
         std::vector<float> muonFeatures;
         const auto hasFeaturesMuonBDT = BDTHelper::GetBDTFeatures(leadingproton, BDTHelper::MuonBDTFeatureNames, muonFeatures);
@@ -4137,7 +4159,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart2(
             return false;
         }
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 3.2"<<std::endl;
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 3.2"<<std::endl;
         // Insist that the BDT response is greater than the cut value
         const auto bdtResponseMu = pMuonBDT->GetResponse(muonFeatures);
 
@@ -4146,12 +4168,12 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart2(
             return false;
         }
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 3.3"<<std::endl;
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 3.3"<<std::endl;
         // Mark the cut "muonLikeProton" as passed
         cutTracker.MarkCutAsPassed("muonLikeProton");
         //std::cout<<"CC0pi: muonLikeProton"<<std::endl;
 
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 4"<<std::endl;
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 4"<<std::endl;
         // ----------------------------------------------------------------------------------
         // barelyResemblingProton
         // ----------------------------------------------------------------------------------
@@ -4179,7 +4201,7 @@ SelectionHelper::EventSelection SelectionHelper::GetCC0piSelectionModifiedPart2(
 
         // Mark the cut "barelyResemblingProton" as passed
         cutTracker.MarkCutAsPassed("barelyResemblingProton");
-        // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 5"<<std::endl;
+        // // std::cout<<"SelectionHelper::GetCC0piSelectionModifiedPart2 - Point 5"<<std::endl;
         // We passed all cuts!
         return true;
     };
