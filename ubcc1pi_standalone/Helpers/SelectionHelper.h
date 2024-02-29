@@ -289,11 +289,32 @@ class SelectionHelper
         static EventSelection GetCC0piSelectionModified(const float muonLikeProtonValue = -0.4f, const float barelyResemblingProtonValue = 0.1f);
 
         /**
+         *  @brief  Get the original CC0pi event selection for PeLEE
+         *
+         *  @return the event selection
+         */
+        static EventSelection GetCC0piSelectionOriginalPeLEE(const float muonLikeProtonValue = -0.4f, const float barelyResemblingProtonValue = 0.1f, const bool skipOldCuts = false);
+
+        /**
          *  @brief  Get the CC0pi event selection
          *
          *  @return the event selection
          */
         static EventSelection GetCC0piSelectionModifiedPeLEE(const float muonLikeProtonValue = -0.4f, const float barelyResemblingProtonValue = 0.1f, const bool skipOldCuts = false);
+
+        /**
+         *  @brief  Get the CC0pi event selection
+         *
+         *  @return the event selection
+         */
+        static EventSelection GetCC0piSelectionModifiedPeLEENoCCInclusive(const float muonLikeProtonValue = -0.4f, const float barelyResemblingProtonValue = 0.1f, const bool skipOldCuts = false);
+
+        /**
+         *  @brief  Get the CC0pi event selection
+         *
+         *  @return the event selection
+         */
+        static EventSelection GetCC0piSelectionModifiedAgainPeLEE(const float muonLikeProtonValue = -0.4f, const float barelyResemblingProtonValue = 0.1f, const bool skipOldCuts = false);
 
         /**
          *  @brief  Get the CC0pi event selection
@@ -308,6 +329,21 @@ class SelectionHelper
          *  @return the event selection
          */
         static EventSelection GetCC0piSelectionModifiedPart2(const float muonLikeProtonValue = -0.4f, const float barelyResemblingProtonValue = 0.1f);
+
+        /**
+         *  @brief  Get the CC0pi event selection
+         *
+         *  @return the event selection
+         */
+        static EventSelection GetCC0piSelectionModifiedPeLEEPart1(const bool skipOldCuts = false);
+
+        /**
+         *  @brief  Get the CC0pi event selection
+         *
+         *  @return the event selection
+         */
+        static EventSelection GetCC0piSelectionModifiedPeLEEPart2(const int ccInclusiveMuonCandidateIndex, const float muonLikeProtonValue = -0.4f, const float barelyResemblingProtonValue = 0.1f);
+
 
         /**
         *  @brief  Check if a given cut is listed in the input vector of cuts passed
@@ -335,12 +371,24 @@ class SelectionHelper
          *  @brief  Get the leading proton candidate index (works for the CC0pi1p sideband selection only)
          *
          *  @param  particles the input list of all reco particles
-         *  @param  featureNames the input list of proton BDT feature names
-         *  @param  protonBDT the proton BDT
+         *  @param  assignedPdgCodes the input list of proton BDT feature names
          *
          *  @return the index of the muon candidate in the input list
          */
         static unsigned int GetLeadingProtonCandidateIndex(const std::vector<Event::Reco::Particle> &particles, std::vector<int> const &assignedPdgCodes);
+
+        /**
+         *  @brief  Get the leading proton candidate index (works for the CC0pi1p sideband selection only)
+         *
+         *  @param  particles the input list of all reco particles
+         *  @param  assignedPdgCodes the input list of proton BDT feature names
+         *  @param  protonBDTThresholdHigh the upper proton BDT threshold
+         *  @param  protonBDTThresholdLow the lower proton BDT threshold
+         *
+         *  @return the index of the muon candidate in the input list
+         */
+        static unsigned int GetLeadingProtonCandidateIndexByBDTScore(const std::vector<Event::Reco::Particle> &particles, std::vector<int> const &assignedPdgCodes, const float protonBDTThresholdHigh = 0.12f, const float protonBDTThresholdLow = -0.06, std::shared_ptr<BDTHelper::BDT> pProtonBDT = nullptr);
+
 };
 
 } // namespace ubcc1pi

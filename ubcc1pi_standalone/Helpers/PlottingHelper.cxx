@@ -794,23 +794,24 @@ PlottingHelper::PlotStyle PlottingHelper::GetPlotStyle(const Event::Reco::Partic
     if (sampleType == AnalysisHelper::DataEXT)
         return externalType;
 
-    if ((peleeMode && (!particle.pdgBacktracked.IsSet() || particle.pdgBacktracked() == -2147483647)) 
-        || (!peleeMode && (!particle.hasMatchedMCParticle.IsSet() || !particle.hasMatchedMCParticle())))
-    {
-        return externalType;
-    }
+    // if ((peleeMode && (!particle.pdgBacktracked.IsSet() || particle.pdgBacktracked() == -2147483647)) 
+    //     || (!peleeMode && (!particle.hasMatchedMCParticle.IsSet() || !particle.hasMatchedMCParticle())))
+    // {
+    //     return externalType;
+    // }
 
     if (truthParticles.empty())
         return externalType;
 
-    // Get the true pdg code applying the visibility conditions
+    // // Get the true pdg code applying the visibility conditions
     auto truePdgCode = -std::numeric_limits<int>::max();
-    bool isGolden = false;
+    // bool isGolden = false;
     try
     {
-        const auto truthParticle = AnalysisHelper::GetBestMatchedTruthParticle(particle, truthParticles);
-        truePdgCode = useAbsPdg ? std::abs(truthParticle.pdgCode()) : truthParticle.pdgCode();
-        isGolden = AnalysisHelper::IsGolden(truthParticle);
+        // const auto truthParticle = AnalysisHelper::GetBestMatchedTruthParticle(particle, truthParticles);
+        // truePdgCode = useAbsPdg ? std::abs(truthParticle.pdgCode()) : truthParticle.pdgCode();
+        // isGolden = AnalysisHelper::IsGolden(truthParticle);
+	    truePdgCode = useAbsPdg ? std::abs(particle.pdgBacktracked()) : particle.pdgBacktracked(); 
     }
     catch (const std::logic_error &)
     {
@@ -824,7 +825,14 @@ PlottingHelper::PlotStyle PlottingHelper::GetPlotStyle(const Event::Reco::Partic
         case 2212:
             return usePoints ? ProtonPoints : Proton;
         case 211:
-            return (isGolden ? (usePoints ? GoldenPionPoints : GoldenPion) : (usePoints ? NonGoldenPionPoints : NonGoldenPion));
+            {
+                // Get the true pdg code applying the visibility conditions
+                bool isGolden = false;
+                const auto truthParticle = AnalysisHelper::GetBestMatchedTruthParticle(particle, truthParticles);
+                // truePdgCode = useAbsPdg ? std::abs(truthParticle.pdgCode()) : truthParticle.pdgCode();
+                isGolden = AnalysisHelper::IsGolden(truthParticle);
+                return (isGolden ? (usePoints ? GoldenPionPoints : GoldenPion) : (usePoints ? NonGoldenPionPoints : NonGoldenPion));
+            }
         case -211:
             return usePoints ? PiMinusPoints : PiMinus;
         case 11:
@@ -838,6 +846,8 @@ PlottingHelper::PlotStyle PlottingHelper::GetPlotStyle(const Event::Reco::Partic
         case 111:
         case 22:
             return usePoints ? PhotonPoints : Photon;
+        case 0:
+	        return usePoints ? ExternalPoints : External;
         default:
             return usePoints ? OtherPoints : Other;
     }

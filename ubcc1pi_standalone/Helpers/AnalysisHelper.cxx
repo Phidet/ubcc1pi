@@ -457,15 +457,41 @@ float AnalysisHelper::GetNominalEventWeight(const std::shared_ptr<Event> &pEvent
     // failure in the event weighting code - for now we just skip infinite weights
     if (truth.splineEventWeight.IsSet() && std::abs(truth.splineEventWeight()) < std::numeric_limits<float>::max())
         weight *= truth.splineEventWeight();
+    else
+        std::cout << "WARNING AnalysisHelper::GetNominalEventWeight - splineEventWeight is not set or is infinite" << std::endl;
 
     if (truth.genieTuneEventWeight.IsSet() && std::abs(truth.genieTuneEventWeight()) < std::numeric_limits<float>::max())
         weight *= truth.genieTuneEventWeight();
+    else
+        std::cout << "WARNING AnalysisHelper::GetNominalEventWeight - genieTuneEventWeight is not set or is infinite" << std::endl;
 
     // if(!truth.splineEventWeight.IsSet() || !truth.genieTuneEventWeight.IsSet())
     //     std::cout << "DEBUG: splineEventWeight = " << truth.splineEventWeight.IsSet() << ", genieTuneEventWeight = " << truth.genieTuneEventWeight.IsSet() << std::endl;
 
     return weight;
 }
+
+// // -----------------------------------------------------------------------------------------------------------------------------------------
+
+// float AnalysisHelper::GetNominalEventWeight(const std::shared_ptr<EventPeLEE> &pEventPeLEE)
+// {
+//     float weight = 1.f;
+
+//     const auto &truth = pEventPeLEE->truth;
+
+//     // ATTN unfortunately when the event weights are applied a small fraction of events are given an infinite weight, I assume due to a
+//     // failure in the event weighting code - for now we just skip infinite weights
+//     if (truth.splineEventWeight.IsSet() && std::abs(truth.splineEventWeight()) < std::numeric_limits<float>::max())
+//         weight *= truth.splineEventWeight();
+
+//     if (truth.genieTuneEventWeight.IsSet() && std::abs(truth.genieTuneEventWeight()) < std::numeric_limits<float>::max())
+//         weight *= truth.genieTuneEventWeight();
+
+//     // if(!truth.splineEventWeight.IsSet() || !truth.genieTuneEventWeight.IsSet())
+//     //     std::cout << "DEBUG: splineEventWeight = " << truth.splineEventWeight.IsSet() << ", genieTuneEventWeight = " << truth.genieTuneEventWeight.IsSet() << std::endl;
+
+//     return weight;
+// }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -905,7 +931,7 @@ unsigned int AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE(const Event::
     {
         if (applyVisibilityThreshold && !AnalysisHelper::PassesVisibilityThreshold(truthParticles.at(i)))
         {
-            // std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - truth particle with pdg "<<truthParticles.at(i).pdgCode()<<" doesn't pass visibility threshold"<<std::endl;
+            std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - truth particle with pdg "<<truthParticles.at(i).pdgCode()<<" doesn't pass visibility threshold"<<std::endl;
             continue;
         }
 
@@ -923,13 +949,15 @@ unsigned int AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE(const Event::
         }
         else
         {
-            // std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - truth particle momentum doesn't match. Backtracked: "<<backtrackedMomentum<<" vs Truth particle: "<<truthParticles.at(i).momentum()<<std::endl;
+            std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - truth particle momentum doesn't match. Backtracked: "<<backtrackedMomentum<<" vs Truth particle: "<<truthParticles.at(i).momentum()<<std::endl;
         }
     }
 
     if (bestMatchedParticleId == std::numeric_limits<unsigned int>::max())
-        throw std::logic_error("AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - input reco particle with pdg: "+std::to_string(backtrackedPDG)+" has no matched truth particle");
-
+    {
+        // Print out all the 
+        throw std::logic_error("AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - input reco particle with backtracked pdg: "+std::to_string(backtrackedPDG)+" has no matched truth particle");
+    }
 
     // std::cout<<"DEBUG AnalysisHelper::GetBestMatchedTruthParticleIndexPeLEE - successfully matched reco to truth particle"<<std::endl;
     return bestMatchedParticleId;
@@ -1044,6 +1072,7 @@ std::shared_ptr<TF1> AnalysisHelper::GetRangeToMomentumFunctionPion()
 
 std::shared_ptr<TF1> AnalysisHelper::GetRangeToMomentumFunctionProton()
 {
+    // std::cout<<"DEBUG AnalysisHelper::GetRangeToMomentumFunctionProton - P0"<<std::endl;
     RangeToMomentumFitParameters params;
     params.a = 14.96; // Fit full range: 14.96, Fit 0-30cm: 5.7364
     params.b = 0.0043489; // Fit full range: 0.0043489, Fit 0-30cm: 0.0074425
@@ -1052,7 +1081,7 @@ std::shared_ptr<TF1> AnalysisHelper::GetRangeToMomentumFunctionProton()
 
     auto pFunc = AnalysisHelper::GetRangeToMomentumFunction();
     AnalysisHelper::SetRangeToMomentumFunctionParameters(params, pFunc);
-
+    // std::cout<<"DEBUG AnalysisHelper::GetRangeToMomentumFunctionProton - P1"<<std::endl;
     return pFunc;
 }
 
@@ -1231,11 +1260,15 @@ float AnalysisHelper::GetMuonMomentumFromRange(const float &range)
 
 float AnalysisHelper::GetMuonMomentumFromMCS(const Event::Reco::Particle &muon)
 {
+    // std::cout<<"DEBUG AnalysisHelper::GetMuonMomentumFromMCS - mcsMomentumForwardMuon: "<<muon.mcsMomentumForwardMuon.IsSet() << " - mcsMomentumBackwardMuon: "<<muon.mcsMomentumBackwardMuon.IsSet() << " - mcsMuonMomentum: "<<muon.mcsMuonMomentum.IsSet()<<std::endl;
     if (muon.mcsMomentumForwardMuon.IsSet())
         return muon.mcsMomentumForwardMuon();
 
     if (muon.mcsMomentumBackwardMuon.IsSet())
         return muon.mcsMomentumBackwardMuon();
+
+    if (muon.mcsMuonMomentum.IsSet()) // Pelee version which already chose fwd/bwd
+        return muon.mcsMuonMomentum();
 
     // ATTN could throw here instead - would need to add event selection cut to remove ents in which muon momentum isn't available
     return -std::numeric_limits<float>::max();
@@ -1245,6 +1278,10 @@ float AnalysisHelper::GetMuonMomentumFromMCS(const Event::Reco::Particle &muon)
 
 float AnalysisHelper::GetMuonMomentum(const Event::Reco::Particle &muon)
 {
+    // std::cout<<"DEBUG AnalysisHelper::GetMuonMomentum - isContained: "<<AnalysisHelper::IsContained(muon);
+    // std::cout<<" "<<muon.startX()<<", "<<muon.startY()<<", "<<muon.startZ();
+    // std::cout<<" "<<muon.endX()<<", "<<muon.endY()<<", "<<muon.endZ()<<std::endl;
+
     if (AnalysisHelper::IsContained(muon))
         return AnalysisHelper::GetMuonMomentumFromRange(muon.range());
 
@@ -1255,7 +1292,9 @@ float AnalysisHelper::GetMuonMomentum(const Event::Reco::Particle &muon)
 
 float AnalysisHelper::GetProtonMomentumFromRange(const float &range)
 {
+    // std::cout<<"DEBUG AnalysisHelper::GetProtonMomentumFromRange - range: "<<range<<std::endl;
     auto pFunc = AnalysisHelper::GetRangeToMomentumFunctionProton();
+    // std::cout<<"DEBUG AnalysisHelper::GetProtonMomentumFromRange P2"<<std::endl;
     return pFunc->Eval(range);
 }
 
@@ -1404,7 +1443,6 @@ AnalysisHelper::AnalysisData AnalysisHelper::GetRecoAnalysisDataCC0Pi(const Even
 {
     AnalysisData data;
 
-
     // Sanity check
     const auto recoParticles = reco.particles;
     if (assignedPdgCodes.size() != recoParticles.size())
@@ -1439,6 +1477,7 @@ AnalysisHelper::AnalysisData AnalysisHelper::GetRecoAnalysisDataCC0Pi(const Even
                 {
                     auto range = proton.range();
                     auto protonMomentum = AnalysisHelper::GetPionMomentumFromRange(range); //ATTN: Use pion momentum here for reco values
+                    // It does not matter whether pion or proton momentum is used to get the leading proton (larger range -> larger momentum in both cases) but it does matter for the reconstructed momentum
                     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     if (protonMomentum>highestProtonMomentum)
@@ -1872,6 +1911,34 @@ unsigned int AnalysisHelper::GetTrueMuonIndex(const Event::Truth &truth, const b
     }
 
     return muonidx;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+unsigned int AnalysisHelper::GetTruePionIndex(const Event::Truth &truth, const bool useAbsPdg)
+{
+    bool foundPion = false;
+    unsigned int pionidx = std::numeric_limits<unsigned int>::max();
+
+    for (unsigned int i = 0; i < truth.particles.size(); ++i){
+        auto particle = truth.particles.at(i);
+
+        const auto pdg = useAbsPdg ? std::abs(particle.pdgCode()) : particle.pdgCode();
+
+        if (pdg == 211)
+        {
+            if (foundPion)
+                throw std::logic_error("AnalysisHelper::GetTruthAnalysisData - Found multiple muons! Are you sure this is a signal event?");
+
+            foundPion = true;
+
+            pionidx = i;
+
+            continue;
+        }
+    }
+
+    return pionidx;
 }
 
 } // namespace ubcc1pi

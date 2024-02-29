@@ -122,8 +122,11 @@ void AnalyzerTest(const Config &config)
 
     // std::cout<<"..........................................\nUSING Modified CC0pi Selection: muonLikeProtonValue=-0.48f, barelyResemblingProtonValue=0.12f\n.........................................."<<std::endl;
     // auto sidebandSelection = SelectionHelper::GetCC0piSelectionModified(-0.48f, 0.12f);
-    auto originalSelection = SelectionHelper::GetOriginalSelection(); // Relies on the pre-applied CC-inclusive filter
-    auto defaultSelection = SelectionHelper::GetDefaultSelection(); // Recreates cuts from the CC-inclusive filter in the selection
+    auto ubcc1piSelection = SelectionHelper::GetCC0piSelection();
+    auto peleeSelection = SelectionHelper::GetCC0piSelectionOriginalPeLEE();
+
+    // auto ubcc1piSelection = SelectionHelper::GetOriginalSelection(); // Relies on the pre-applied CC-inclusive filter
+    // auto peleeSelection = SelectionHelper::GetDefaultSelection(); // Recreates cuts from the CC-inclusive filter in the selection
 
     ExtractionHelper::InputFileList inputData;
     // float totalExposurePOT;
@@ -534,21 +537,21 @@ void AnalyzerTest(const Config &config)
                 COMPARETWOSINGLEVALUES(Reco Particles, particle, particleUbcc1pi, vertexX)
                 COMPARETWOSINGLEVALUES(Reco Particles, particle, particleUbcc1pi, vertexY)
                 COMPARETWOSINGLEVALUES(Reco Particles, particle, particleUbcc1pi, vertexZ)
-
             }
 
             // ******************************************************************************************
             // Check the selections
             // ******************************************************************************************
-            const auto &[passedGoldenSelectionDefault, cutsPassedDefault, assignedPdgCodesDefault] = defaultSelection.Execute(pEvent);
+            const auto &[passedGoldenSelectionDefault, cutsPassedDefault, assignedPdgCodesDefault] = peleeSelection.Execute(pEvent);
             const auto passedCCInclusiveSelectionDefault = SelectionHelper::IsCutPassed(cutsPassedDefault, "topologicalScoreCC");
-            const auto &[passedGoldenSelectionOriginal, cutsPassedOriginal, assignedPdgCodesOriginal] = originalSelection.Execute(pEvent);
+            const auto &[passedGoldenSelectionOriginal, cutsPassedOriginal, assignedPdgCodesOriginal] = ubcc1piSelection.Execute(pEvent);
             const auto passedCCInclusiveSelectionOriginal = SelectionHelper::IsCutPassed(cutsPassedOriginal, "passesCCInclusive");
 
-            std::cout<<"Ubcc1pi event - passes CC-inclusive: original: "<<passedCCInclusiveSelectionOriginal<<" vs default: "<<passedCCInclusiveSelectionDefault<<std::endl;
-            std::cout<<"    passed default cuts:";
-            for(const auto &cut : cutsPassedDefault) std::cout<<" "<<cut;
-            std::cout<<std::endl;
+            std::cout<<"Ubcc1pi event - passes CC-inclusive: ubcc1pi: "<<passedCCInclusiveSelectionOriginal<<" vs pelee: "<<passedCCInclusiveSelectionDefault<<std::endl;
+            std::cout<<"Ubcc1pi event - passes golden selection: ubcc1pi: "<<passedGoldenSelectionOriginal<<" vs pelee: "<<passedGoldenSelectionDefault<<std::endl;
+            // std::cout<<"    passed default cuts:";
+            // for(const auto &cut : cutsPassedDefault) std::cout<<" "<<cut;
+            // std::cout<<std::endl;
 
         }
         break;

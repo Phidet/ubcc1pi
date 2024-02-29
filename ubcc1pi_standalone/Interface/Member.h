@@ -846,12 +846,8 @@ inline std::string Member< std::map<std::string, std::vector<double>> >::ToStrin
 
 /** Define a macro to bind a member variable to an input branch */
 #define PELEE_MACRO_BIND_INPUT_BRANCH(p, q, r, t, n)                                                                                       \
-    std::cout << "Binding input branch " << #n << std::endl;                                                                               \
-    std::cout << "DEBUG Binding input branch P0" << std::endl;                                                                             \
     q.n.m_isSet = true;                                                                                                                    \
-    std::cout << "DEBUG Before binding input branch " << #n << " with r = " << r << ", address = " << q.n.m_pAddress << std::endl;         \
-    if (r) {pTree->SetBranchAddress(#n, &(q.n.m_pAddress));} else {pTree->SetBranchAddress(#n, q.n.m_pAddress);}                           \
-    std::cout << "DEBUG Done binding input branch " << #n << " with r = " << r << ", address = " << q.n.m_pAddress << std::endl;
+    if (r) {pTree->SetBranchAddress(#n, &(q.n.m_pAddress));} else {pTree->SetBranchAddress(#n, q.n.m_pAddress);}
 
 /** Define a macro to bind a member variable to an input vector branch */
 #define PELEE_MACRO_BIND_INPUT_VECTOR_BRANCH(p, q, r, t, n)                                                                                \

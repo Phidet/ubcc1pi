@@ -74,13 +74,13 @@ void GetRunSubrunList(const Config &config)
             // if(!isGoodRun) continue;
             if(!isGoodRun)
             {
-                // std::cout << "DEBUG - bad run: "<<pSubrun->run()<<std::endl;
+                std::cout << "DEBUG - bad run: "<<pSubrun->run()<<std::endl;
                 continue;
             }
-            // else
-            // {
-            //     std::cout << "DEBUG - good run: " << run << std::endl;
-            // }
+            else
+            {
+                // std::cout << "DEBUG - good run: " << run << std::endl;
+            }
 
             outFile << pSubrun->run() << " " << pSubrun->subRun() << std::endl;
         }
@@ -89,7 +89,7 @@ void GetRunSubrunList(const Config &config)
 
         if(zarkosToolExists)
         {
-            std::system(std::string("/uboone/app/users/zarko/getDataInfo.py -v2 --run-subrun-list ").append(outputFilePath).c_str());
+            std::system(std::string("/uboone/app/users/zarko/getDataInfo.py -v3 --run-subrun-list ").append(outputFilePath).c_str());
         }
     }
 }

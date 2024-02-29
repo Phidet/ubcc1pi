@@ -278,6 +278,15 @@ class AnalysisHelper
          */
         static float GetNominalEventWeight(const std::shared_ptr<Event> &pEvent);
 
+        // /**
+        //  *  @brief  Get the nominal event weight
+        //  *
+        //  *  @param  pEventPeLEE the input event
+        //  *
+        //  *  @return the nominal event weight
+        //  */
+        // static float GetNominalEventWeight(const std::shared_ptr<EventPeLEE> &pEventPeLEE);
+
         /**
          *  @brief  Determine if the input event is truly a fiducial CC inclusive event
          *
@@ -764,6 +773,16 @@ class AnalysisHelper
          *  @return the index of the true muon
          */
         static unsigned int GetTrueMuonIndex(const Event::Truth &truth, const bool useAbsPdg);
+
+        /**
+         *  @brief  Get the index of the true pion
+         *
+         *  @param  truth the input truth information of the event
+         *  @param  useAbsPdg if we should use absolute pdg code values
+         *
+         *  @return the index of the true pion
+         */
+        static unsigned int GetTruePionIndex(const Event::Truth &truth, const bool useAbsPdg);
 
     private:
 

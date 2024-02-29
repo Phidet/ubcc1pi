@@ -181,6 +181,11 @@ Event::Event(const EventPeLEE& eventPeLEE, const bool excludeGranddaughterPartic
         if(pParticlePeLEE->pfnplanehits_U() != intMinValue) pParticle->nHitsU.Set(pParticlePeLEE->pfnplanehits_U());
         if(pParticlePeLEE->pfnplanehits_V() != intMinValue) pParticle->nHitsV.Set(pParticlePeLEE->pfnplanehits_V());
         if(pParticlePeLEE->pfnplanehits_Y() != intMinValue) pParticle->nHitsW.Set(pParticlePeLEE->pfnplanehits_Y());
+        
+        if(pParticlePeLEE->trk_nhits_u_v() != intMinValue) pParticle->nTrackHitsU.Set(pParticlePeLEE->trk_nhits_u_v());
+        if(pParticlePeLEE->trk_nhits_v_v() != intMinValue) pParticle->nTrackHitsV.Set(pParticlePeLEE->trk_nhits_v_v());
+        if(pParticlePeLEE->trk_nhits_y_v() != intMinValue) pParticle->nTrackHitsW.Set(pParticlePeLEE->trk_nhits_y_v());
+
         if(pParticlePeLEE->pfp_trk_daughters_v() != intMinValue && pParticlePeLEE->pfp_shr_daughters_v() != intMinValue) pParticle->nDaughters.Set(pParticlePeLEE->pfp_trk_daughters_v() + pParticlePeLEE->pfp_shr_daughters_v());
         if(pParticlePeLEE->pfp_n_descendents_v() != intMinValue) pParticle->nDescendents.Set(pParticlePeLEE->pfp_n_descendents_v());
         // pParticle->nDescendentHitsU.Set(pParticlePeLEE->);
@@ -345,7 +350,7 @@ Event::Event(const EventPeLEE& eventPeLEE, const bool excludeGranddaughterPartic
                     if (hasU) truncatedMeandEdx += pParticle->truncatedMeandEdxU() * uWeight;
                     if (hasV) truncatedMeandEdx += pParticle->truncatedMeandEdxV() * vWeight;
 
-                    truncatedMeandEdx /= (uWeight + vWeight);
+                    truncatedMeandEdx /= ((hasU ? uWeight : 0) + (hasV ? vWeight: 0));
                     pParticle->truncatedMeandEdx.Set(truncatedMeandEdx);
                 }
             }
@@ -360,6 +365,8 @@ Event::Event(const EventPeLEE& eventPeLEE, const bool excludeGranddaughterPartic
         if(pParticlePeLEE->trk_pid_chipr_v() >= 0) pParticle->chi2ForwardProtonW.Set(pParticlePeLEE->trk_pid_chipr_v());
         if(pParticlePeLEE->trk_pid_chimu_v() >= 0) pParticle->chi2ForwardMuonW.Set(pParticlePeLEE->trk_pid_chimu_v());
         if(pParticlePeLEE->trk_distance_v() != floatMinValue) pParticle->distance.Set(pParticlePeLEE->trk_distance_v());
+        // The upper limit of 14 is arbitrary but identical to the ubcc1pi ntuples 
+        if(pParticlePeLEE->trk_mcs_muon_mom_v() != floatMinValue && pParticlePeLEE->trk_mcs_muon_mom_v()>0 && pParticlePeLEE->trk_mcs_muon_mom_v()<14.f) pParticle->mcsMuonMomentum.Set(pParticlePeLEE->trk_mcs_muon_mom_v());
 
         // if(pParticlePeLEE->dvtx_x_boundary() != doubleMinValue) pParticle->vertexDistanceToXBoundary.Set(pParticlePeLEE->dvtx_x_boundary());
         // if(pParticlePeLEE->dvtx_y_boundary() != doubleMinValue) pParticle->vertexDistanceToYBoundary.Set(pParticlePeLEE->dvtx_y_boundary());
@@ -508,17 +515,22 @@ void Event::PrepareForTreeFill()
 
 void Event::PrepareAfterTreeRead()
 {
+    std::cout<<"DEBUG Event.cxx PrepareAfterTreeRead Point 0"<<std::endl;
     unsigned int nTruthParticles;
     UBCC1PI_MACRO_EVENT_TRUTH_PARTICLE_MEMBERS(truth_particle, &nTruthParticles, UBCC1PI_MACRO_GET_MEMBER_VECTOR_SIZE)
+    std::cout<<"DEBUG Event.cxx PrepareAfterTreeRead Point 1"<<std::endl;
 
     truth.particles.resize(nTruthParticles);
     UBCC1PI_MACRO_EVENT_TRUTH_PARTICLE_MEMBERS(truth_particle, truth.particles, UBCC1PI_MACRO_READ_MEMBER_VECTOR)
+    std::cout<<"DEBUG Event.cxx PrepareAfterTreeRead Point 2"<<std::endl;
 
     unsigned int nRecoParticles;
     UBCC1PI_MACRO_EVENT_RECO_PARTICLE_MEMBERS(reco_particle, &nRecoParticles, UBCC1PI_MACRO_GET_MEMBER_VECTOR_SIZE)
+    std::cout<<"DEBUG Event.cxx PrepareAfterTreeRead Point 3"<<std::endl;
 
     reco.particles.resize(nRecoParticles);
     UBCC1PI_MACRO_EVENT_RECO_PARTICLE_MEMBERS(reco_particle, reco.particles, UBCC1PI_MACRO_READ_MEMBER_VECTOR)
+    std::cout<<"DEBUG Event.cxx PrepareAfterTreeRead Point 4"<<std::endl;
 }
 
 

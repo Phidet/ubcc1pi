@@ -51,6 +51,9 @@ class BDTHelper
                  */
                 BDTBase(const std::string &bdtName, const std::vector<std::string> &featureNames);
 
+                // Destructor
+                virtual ~BDTBase() = default;
+
                 /**
                  *  @brief  Get the name
                  *
@@ -162,6 +165,14 @@ class BDTHelper
                  */
                 void TrainAndTest();
 
+                /**
+                 *  @brief  Get the feature importance for a trained BDT
+                 * 
+                 * @param  featureImportance the output feature importance histogram
+                 * 
+                 */
+                void GetFeatureImportance(TH1F *featureImportance);
+
             private:
 
                 /**
@@ -193,6 +204,9 @@ class BDTHelper
                  *  @param  featureNames the vector of feature variable names
                  */
                 BDT(const std::string &bdtName, const std::vector<std::string> &featureNames);
+
+                // Destructor
+                ~BDT() override;
 
                 /**
                  *  @brief  Get the BDT response for a given set of features

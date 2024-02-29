@@ -19,34 +19,40 @@ using namespace ubcc1pi;
 namespace ubcc1pi_macros
 {
 
+bool isTraining(const int eventNumber)
+{
+    return (eventNumber % 2 == 0); // Even events are used for training
+}
+
 void TrainBDTs(const Config &config)
 {
+    const auto recombScaling = config.input.dataBNBTor860WCut.at(0) / config.input.dataBNBTor860WCut.at(2); // BDTs are scaled to run 3 BNB in the settings by deafult
+    // std::cout << "DEBUG recombScaling: " << recombScaling << std::endl;
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Extract the CC1Pi events tha pass the pre-selection
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     std::cout << "Finding CC1Pi events" << std::endl;
     auto ccInclusiveSelection = SelectionHelper::GetCCInclusiveSelection2(true); // todo decide on final selection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    std::cout << "DEBUG Point 0" << std::endl;
+    // std::cout << "DEBUG Point 0" << std::endl;
     std::vector<std::pair<unsigned int, unsigned int>> cc1PiEventIndices;
-    // for (const auto &[sampleType, fileRun, fileName, normalisation] : inputData)
+    unsigned int nTrainingEvents = 0;
+    float overlayWeight = 0;
+    float detVarWeight = 0;
     for (const auto &[fileRun, normalisation, sampleType, useThisFile, filePath] : config.input.files)
-    {   
-        std::cout << "DEBUG Point 1" << std::endl;
-        if(!useThisFile || sampleType != AnalysisHelper::Overlay) continue;
+    {
+        if(!useThisFile || ( sampleType != AnalysisHelper::Overlay)) continue; // && sampleType != AnalysisHelper::DetectorVariation
         // Read the input file
-        std::cout << "DEBUG Point 2" << std::endl;
         std::cout<<"Using file: "<<filePath<<std::endl;
         FileReader<EventPeLEE, SubrunPeLEE> readerPeLEE(filePath, true);
-        std::cout<<"WARNING: Only using 5\% of events!"<<std::endl; // TODO: Remove this line
-        const auto nEvents = readerPeLEE.GetNumberOfEvents()/20;
-        std::cout << "DEBUG Point 3" << std::endl;
+        // std::cout<<"WARNING: Only using 10\% of events!"<<std::endl; // TODO: Remove this line
+        const auto nEvents = readerPeLEE.GetNumberOfEvents();
         const auto pEventPeLEE = readerPeLEE.GetBoundEventAddress();
-        std::cout << "DEBUG Point 4" << std::endl;
         for (unsigned int eventIndex = 0; eventIndex < nEvents; ++eventIndex)
         {
             AnalysisHelper::PrintLoadingBar(eventIndex, nEvents);
             readerPeLEE.LoadEvent(eventIndex);
-            Event event(*pEventPeLEE, true);// true or false decides wether to cut generation!=2 particles
+            Event event(*pEventPeLEE, true);// true or false decides whether to cut generation!=2 particles
             const auto pEvent = std::make_shared<Event>(event);
 
             // Event must be true CC1Pi
@@ -58,17 +64,28 @@ void TrainBDTs(const Config &config)
             if (!passesCCInclusive)
                 continue;
 
+            const auto isTrainingEvent = isTraining(pEvent->metadata.event());
+            if(isTrainingEvent) nTrainingEvents++;
+
+            if(sampleType == AnalysisHelper::DetectorVariation)
+            {
+                detVarWeight += AnalysisHelper::GetNominalEventWeight(pEvent)*normalisation*recombScaling;
+            }
+            else
+            {
+                overlayWeight += AnalysisHelper::GetNominalEventWeight(pEvent)*normalisation;
+            }
+
             cc1PiEventIndices.emplace_back(fileRun, eventIndex);
         }
-        std::cout << "DEBUG Point 5" << std::endl;
     }
-    std::cout << "DEBUG Point 6" << std::endl;
+    // std::cout << "DEBUG Point 6" << std::endl;
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Randomly choose the training events
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const auto nCC1PiEvents = cc1PiEventIndices.size();
-    const auto nTrainingEvents = static_cast<unsigned int>(std::floor(static_cast<float>(nCC1PiEvents) * config.trainBDTs.trainingFraction));
-    BDTHelper::EventShuffler shuffler(nCC1PiEvents, nTrainingEvents);
+    // const auto nTrainingEvents = static_cast<unsigned int>(std::floor(static_cast<float>(nCC1PiEvents) * config.trainBDTs.trainingFraction));
+    // BDTHelper::EventShuffler shuffler(nCC1PiEvents, nTrainingEvents);
     std::cout << "Found " << nCC1PiEvents << " CC1Pi events passing CC inclusive seleciton. Using " << nTrainingEvents << " for training." << std::endl;
     if(nCC1PiEvents==0) throw std::runtime_error("No CC1Pi events found. Check input files and selection.");
 
@@ -82,15 +99,17 @@ void TrainBDTs(const Config &config)
     BDTHelper::BDTFactory protonBDTFactory("proton", protonFeatureNames);
     BDTHelper::BDTFactory muonBDTFactory("muon", muonFeatureNames);
 
+    // std::cout << "DEBUG Point 8" << std::endl;
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Fill the BDT training and testing entries
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     for (const auto &[fileRun, normalisation, sampleType, useThisFile, filePath] : config.input.files)
     {   
-        if(!useThisFile || sampleType != AnalysisHelper::Overlay) continue;
+        // std::cout << "DEBUG Point 9" << std::endl;
+        if(!useThisFile || (sampleType != AnalysisHelper::Overlay)) continue; // && sampleType != AnalysisHelper::DetectorVariation
         // Read the input file
         FileReader<EventPeLEE, SubrunPeLEE> readerPeLEE(filePath, true);
-        const auto pEventPeLEE = readerPeLEE.GetBoundEventAddress();
+        auto pEventPeLEE = readerPeLEE.GetBoundEventAddress();
 
         std::cout << "Filling the "<<nCC1PiEvents<<" BDT entries for file "<<filePath<<std::endl;
         for (unsigned int i = 0; i < nCC1PiEvents; ++i)
@@ -101,15 +120,19 @@ void TrainBDTs(const Config &config)
             AnalysisHelper::PrintLoadingBar(i, nCC1PiEvents);
 
             const auto eventIndex = cc1PiEventIndices.at(i).second;
-            const auto isTrainingEvent = shuffler.IsTrainingEvent(i);
-            readerPeLEE.LoadEvent(i);
+            // const auto isTrainingEvent = shuffler.IsTrainingEvent(i);
+            readerPeLEE.LoadEvent(eventIndex);
             Event event(*pEventPeLEE, true); // true or false decides wether to cut generation!=2 particles
             const auto pEvent = std::make_shared<Event>(event);
+            // std::cout << "DEBUG Point 10.1" << std::endl;
+
+            const auto isTrainingEvent = isTraining(pEvent->metadata.event());
 
             const auto truthParticles = pEvent->truth.particles;
             const auto recoParticles = pEvent->reco.particles;
             const float eventWeight = AnalysisHelper::GetNominalEventWeight(pEvent)*normalisation;
 
+            // std::cout << "DEBUG Point 11" << std::endl;
             for (const auto &recoParticle : recoParticles)
             {
                 if(recoParticle.generation() > 2) throw std::runtime_error("Found reco particle with generation > 2");
@@ -128,6 +151,7 @@ void TrainBDTs(const Config &config)
                 if(recoParticle.pdgBacktracked.IsSet()) std::cout<<"DEBUG recoParticle.pdgBacktracked(): "<<recoParticle.pdgBacktracked()<<std::endl;
                 else std::cout<<"DEBUG recoParticle.pdgBacktracked() not set"<<std::endl;
 
+                // std::cout << "DEBUG Point 12" << std::endl;
                 try
                 {
                     const auto truthParticleIndex = AnalysisHelper::GetBestMatchedTruthParticleIndex(recoParticle, truthParticles);
@@ -148,6 +172,8 @@ void TrainBDTs(const Config &config)
                 {
                     std::cout << "Exception caught in TrainBDTs.cxx: " << e.what() << std::endl;
                 }
+
+                if (isExternal && recoParticle.pdgBacktracked.IsSet()) continue; // Some particles have a backtracked pdg code but the momentum could not be matched correctly
 
                 // Only use good matches for training
                 if (config.trainBDTs.onlyGoodTruthMatches && (isExternal || completeness < 0.5f))
@@ -174,6 +200,8 @@ void TrainBDTs(const Config &config)
                 const auto completenessWeight = (config.trainBDTs.weightByCompleteness ? (isExternal ? 1.f : completeness) : 1.f);
                 std::cout<<"DEBUG completenessWeight: "<<completenessWeight<<" isExternal: "<<isExternal<<std::endl;
                 const auto weight = eventWeight * completenessWeight;
+                // if(sampleType == AnalysisHelper::DetectorVariation)
+                //     weight *= recombScaling;
 
                 if (areAllFeaturesAvailableGoldenPion)
                 {
@@ -211,6 +239,7 @@ void TrainBDTs(const Config &config)
         }
     }
 
+    // std::cout << "DEBUG Point 13" << std::endl;
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Optimize the BDTs
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -226,6 +255,7 @@ void TrainBDTs(const Config &config)
         muonBDTFactory.OptimizeParameters();
     }
 
+    // std::cout << "DEBUG Point 14" << std::endl;
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Train and test the BDTs
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -237,6 +267,18 @@ void TrainBDTs(const Config &config)
 
     std::cout << "Training and testing muon BDT" << std::endl;
     muonBDTFactory.TrainAndTest();
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Make feature importance plots
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // std::cout << "Making feature importance plots" << std::endl;
+    // TH1F *featureImportance = nullptr;
+    // goldenPionBDTFactory.GetFeatureImportance(featureImportance);
+    // std::cout << "Feature importance for golden pion BDT:" << std::endl;
+    // for (unsigned int b = 1; b <= goldenPionFeatureNames.size(); ++b)
+    // {
+    //     std::cout << "Feature " << b << ": " << featureImportance->GetBinContent(b) << std::endl;
+    // }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Make plots
@@ -258,7 +300,7 @@ void TrainBDTs(const Config &config)
     std::cout << "Making BDT training plots" << std::endl;
     for (const auto &[fileRun, normalisation, sampleType, useThisFile, filePath] : config.input.files)
     {   
-        if(!useThisFile || sampleType != AnalysisHelper::Overlay) continue;
+        if(!useThisFile || (sampleType != AnalysisHelper::Overlay)) continue; //  && sampleType != AnalysisHelper::DetectorVariation
         // Read the input file
         FileReader<EventPeLEE, SubrunPeLEE> readerPeLEE(filePath, true);
         const auto pEventPeLEE = readerPeLEE.GetBoundEventAddress();
@@ -272,14 +314,18 @@ void TrainBDTs(const Config &config)
 
             AnalysisHelper::PrintLoadingBar(i, nCC1PiEvents);
             const auto eventIndex = cc1PiEventIndices.at(i).second;
-            const auto isTrainingEvent = shuffler.IsTrainingEvent(i);
-            readerPeLEE.LoadEvent(i);
+            // const auto isTrainingEvent = shuffler.IsTrainingEvent(i);
+            readerPeLEE.LoadEvent(eventIndex);
             Event event(*pEventPeLEE, true);// true or false decides wether to cut generation!=2 particles
             const auto pEvent = std::make_shared<Event>(event);
+
+            const auto isTrainingEvent = isTraining(pEvent->metadata.event());
 
             const auto truthParticles = pEvent->truth.particles;
             const auto recoParticles = pEvent->reco.particles;
             const float eventWeight = AnalysisHelper::GetNominalEventWeight(pEvent)*normalisation;
+            // if(sampleType == AnalysisHelper::DetectorVariation)
+            //     eventWeight *= recombScaling;
 
             for (const auto &recoParticle : recoParticles)
             {
@@ -308,42 +354,46 @@ void TrainBDTs(const Config &config)
                 {
                     std::cout << "Exception caught in TrainBDTs.cxx (Point 2): " << e.what() << std::endl;
                 }
+
+                if (isExternal && recoParticle.pdgBacktracked.IsSet()) continue; // Some particles have a backtracked pdg code but the momentum could not be matched correctly
+
                 // Only use good matches for testing
                 if (config.trainBDTs.onlyGoodTruthMatches && (isExternal || completeness < 0.5f))
                     continue;
 
-                std::cout << "DEBUG: Passed good matches test" << std::endl;
+                // std::cout << "DEBUG: Passed good matches test" << std::endl;
 
                 // Fill to the plots
-                const auto style = PlottingHelper::GetPlotStyle(recoParticle, AnalysisHelper::Overlay, truthParticles, isTrainingEvent, config.global.useAbsPdg, true);
-                std::cout << "DEBUG style: " << style << std::endl;
+                const auto style = PlottingHelper::GetPlotStyle(recoParticle, sampleType, truthParticles, isTrainingEvent, config.global.useAbsPdg, true);
 
                 // For these plots skip neutrons
                 if (style == PlottingHelper::Other || style == PlottingHelper::OtherPoints)
                     continue;
 
-                std::cout << "DEBUG: Passed neutron skip test" << std::endl;
+                // std::cout << "DEBUG: Passed neutron skip test" << std::endl;
 
-                if (style == PlottingHelper::Electron || style == PlottingHelper::ElectronPoints ||
-                    style == PlottingHelper::Photon || style == PlottingHelper::PhotonPoints) continue; // Skip shower particles
+                // if (style == PlottingHelper::Electron || style == PlottingHelper::ElectronPoints ||
+                //     style == PlottingHelper::Photon || style == PlottingHelper::PhotonPoints) continue; // Skip shower particles
 
-                std::cout << "DEBUG: Passed shower particles skip test" << std::endl;
+                // std::cout << "DEBUG: Passed shower particles skip test" << std::endl;
+
+                // std::cout << "DEBUG style: " << style << std::endl;
 
                 // Extract the features
                 std::vector<float> goldenPionFeatures;
                 const auto areAllFeaturesAvailableGoldenPion = BDTHelper::GetBDTFeatures(recoParticle, goldenPionFeatureNames, goldenPionFeatures);
 
-                std::cout << "DEBUG: Extracted goldenPionFeatures" << std::endl;
+                // std::cout << "DEBUG: Extracted goldenPionFeatures" << std::endl;
 
                 std::vector<float> protonFeatures;
                 const auto areAllFeaturesAvailableProton = BDTHelper::GetBDTFeatures(recoParticle, protonFeatureNames, protonFeatures);
 
-                std::cout << "DEBUG: Extracted protonFeatures" << std::endl;
+                // std::cout << "DEBUG: Extracted protonFeatures" << std::endl;
 
                 std::vector<float> muonFeatures;
                 const auto areAllFeaturesAvailableMuon = BDTHelper::GetBDTFeatures(recoParticle, muonFeatureNames, muonFeatures);
 
-                std::cout << "DEBUG: Extracted muonFeatures" << std::endl;
+                // std::cout << "DEBUG: Extracted muonFeatures" << std::endl;
 
                 if (areAllFeaturesAvailableGoldenPion)
                 {
@@ -351,7 +401,7 @@ void TrainBDTs(const Config &config)
                     goldenPionBDTPlot.Fill(goldenPionBDTResponse, style, eventWeight);
                 }
 
-                std::cout << "DEBUG: Filled goldenPionBDTPlot" << std::endl;
+                // std::cout << "DEBUG: Filled goldenPionBDTPlot" << std::endl;
 
                 if (areAllFeaturesAvailableProton)
                 {
@@ -359,7 +409,7 @@ void TrainBDTs(const Config &config)
                     protonBDTPlot.Fill(protonBDTResponse, style, eventWeight);
                 }
 
-                std::cout << "DEBUG: Filled protonBDTPlot" << std::endl;
+                // std::cout << "DEBUG: Filled protonBDTPlot" << std::endl;
 
                 if (areAllFeaturesAvailableMuon)
                 {
@@ -367,7 +417,7 @@ void TrainBDTs(const Config &config)
                     muonBDTPlot.Fill(muonBDTResponse, style, eventWeight);
                 }
 
-                std::cout << "DEBUG: Filled muonBDTPlot" << std::endl;
+                // std::cout << "DEBUG: Filled muonBDTPlot" << std::endl;
             }
         }
     }
@@ -376,6 +426,8 @@ void TrainBDTs(const Config &config)
     goldenPionBDTPlot.SaveAs("goldenPionBDTResponse");
     protonBDTPlot.SaveAs("protonBDTResponse");
     muonBDTPlot.SaveAs("muonBDTResponse");
+
+    std::cout << "Finished" << std::endl;
 }
 
 } // namespace ubcc1pi_plots

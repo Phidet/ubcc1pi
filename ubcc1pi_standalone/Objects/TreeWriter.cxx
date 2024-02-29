@@ -132,6 +132,7 @@ void TreeWriter::CreateNoNewBranches()
 
 // Need to explicitly instantiate the template we use
 template void TreeWriter::SetObjectOutputBranchAddress<std::vector<double>>(const std::string& branchName, const std::vector<double>*& address);
+template void TreeWriter::SetObjectOutputBranchAddress<std::vector<bool>>(const std::string& branchName, const std::vector<bool>*& address);
 template void TreeWriter::SetObjectOutputBranchAddress<std::vector<int>>(const std::string& branchName, const std::vector<int>*& address);
 template void TreeWriter::SetObjectOutputBranchAddress<std::vector<float>>(const std::string& branchName, const std::vector<float>*& address);
 

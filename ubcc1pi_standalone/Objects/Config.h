@@ -24,7 +24,100 @@ struct Config
 {
 
     struct Inputs {
-        const std::vector<float> overlayPOT {1.28278e+21, 1.01592e+21, 1.31355e+21, 2.48772e+20, 7.64399e+20, 4.64842e+20, 8.66958e+20, 9.70634e+20}; // run 1, 2, 3, 4a, 4b, 4c, 4d, 5
+        const std::vector<float> overlayPOT {1.28278e+21, 1.01592e+21, 1.31355e+21, 2.48772e+20, 7.64399e+20, 4.64842e+20, 8.66958e+20, 9.70631e+20}; // run 1, 2, 3, 4a, 4b, 4c, 4d, 5
+        const std::vector<float> nuWroPOT {3.08672e+20, 3.14546e+20, 3.154e+20, 3.47601e+20, 3.68372e+20}; // run 1, 2, 3, 4bcd, 5
+        const std::vector<float> dirtPOT {3.1606e+20, 9.50551e+20, 3.26609e+20, 1.10496e+20, 3.02251e+20, 1.77721e+20, 3.52244e+20, 3.57315e+20}; // Done
+        // const std::vector<float> dataEXTTriggers {65744587.0, 153928909.0, 207380078.0, 27596585.0, 86095801.0, 50162518.0, 74593111.0, 107494728.0};
+        // const std::vector<float> dataBNBTor860WCut {1.669e+20, 2.616e+20, 2.562e+20, 3.607e+19, 1.39e+20, 8.586e+19, 4.919e+19, 1.23e+20};
+        // const std::vector<float> dataEXTE1DCNTWCut {37094101.0, 61882790.0, 61381194.0, 8037237.0, 32968278.0, 19476010.0, 11179294.0, 29378241.0};
+
+        const std::vector<float> dataEXTTriggers {65744587.0, 153928909.0, 207380080.0, 27614345.0, 86095801.0, 50162518.0, 74593111.0, 107494728.0};
+        const std::vector<float> dataBNBTor860WCut {1.669e+20, 2.616e+20, 2.642e+20, 4.497e+19, 1.39e+20, 8.586e+19, 4.919e+19, 1.475e+20};
+        const std::vector<float> dataEXTE1DCNTWCut {37094047.0, 61882879.0, 63576878.0, 9897624.0, 32968190.0, 19476018.0, 11179292.0, 35265730.0};
+
+        // todo remove dedx ????
+        const std::vector<float> detVarPOT {1.3422e+21, 6.28536e+20, 9.95366e+20, 1.31618e+21, 1.3532e+21, 9.177e+20, 6.344e+20, 6.23808e+20, 1.26005e+21, 1.34671e+21, 1.11179e+21, 1.34253e+21}; // CV, CVextra, WireModdEdx, LYAtteNuation, LYDown, LYRayleigh, Recomb2, SCE, WireModThetaXZ, WireModThetaYZ, WireModX, WireModYZ
+
+        /**
+        *  @brief  Input files
+        *
+        * Specify the type and location of PeLEE ntuples
+        * The first entry is the run number, the second is the sample type, the third is whether to use the file, the fourth is the file path
+        *
+        */
+        std::vector< std::tuple<unsigned int, float, AnalysisHelper::SampleType, bool, std::string> > files = {
+ 
+            // Beam off
+            // { /* 1  */ 1, dataEXTE1DCNTWCut.at(0)/dataEXTTriggers.at(0), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run1.root"},
+            { /* 1  */ 1, dataEXTE1DCNTWCut.at(0)/dataEXTTriggers.at(0), AnalysisHelper::DataEXT, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run1.root"},
+            { /* 2  */ 2, dataEXTE1DCNTWCut.at(1)/dataEXTTriggers.at(1), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run2.root"},
+            { /* 3  */ 3, dataEXTE1DCNTWCut.at(2)/dataEXTTriggers.at(2), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run3.root"},
+            { /* 4a */ 4, dataEXTE1DCNTWCut.at(3)/dataEXTTriggers.at(3), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_off_peleeTuple_uboone_v08_00_00_73_run4a.root"},
+            { /* 4b */ 5, dataEXTE1DCNTWCut.at(4)/dataEXTTriggers.at(4), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/Run4b_bnb_beamOff_PeLee_ntuples_run4b_ana.root"},
+            { /* 4c */ 6, dataEXTE1DCNTWCut.at(5)/dataEXTTriggers.at(5), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_off_peleeTuple_uboone_v08_00_00_73_run4c.root"},
+            { /* 4d */ 7, dataEXTE1DCNTWCut.at(6)/dataEXTTriggers.at(6), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_off_peleeTuple_uboone_v08_00_00_73_run4d.root"},
+            { /* 5  */ 8, dataEXTE1DCNTWCut.at(7)/dataEXTTriggers.at(7), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_off_peleeTuple_uboone_v08_00_00_72_run5.root"},
+ 
+            // Beam on
+            // { /* 1  */ 1, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run1_C1.root"},
+            { /* 1  */ 1, 1.f, AnalysisHelper::DataBNB, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run1_C1.root"},
+            { /* 2  */ 2, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run2.root"},
+            { /* 3  */ 3, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run3.root"},
+            { /* 4a */ 4, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/Run4a_bnb_beamOn_PeLee_ntuples_run4a_ana.root"},
+            { /* 4b */ 5, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_74_run4b.root"},
+            { /* 4c */ 6, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_73_run4c.root"},
+            { /* 4d */ 7, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_73_run4d.root"},
+            { /* 5  */ 8, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_75_run5.root"},
+
+            // Overlay dirt
+            // { /* 1  */ 1, dataBNBTor860WCut.at(0)/dirtPOT.at(0), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run1_dirt.root"},
+            { /* 1  */ 1, dataBNBTor860WCut.at(0)/dirtPOT.at(0), AnalysisHelper::Dirt, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run1_dirt.root"},
+            { /* 2  */ 2, dataBNBTor860WCut.at(1)/dirtPOT.at(1), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/overlay_peleeTuple_uboone_v08_00_00_70_run2_dirt.root"},
+            { /* 3  */ 3, dataBNBTor860WCut.at(2)/dirtPOT.at(2), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run3_dirt.root"},
+            { /* 4a */ 4, dataBNBTor860WCut.at(3)/dirtPOT.at(3), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/Run4a_BNB_dirt_overlay_Pandora_Unified_Reco2_fixed_run4a_ana.root"},
+            { /* 4b */ 5, dataBNBTor860WCut.at(4)/dirtPOT.at(4), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4b_dirt.root"},
+            { /* 4c */ 6, dataBNBTor860WCut.at(5)/dirtPOT.at(5), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4c_dirt.root"},
+            { /* 4d */ 7, dataBNBTor860WCut.at(6)/dirtPOT.at(6), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4d_dirt.root"},
+            { /* 5  */ 8, dataBNBTor860WCut.at(7)/dirtPOT.at(7), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run5_dirt.root"},
+
+            // Overlay MC
+            // { /* 1  */ 1, dataBNBTor860WCut.at(0)/overlayPOT.at(0), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run1_nu.root"},
+            { /* 1  */ 1, dataBNBTor860WCut.at(0)/overlayPOT.at(0), AnalysisHelper::Overlay, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run1_nu.root"},
+            { /* 2  */ 2, dataBNBTor860WCut.at(1)/overlayPOT.at(1), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run2_nu.root"},
+            { /* 3  */ 3, dataBNBTor860WCut.at(2)/overlayPOT.at(2), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run3_nu.root"},
+            { /* 4a */ 4, dataBNBTor860WCut.at(3)/overlayPOT.at(3), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_73_run4a_nu.root"},
+            { /* 4b */ 5, dataBNBTor860WCut.at(4)/overlayPOT.at(4), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_73_run4b_nu.root"},
+            { /* 4c */ 6, dataBNBTor860WCut.at(5)/overlayPOT.at(5), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4c_nu.root"},
+            { /* 4d */ 7, dataBNBTor860WCut.at(6)/overlayPOT.at(6), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4d_nu.root"},
+            // { /* 5  */ 8, dataBNBTor860WCut.at(7)/overlayPOT.at(7), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run5_nu.root"},
+            { /* 5  */ 8, dataBNBTor860WCut.at(7)/overlayPOT.at(7), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_nu_peleeTuple_uboone_v08_00_00_73_weightFix_run5.root"},
+
+            // DetVar
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(0), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_CV_virtualParentsFix.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(1), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_CVextra.root"},
+            // {3, dataBNBTor860WCut.at(2)/detVarPOT.at(2), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModdEdx_virtualParentsFix.root.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(3), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYAtteNuation.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(4), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYDown.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(5), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYRayleigh_virtualParentsFix.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(6), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_Recomb2.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(7), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_SCE.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(8), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaXZ.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(9), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaYZ.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(10), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModX_virtualParentsFix.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(11), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModYZ.root"},
+
+            // NuWro MC
+            { /* 1  */ 1, dataBNBTor860WCut.at(0)/nuWroPOT.at(0), AnalysisHelper::NuWro, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/nuwro_fakedata_peleeTuple_uboone_run1.root"},
+            { /* 2  */ 2, dataBNBTor860WCut.at(1)/nuWroPOT.at(1), AnalysisHelper::NuWro, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/nuwro_fakedata_peleeTuple_uboone_run2.root"},
+            { /* 3  */ 3, dataBNBTor860WCut.at(2)/nuWroPOT.at(2), AnalysisHelper::NuWro, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/nuwro_fakedata_peleeTuple_uboone_run3.root"},
+            { /* 4 (without 4a)  */ 0, -1, AnalysisHelper::NuWro, false, "/uboone/data/users/apapadop/searchingfornues/high_stat_prodgenie_bnb_nu_nuwro_overlay_run4_pelee.root"},
+            { /* 5  */ 8, -1, AnalysisHelper::NuWro, false, "/uboone/data/users/apapadop/searchingfornues/high_stat_prodgenie_bnb_nu_nuwro_overlay_run5_pelee.root"}
+        };
+    };
+    Inputs input;
+
+    struct Outputs {
+        const std::vector<float> overlayPOT {1.28278e+21, 1.01592e+21, 1.31355e+21, 2.48772e+20, 7.64399e+20, 4.64842e+20, 8.66958e+20, 9.70631e+20}; // run 1, 2, 3, 4a, 4b, 4c, 4d, 5
         const std::vector<float> nuWroPOT {3.08672e+20, 3.14546e+20, 3.154e+20, -1.f, -1.f, -1.f, -1.f, -1.f};
         const std::vector<float> dirtPOT {3.1606e+20, 9.50551e+20, 3.26609e+20, 1.10496e+20, 3.02251e+20, 1.77721e+20, 3.52244e+20, 3.57315e+20}; // Done
         const std::vector<float> dataEXTTriggers {65744587.0, 153928909.0, 207380078.0, 27596585.0, 86095801.0, 50162518.0, 74593111.0, 107494728.0};
@@ -34,89 +127,7 @@ struct Config
 
         // todo remove dedx ????
         const std::vector<float> detVarPOT {1.3422e+21, 6.28536e+20, 9.95366e+20, 1.31618e+21, 1.3532e+21, 9.177e+20, 6.344e+20, 6.23808e+20, 1.26005e+21, 1.34671e+21, 1.11179e+21, 1.34253e+21}; // CV, CVextra, WireModdEdx, LYAtteNuation, LYDown, LYRayleigh, Recomb2, SCE, WireModThetaXZ, WireModThetaYZ, WireModX, WireModYZ
-
-        /**
-        *  @brief  Input files
-        *
-        * Specify the type and location of PeLEE ntuples
-        * The first entry is the run number, the second is the sample type, the third is whether to use the file, the fourth is the file path
-        *
-        */
-        std::vector< std::tuple<unsigned int, float, AnalysisHelper::SampleType, bool, std::string> > files = {
- 
-            // Beam off
-            { /* 1  */ 1, dataEXTE1DCNTWCut.at(0)/dataEXTTriggers.at(0), AnalysisHelper::DataEXT, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run1.root"},
-            { /* 2  */ 2, dataEXTE1DCNTWCut.at(1)/dataEXTTriggers.at(1), AnalysisHelper::DataEXT, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run2.root"},
-            { /* 3  */ 3, dataEXTE1DCNTWCut.at(2)/dataEXTTriggers.at(2), AnalysisHelper::DataEXT, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run3.root"},
-            { /* 4a */ 4, dataEXTE1DCNTWCut.at(3)/dataEXTTriggers.at(3), AnalysisHelper::DataEXT, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_off_peleeTuple_uboone_v08_00_00_73_run4a.root"},
-            { /* 4b */ 5, dataEXTE1DCNTWCut.at(4)/dataEXTTriggers.at(4), AnalysisHelper::DataEXT, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/Run4b_bnb_beamOff_PeLee_ntuples_run4b_ana.root"},
-            { /* 4c */ 6, dataEXTE1DCNTWCut.at(5)/dataEXTTriggers.at(5), AnalysisHelper::DataEXT, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_off_peleeTuple_uboone_v08_00_00_73_run4c.root"},
-            { /* 4d */ 7, dataEXTE1DCNTWCut.at(6)/dataEXTTriggers.at(6), AnalysisHelper::DataEXT, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_off_peleeTuple_uboone_v08_00_00_73_run4d.root"},
-            { /* 5  */ 8, dataEXTE1DCNTWCut.at(7)/dataEXTTriggers.at(7), AnalysisHelper::DataEXT, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_off_peleeTuple_uboone_v08_00_00_72_run5.root"},
- 
-            // Beam on
-            { /* 1  */ 1, 1.f, AnalysisHelper::DataBNB, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run1_C1.root"},
-            { /* 2  */ 2, 1.f, AnalysisHelper::DataBNB, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run2.root"},
-            { /* 3  */ 3, 1.f, AnalysisHelper::DataBNB, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run3.root"},
-            { /* 4a */ 4, 1.f, AnalysisHelper::DataBNB, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/Run4a_bnb_beamOn_PeLee_ntuples_run4a_ana.root"},
-            { /* 4b */ 5, 1.f, AnalysisHelper::DataBNB, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_74_run4b.root"},
-            { /* 4c */ 6, 1.f, AnalysisHelper::DataBNB, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_73_run4c.root"},
-            { /* 4d */ 7, 1.f, AnalysisHelper::DataBNB, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_73_run4d.root"},
-            { /* 5  */ 8, 1.f, AnalysisHelper::DataBNB, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_75_run5.root"},
-
-            // Overlay dirt
-            { /* 1  */ 1, dataBNBTor860WCut.at(0)/dirtPOT.at(0), AnalysisHelper::Dirt, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run1_dirt.root"},
-            { /* 2  */ 2, dataBNBTor860WCut.at(1)/dirtPOT.at(1), AnalysisHelper::Dirt, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/overlay_peleeTuple_uboone_v08_00_00_70_run2_dirt.root"},
-            { /* 3  */ 3, dataBNBTor860WCut.at(2)/dirtPOT.at(2), AnalysisHelper::Dirt, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run3_dirt.root"},
-            { /* 4a */ 4, dataBNBTor860WCut.at(3)/dirtPOT.at(3), AnalysisHelper::Dirt, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/Run4a_BNB_dirt_overlay_Pandora_Unified_Reco2_fixed_run4a_ana.root"},
-            { /* 4b */ 5, dataBNBTor860WCut.at(4)/dirtPOT.at(4), AnalysisHelper::Dirt, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4b_dirt.root"},
-            { /* 4c */ 6, dataBNBTor860WCut.at(5)/dirtPOT.at(5), AnalysisHelper::Dirt, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4c_dirt.root"},
-            { /* 4d */ 7, dataBNBTor860WCut.at(6)/dirtPOT.at(6), AnalysisHelper::Dirt, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4d_dirt.root"},
-            { /* 5  */ 8, dataBNBTor860WCut.at(7)/dirtPOT.at(7), AnalysisHelper::Dirt, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run5_dirt.root"},
-
-            // Overlay MC
-            { /* 1  */ 1, dataBNBTor860WCut.at(0)/overlayPOT.at(0), AnalysisHelper::Overlay, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run1_nu.root"},
-            { /* 2  */ 2, dataBNBTor860WCut.at(1)/overlayPOT.at(1), AnalysisHelper::Overlay, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run2_nu.root"},
-            { /* 3  */ 3, dataBNBTor860WCut.at(2)/overlayPOT.at(2), AnalysisHelper::Overlay, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run3_nu.root"},
-            { /* 4a */ 4, dataBNBTor860WCut.at(3)/overlayPOT.at(3), AnalysisHelper::Overlay, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_73_run4a_nu.root"},
-            { /* 4b */ 5, dataBNBTor860WCut.at(4)/overlayPOT.at(4), AnalysisHelper::Overlay, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_73_run4b_nu.root"},
-            { /* 4c */ 6, dataBNBTor860WCut.at(5)/overlayPOT.at(5), AnalysisHelper::Overlay, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4c_nu.root"},
-            { /* 4d */ 7, dataBNBTor860WCut.at(6)/overlayPOT.at(6), AnalysisHelper::Overlay, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4d_nu.root"},
-            { /* 5  */ 8, dataBNBTor860WCut.at(7)/overlayPOT.at(7), AnalysisHelper::Overlay, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run5_nu.root"},
-
-            // DetVar
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(0), AnalysisHelper::DetectorVariation, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_CV_virtualParentsFix.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(1), AnalysisHelper::DetectorVariation, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_CVextra.root"},
-            // {3, dataBNBTor860WCut.at(2)/detVarPOT.at(2), AnalysisHelper::DetectorVariation, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModdEdx_virtualParentsFix.root.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(3), AnalysisHelper::DetectorVariation, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYAtteNuation.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(4), AnalysisHelper::DetectorVariation, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYDown.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(5), AnalysisHelper::DetectorVariation, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYRayleigh_virtualParentsFix.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(6), AnalysisHelper::DetectorVariation, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_Recomb2.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(7), AnalysisHelper::DetectorVariation, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_SCE.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(8), AnalysisHelper::DetectorVariation, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaXZ.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(9), AnalysisHelper::DetectorVariation, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaYZ.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(10), AnalysisHelper::DetectorVariation, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModX_virtualParentsFix.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(11), AnalysisHelper::DetectorVariation, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModYZ.root"},
-
-            // NuWro MC
-            {1, dataBNBTor860WCut.at(0)/nuWroPOT.at(0), AnalysisHelper::NuWro, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/nuwro_fakedata_peleeTuple_uboone_run1.root"},
-            {2, dataBNBTor860WCut.at(1)/nuWroPOT.at(1), AnalysisHelper::NuWro, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/nuwro_fakedata_peleeTuple_uboone_run2.root"},
-            {3, dataBNBTor860WCut.at(2)/nuWroPOT.at(2), AnalysisHelper::NuWro, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/nuwro_fakedata_peleeTuple_uboone_run3.root"}
-        };
-
-    };
-    Inputs input;
-
-struct Outputs {
-        const std::vector<float> overlayPOT {1.28278e+21, 1.01592e+21, 1.31355e+21, 2.48772e+20, 7.64399e+20, 4.64842e+20, 8.66958e+20, 9.70634e+20}; // run 1, 2, 3, 4a, 4b, 4c, 4d, 5
-        const std::vector<float> nuWroPOT {3.08672e+20, 3.14546e+20, 3.154e+20, -1.f}; // run 1, 2, 3, 4c
-        const std::vector<float> dirtPOT {3.1606e+20, 9.50551e+20, 3.26609e+20, 1.77721e+20, 3.52244e+20, 3.57315e+20}; // run 1, 2, 3, 4c, 4d, 5
-        const std::vector<float> dataEXTTriggers {65744587.f, 153928909.f, 207380078.f, 11212608.f}; // run 1, 2, 3, 4c
-        const std::vector<float> dataBNBTor860WCut {1.669e+20, 2.616e+20, 2.562e+20, 0, 0, 8.586e+19, 0, 0}; // run 1, 2, 3, 4a, 4b, 4c, 4d, 5
-        const std::vector<float> dataEXTE1DCNTWCut {36906271.f, 62557664.f, 61744410.f, 19476010.f}; // run 1, 2, 3, 4c // todo run 4c very low. Is this right?
-        // todo remove dedx ????
-        const std::vector<float> detVarPOT {1.3422e+21, 6.28536e+20, 9.95366e+20, 1.31618e+21, 1.3532e+21, 9.177e+20, 6.344e+20, 6.23808e+20, 1.26005e+21, 1.34671e+21, 1.11179e+21, 1.34253e+21}; // CV, CVextra, WireModdEdx, LYAtteNuation, LYDown, LYRayleigh, Recomb2, SCE, WireModThetaXZ, WireModThetaYZ, WireModX, WireModYZ
-
+  
         /**
         *  @brief  Input files
         *
@@ -126,51 +137,64 @@ struct Outputs {
         */
         std::vector< std::tuple<unsigned int, float, AnalysisHelper::SampleType, bool, std::string> > files = {
             // Beam off
-            {1, dataEXTE1DCNTWCut.at(0)/dataEXTTriggers.at(0), AnalysisHelper::DataEXT, false, ""},
-            {2, dataEXTE1DCNTWCut.at(1)/dataEXTTriggers.at(1), AnalysisHelper::DataEXT, false, ""},
-            {3, dataEXTE1DCNTWCut.at(2)/dataEXTTriggers.at(2), AnalysisHelper::DataEXT, false, ""},
-            {4, dataEXTE1DCNTWCut.at(3)/dataEXTTriggers.at(3), AnalysisHelper::DataEXT, false, ""},
-            // {6, dataEXTE1DCNTWCut.at(3)/dataEXTTriggers.at(3), AnalysisHelper::DataEXT, false, ""},
+            { /* 1  */ 1, dataEXTE1DCNTWCut.at(0)/dataEXTTriggers.at(0), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run1_ubcc1pi.root"},
+            { /* 2  */ 2, dataEXTE1DCNTWCut.at(1)/dataEXTTriggers.at(1), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run2_ubcc1pi.root"},
+            { /* 3  */ 3, dataEXTE1DCNTWCut.at(2)/dataEXTTriggers.at(2), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run3_ubcc1pi.root"},
+            { /* 4a */ 4, dataEXTE1DCNTWCut.at(3)/dataEXTTriggers.at(3), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_off_peleeTuple_uboone_v08_00_00_73_run4a_ubcc1pi.root"},
+            { /* 4b */ 5, dataEXTE1DCNTWCut.at(4)/dataEXTTriggers.at(4), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/Run4b_bnb_beamOff_PeLee_ntuples_run4b_ana_ubcc1pi.root"},
+            { /* 4c */ 6, dataEXTE1DCNTWCut.at(5)/dataEXTTriggers.at(5), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_off_peleeTuple_uboone_v08_00_00_73_run4c_ubcc1pi.root"},
+            { /* 4d */ 7, dataEXTE1DCNTWCut.at(6)/dataEXTTriggers.at(6), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_off_peleeTuple_uboone_v08_00_00_73_run4d_ubcc1pi.root"},
+            { /* 5  */ 8, dataEXTE1DCNTWCut.at(7)/dataEXTTriggers.at(7), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_off_peleeTuple_uboone_v08_00_00_72_run5_ubcc1pi.root"},
+ 
             // Beam on
-            {1, 1.f, AnalysisHelper::DataBNB, false, ""},
-            {2, 1.f, AnalysisHelper::DataBNB, false, ""},
-            {3, 1.f, AnalysisHelper::DataBNB, false, ""},
-            {4, 1.f, AnalysisHelper::DataBNB, false, ""},
+            { /* 1  */ 1, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run1_C1_ubcc1pi.root"},
+            { /* 2  */ 2, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run2_ubcc1pi.root"},
+            { /* 3  */ 3, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run3_ubcc1pi.root"},
+            { /* 4a */ 4, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/Run4a_bnb_beamOn_PeLee_ntuples_run4a_ana_ubcc1pi.root"},
+            { /* 4b */ 5, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_on_peleeTuple_uboone_v08_00_00_74_run4b_ubcc1pi.root"},
+            { /* 4c */ 6, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_on_peleeTuple_uboone_v08_00_00_73_run4c_ubcc1pi.root"},
+            { /* 4d */ 7, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_on_peleeTuple_uboone_v08_00_00_73_run4d_ubcc1pi.root"},
+            { /* 5  */ 8, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/bnb_beam_on_peleeTuple_uboone_v08_00_00_75_run5_ubcc1pi.root"},
+
             // Overlay dirt
-            {1, dataBNBTor860WCut.at(0)/dirtPOT.at(0), AnalysisHelper::Dirt, false, ""},
-            {2, dataBNBTor860WCut.at(1)/dirtPOT.at(1), AnalysisHelper::Dirt, false, ""},
-            {3, dataBNBTor860WCut.at(2)/dirtPOT.at(2), AnalysisHelper::Dirt, false, ""},
-            {4, dataBNBTor860WCut.at(3)/dirtPOT.at(3), AnalysisHelper::Dirt, false, ""},
-            {5, dataBNBTor860WCut.at(3)/dirtPOT.at(4), AnalysisHelper::Dirt, false, ""},
-            {6, dataBNBTor860WCut.at(3)/dirtPOT.at(5), AnalysisHelper::Dirt, false, ""},
+            { /* 1  */ 1, dataBNBTor860WCut.at(0)/dirtPOT.at(0), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_70_run1_dirt_ubcc1pi.root"},
+            { /* 2  */ 2, dataBNBTor860WCut.at(1)/dirtPOT.at(1), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_70_run2_dirt_ubcc1pi.root"},
+            { /* 3  */ 3, dataBNBTor860WCut.at(2)/dirtPOT.at(2), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_70_run3_dirt_ubcc1pi.root"},
+            { /* 4a */ 4, dataBNBTor860WCut.at(3)/dirtPOT.at(3), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/Run4a_BNB_dirt_overlay_Pandora_Unified_Reco2_fixed_run4a_ana_ubcc1pi.root"},
+            { /* 4b */ 5, dataBNBTor860WCut.at(4)/dirtPOT.at(4), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_70_run4b_dirt_ubcc1pi.root"},
+            { /* 4c */ 6, dataBNBTor860WCut.at(5)/dirtPOT.at(5), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_70_run4c_dirt_ubcc1pi.root"},
+            { /* 4d */ 7, dataBNBTor860WCut.at(6)/dirtPOT.at(6), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_70_run4d_dirt_ubcc1pi.root"},
+            { /* 5  */ 8, dataBNBTor860WCut.at(7)/dirtPOT.at(7), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_70_run5_dirt_ubcc1pi.root"},
+
 
             // Overlay MC
-            { /* 1  */ 1, dataBNBTor860WCut.at(0)/overlayPOT.at(0), AnalysisHelper::Overlay, false, "/uboone/data/users/jdetje/ubcc1piOutput/100Percent_5/overlay_peleeTuple_uboone_v08_00_00_70_run1_nu_ubcc1pi.root"},
-            { /* 2  */ 2, dataBNBTor860WCut.at(1)/overlayPOT.at(1), AnalysisHelper::Overlay, false, "/uboone/data/users/jdetje/ubcc1piOutput/100Percent_5/overlay_peleeTuple_uboone_v08_00_00_70_run2_nu_ubcc1pi.root"},
-            { /* 3  */ 3, dataBNBTor860WCut.at(2)/overlayPOT.at(2), AnalysisHelper::Overlay, false, "/uboone/data/users/jdetje/ubcc1piOutput/100Percent_5/overlay_peleeTuple_uboone_v08_00_00_70_run3_nu_ubcc1pi.root"},
-            { /* 4a */ 4, dataBNBTor860WCut.at(3)/overlayPOT.at(3), AnalysisHelper::Overlay, false, "/uboone/data/users/jdetje/ubcc1piOutput/100Percent_5/overlay_peleeTuple_uboone_v08_00_00_73_run4a_nu_ubcc1pi.root"},
-            { /* 4b */ 5, dataBNBTor860WCut.at(4)/overlayPOT.at(4), AnalysisHelper::Overlay, false, "/uboone/data/users/jdetje/ubcc1piOutput/100Percent_5/overlay_peleeTuple_uboone_v08_00_00_73_run4b_nu_ubcc1pi.root"},
-            { /* 4c */ 6, dataBNBTor860WCut.at(5)/overlayPOT.at(5), AnalysisHelper::Overlay, false, "/uboone/data/users/jdetje/ubcc1piOutput/100Percent_5/overlay_peleeTuple_uboone_v08_00_00_70_run4c_nu_ubcc1pi.root"},
-            { /* 4d */ 7, dataBNBTor860WCut.at(6)/overlayPOT.at(6), AnalysisHelper::Overlay, false, "/uboone/data/users/jdetje/ubcc1piOutput/100Percent_5/overlay_peleeTuple_uboone_v08_00_00_70_run4d_nu_ubcc1pi.root"},
-            { /* 5  */ 8, dataBNBTor860WCut.at(7)/overlayPOT.at(7), AnalysisHelper::Overlay, false, "/uboone/data/users/jdetje/ubcc1piOutput/100Percent_5/overlay_peleeTuple_uboone_v08_00_00_70_run5_nu_ubcc1pi.root"},
+            { /* 1  */ 1, dataBNBTor860WCut.at(0)/overlayPOT.at(0), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_70_run1_nu_ubcc1pi.root"},
+            { /* 2  */ 2, dataBNBTor860WCut.at(1)/overlayPOT.at(1), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_70_run2_nu_ubcc1pi.root"},
+            { /* 3  */ 3, dataBNBTor860WCut.at(2)/overlayPOT.at(2), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_70_run3_nu_ubcc1pi.root"},
+            { /* 4a */ 4, dataBNBTor860WCut.at(3)/overlayPOT.at(3), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_73_run4a_nu_ubcc1pi.root"},
+            { /* 4b */ 5, dataBNBTor860WCut.at(4)/overlayPOT.at(4), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_73_run4b_nu_ubcc1pi.root"},
+            { /* 4c */ 6, dataBNBTor860WCut.at(5)/overlayPOT.at(5), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_70_run4c_nu_ubcc1pi.root"},
+            { /* 4d */ 7, dataBNBTor860WCut.at(6)/overlayPOT.at(6), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_peleeTuple_uboone_v08_00_00_70_run4d_nu_ubcc1pi.root"},
+            { /* 5  */ 8, dataBNBTor860WCut.at(7)/overlayPOT.at(7), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/overlay_nu_peleeTuple_uboone_v08_00_00_73_weightFix_run5_ubcc1pi.root"},
 
             // DetVar
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(0), AnalysisHelper::DetectorVariation, false, ""},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(1), AnalysisHelper::DetectorVariation, false, ""},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(0), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/detvar_run3_peleeTuple_uboone_v08_00_00_73_CVextra_ubcc1pi.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(1), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/detvar_run3_peleeTuple_uboone_v08_00_00_73_CV_virtualParentsFix_ubcc1pi.root"},
             // {3, dataBNBTor860WCut.at(2)/detVarPOT.at(2), AnalysisHelper::DetectorVariation, false, ""},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(3), AnalysisHelper::DetectorVariation, false, ""},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(4), AnalysisHelper::DetectorVariation, false, ""},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(5), AnalysisHelper::DetectorVariation, false, ""},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(6), AnalysisHelper::DetectorVariation, false, ""},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(7), AnalysisHelper::DetectorVariation, false, ""},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(8), AnalysisHelper::DetectorVariation, false, ""},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(9), AnalysisHelper::DetectorVariation, false, ""},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(10), AnalysisHelper::DetectorVariation, false, ""},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(11), AnalysisHelper::DetectorVariation, false, ""},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(3), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYAtteNuation_ubcc1pi.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(4), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYDown_ubcc1pi.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(5), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYRayleigh_virtualParentsFix_ubcc1pi.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(6), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/detvar_run3_peleeTuple_uboone_v08_00_00_73_Recomb2_ubcc1pi.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(7), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/detvar_run3_peleeTuple_uboone_v08_00_00_73_SCE_ubcc1pi.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(8), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaXZ_ubcc1pi.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(9), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaYZ_ubcc1pi.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(10), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModX_virtualParentsFix_ubcc1pi.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(11), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModYZ_ubcc1pi.root"},
+
             // NuWro MC
-            {1, dataBNBTor860WCut.at(0)/nuWroPOT.at(0), AnalysisHelper::NuWro, false, ""},
-            {2, dataBNBTor860WCut.at(1)/nuWroPOT.at(1), AnalysisHelper::NuWro, false, ""},
-            {3, dataBNBTor860WCut.at(2)/nuWroPOT.at(2), AnalysisHelper::NuWro, false, ""}
+            { /* 1  */ 1, dataBNBTor860WCut.at(0)/nuWroPOT.at(0), AnalysisHelper::NuWro, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/nuwro_fakedata_peleeTuple_uboone_run1_ubcc1pi.root"},
+            { /* 2  */ 2, dataBNBTor860WCut.at(1)/nuWroPOT.at(1), AnalysisHelper::NuWro, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/nuwro_fakedata_peleeTuple_uboone_run2_ubcc1pi.root"},
+            { /* 3  */ 3, dataBNBTor860WCut.at(2)/nuWroPOT.at(2), AnalysisHelper::NuWro, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/nuwro_fakedata_peleeTuple_uboone_run3_ubcc1pi.root"}
         };
 
     };
@@ -645,7 +669,7 @@ struct Outputs {
     {
         bool        useAbsPdg                   = true;              ///< If we should use absolute PDG codes (this makes pi+ == pi- in the signal definition)
         bool        countProtonsInclusively     = true;              ///< If we should count protons inclusively (as Xp), or exclusively as (0p, 1p, 2p, ...)
-        std::string lastCutGeneric              = "startNearVertex"; ///< The last cut of the generic selection (remaining cuts are part of the golden selection)
+        std::string lastCutGeneric              = "openingAngle";    ///< The last cut of the generic selection (remaining cuts are part of the golden selection)
         float       protonMomentumThreshold     = 0.3f;              ///< The minimum proton momentum to be counted [GeV]
         float       targetDensity               = 8.44191f;          ///< The number of target nuclei per unit volume - units e23 / cm^3
         std::string selection                   = "Default";         ///< Which selection to use (can be "CCInclusive","Default", or "CC0pi")

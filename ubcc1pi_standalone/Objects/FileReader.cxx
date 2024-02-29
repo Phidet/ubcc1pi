@@ -26,7 +26,7 @@ FileReader<T, U>::FileReader(const std::string &inputFile, const bool hasTruthIn
     std::string eventTreeName = "events";
     if constexpr (std::is_same_v<T, EventPeLEE>) eventTreeName = "nuselection/NeutrinoSelectionFilter";
     else if constexpr (std::is_same_v<T, EventXSec>) eventTreeName = "stv_tree";
-    // std::cout << "DEBUG: Event tree name set to: " << eventTreeName << std::endl;
+    std::cout << "DEBUG: Event tree name set to: " << eventTreeName << std::endl;
 
     m_pEventTree = static_cast<TTree*>(m_pFile->Get(eventTreeName.c_str()));
     // std::cout << "DEBUG: Event tree obtained from file" << std::endl;
@@ -34,22 +34,22 @@ FileReader<T, U>::FileReader(const std::string &inputFile, const bool hasTruthIn
     std::string subrunTreeName = "subruns";
     if constexpr (std::is_same_v<U, SubrunPeLEE>) subrunTreeName = "nuselection/SubRun";
     else if constexpr (std::is_same_v<U, SubrunXSec>) subrunTreeName = "stv_tree/nuselection/SubRun";
-    // std::cout << "DEBUG: Subrun tree name set to: " << subrunTreeName << std::endl;
+    std::cout << "DEBUG: Subrun tree name set to: " << subrunTreeName << std::endl;
 
     m_pSubrunTree = static_cast<TTree*>(m_pFile->Get(subrunTreeName.c_str()));
-    // std::cout << "DEBUG: Subrun tree obtained from file" << std::endl;
+    std::cout << "DEBUG: Subrun tree obtained from file" << std::endl;
 
-    // std::cout << "DEBUG: Event and Subrun trees initialized" << std::endl;
+    std::cout << "DEBUG: Event and Subrun trees initialized" << std::endl;
 
     m_pEvent = std::make_shared<T>(hasTruthInfo);
     m_pSubrun = std::make_shared<U>(hasTruthInfo);
 
-    // std::cout << "DEBUG: Event and Subrun objects created" << std::endl;
+    std::cout << "DEBUG: Event and Subrun objects created" << std::endl;
 
     this->BindEventToTree();
     this->BindSubrunToTree();
 
-    // std::cout << "DEBUG: Event and Subrun objects bound to trees" << std::endl;
+    std::cout << "DEBUG: Event and Subrun objects bound to trees" << std::endl;
 
     if (this->GetNumberOfEvents() == 0)
         std::cout << "ubcc1pi::FileReader: Warning, input file has no entries" << std::endl;
@@ -59,12 +59,12 @@ FileReader<T, U>::FileReader(const std::string &inputFile, const bool hasTruthIn
     if (this->GetNumberOfSubruns() == 0)
         std::cout << "ubcc1pi::FileReader: Warning, input file has no subruns" << std::endl;
 
-    // std::cout << "DEBUG: Number of subruns: " << this->GetNumberOfSubruns() << std::endl;
+    std::cout << "DEBUG: Number of subruns: " << this->GetNumberOfSubruns() << std::endl;
 
     // By default, disable the branches that hold the event weights as these are large and only needed in a few cases
     this->DisableSystematicBranches();
 
-    // std::cout << "DEBUG: Exiting FileReader constructor" << std::endl;
+    std::cout << "DEBUG: Exiting FileReader constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------

@@ -36,6 +36,13 @@ namespace ubcc1pi_macros
     void AnalyzerTest(const Config &config = Config());
 
     /**
+     *  @brief  Process nTuples for unfolded analysis
+     *
+     *  @param  config the input configuration
+     */
+    void AnalyzerTest2(const Config &config = Config());
+
+    /**
      *  @brief  Check that the numucc filter and the CC inclusive cuts included in the analysis have the same effect
      *
      *  @param  config the input configuration
@@ -147,6 +154,14 @@ namespace ubcc1pi_macros
      */
     void NMinusOneBDTStudy(const Config &config = Config());
 
+
+    /**
+     *  @brief  Print the normalisations of the input files
+     *
+     *  @param  config the input configuration
+     */
+    void PrintFileNormalisations(const Config &config = Config());
+
     // /**
     //  *  @brief  Make data/MC plots for one iteration of the N-1 BDT study
     //  *
@@ -195,6 +210,13 @@ namespace ubcc1pi_macros
      *  @param  config the input configuration
      */
     void MakeSidebandEventSelectionTable(const Config &config = Config());
+
+    /**
+     *  @brief  Get the properties of pion candidates from CC0pi events in the CC1pi selection
+     *
+     *  @param  config the input configuration
+     */
+    void MakeCC0piProtonSelectionTable(const Config &config = Config());
 
     /**
      *  @brief  Make the PID table
@@ -478,11 +500,25 @@ namespace ubcc1pi_macros
     void MakeSidebandSamplePlots(const Config &config = Config());
 
     /*
+     *  @brief  Make plots for the CC0pi1p sideband sample
+     *
+     *  @param  config the input configuration
+     */
+    void MakeSidebandSamplePlotsV2(const Config &config = Config());
+
+    /*
      *  @brief  Optimize the sideband cuts
      *
      *  @param  config the input configuration
      */
     void OptimizeSidebandCuts(const Config &config = Config());
+
+    /*
+     *  @brief  Confusion plots for muon and pion candidates
+     *
+     *  @param  config the input configuration
+     */
+    void PlotMuonConfusion(const Config &config = Config());
 
     // /*
     //  *  @brief  Optimize the proton momentum threshold

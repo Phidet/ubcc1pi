@@ -24,62 +24,74 @@ namespace ubcc1pi_macros
 
 void PlotInputVariables(const Config &config)
 {
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+    // Get list of good runs
+    // -------------------------------------------------------------------------------------------------------------------------------------
+    std::vector<int> goodRuns;
+    std::ifstream file(config.global.goodRunListFile);
+    int run;
+    while (file >> run) {
+        goodRuns.push_back(run);
+    }
+
+    std::cout << "DEBUG PLotInputVariables Point 0" << std::endl;
     auto ccInclusiveSelection = SelectionHelper::GetCCInclusiveSelection2(true);
     //
     // Set up the plots for each BDT feature
     //
     const auto featureNames = BDTHelper::ParticleBDTFeatureNames;
-    const std::string yLabel = "Fraction of reco particles";
+    std::string yLabel = "Number of reconstructed particles";
     std::vector< PlottingHelper::MultiPlot > plotVector, plotVectorSignal;
 
     for (const auto &featureName : featureNames)
     {
         if (featureName == "logBragg_pToMIP")
         {
-            plotVector.emplace_back("log(L_p / L_MIP)", yLabel, 60, -9, 7);
-            plotVectorSignal.emplace_back("log(L_p / L_MIP)", yLabel, 60, -9, 7);
+            plotVector.emplace_back("log(L_p / L_MIP)", yLabel, 60, -9, 7, true, false);
+            plotVectorSignal.emplace_back("log(L_p / L_MIP)", yLabel, 60, -9, 7, true, false);
             continue;
         }
 
         if (featureName == "logBragg_piToMIP")
         {
-            plotVector.emplace_back("log(L_pi / L_MIP)", yLabel, 60, -4, 6);
-            plotVectorSignal.emplace_back("log(L_pi / L_MIP)", yLabel, 60, -4, 6);
+            plotVector.emplace_back("log(L_pi / L_MIP)", yLabel, 60, -4, 6, true, false);
+            plotVectorSignal.emplace_back("log(L_pi / L_MIP)", yLabel, 60, -4, 6, true, false);
             continue;
         }
 
         if (featureName == "truncMeandEdx")
         {
-            plotVector.emplace_back("Truncated Mean dEdx", yLabel, 60, 0, 10);
-            plotVectorSignal.emplace_back("Truncated Mean dEdx", yLabel, 60, 0, 10);
+            plotVector.emplace_back("Truncated Mean dEdx", yLabel, 60, 0, 25, true, false);
+            plotVectorSignal.emplace_back("Truncated Mean dEdx", yLabel, 60, 0, 25, true, false);
             continue;
         }
 
         if (featureName == "protonForward")
         {
-            plotVector.emplace_back("Proton forward likelihood", yLabel, 60, 0.42, 0.62);
-            plotVectorSignal.emplace_back("Proton forward likelihood", yLabel, 60, 0.42, 0.62);
+            plotVector.emplace_back("Proton forward likelihood", yLabel, 60, 0.42, 0.62, true, false);
+            plotVectorSignal.emplace_back("Proton forward likelihood", yLabel, 60, 0.42, 0.62, true, false);
             continue;
         }
 
         if (featureName == "muonForward")
         {
-            plotVector.emplace_back("Muon forward likelihood", yLabel, 60, 0.35, 0.65);
-            plotVectorSignal.emplace_back("Muon forward likelihood", yLabel, 60, 0.35, 0.65);
+            plotVector.emplace_back("Muon forward likelihood", yLabel, 60, 0.35, 0.65, true, false);
+            plotVectorSignal.emplace_back("Muon forward likelihood", yLabel, 60, 0.35, 0.65, true, false);
             continue;
         }
 
         if (featureName == "nDescendents")
         {
-            plotVector.emplace_back("Number of descendent particles", yLabel, 4, 0, 4);
-            plotVectorSignal.emplace_back("Number of descendent particles", yLabel, 4, 0, 4);
+            plotVector.emplace_back("Number of descendent particles", yLabel, 4, 0, 4, true, false);
+            plotVectorSignal.emplace_back("Number of descendent particles", yLabel, 4, 0, 4, true, false);
             continue;
         }
 
         if (featureName == "nSpacePointsNearEnd")
         {
-            plotVector.emplace_back("Number of spacepoints near track end", yLabel, 45, 0, 90);
-            plotVectorSignal.emplace_back("Number of spacepoints near track end", yLabel, 45, 0, 90);
+            plotVector.emplace_back("Number of spacepoints near track end", yLabel, 45, 0, 90, true, false);
+            plotVectorSignal.emplace_back("Number of spacepoints near track end", yLabel, 45, 0, 90, true, false);
             continue;
         }
 
@@ -94,22 +106,26 @@ void PlotInputVariables(const Config &config)
 
         if (featureName == "trackScore")
         {
-            plotVector.emplace_back("Track score", yLabel, 30, 0, 1);
-            plotVectorSignal.emplace_back("Track score", yLabel, 30, 0, 1);
+            plotVector.emplace_back("Track score", yLabel, 30, 0, 1, true, false);
+            plotVectorSignal.emplace_back("Track score", yLabel, 30, 0, 1, true, false);
             continue;
         }
 
         throw std::logic_error("PlotInputVariables - unknown feature: \"" + featureName + "\"");
     }
 
+    std::cout << "DEBUG PLotInputVariables Point 1" << std::endl;
+
     // Setup the BDT outputs
     const auto goldenPionFeatureNames = BDTHelper::GoldenPionBDTFeatureNames;
     const auto protonFeatureNames = BDTHelper::ProtonBDTFeatureNames;
     const auto muonFeatureNames = BDTHelper::MuonBDTFeatureNames;
 
-    PlottingHelper::MultiPlot muonBDTPlot("Muon BDT response", yLabel, 40, -0.85f, 0.50f);
-    PlottingHelper::MultiPlot protonBDTPlot("Proton BDT response", yLabel, 40, -0.60f, 0.60f);
-    PlottingHelper::MultiPlot goldenPionBDTPlot("Golden pion BDT response", yLabel, 40, -0.8f, 0.4f);
+    PlottingHelper::MultiPlot muonBDTPlot("Muon BDT response", yLabel, 40, -0.85f, 0.50f, true, false);
+    PlottingHelper::MultiPlot protonBDTPlot("Proton BDT response", yLabel, 40, -0.90f, 0.60f, true, false);
+    PlottingHelper::MultiPlot goldenPionBDTPlot("Golden pion BDT response", yLabel, 40, -0.8f, 0.4f, true, false);
+
+    std::cout << "DEBUG PLotInputVariables Point 2" << std::endl;
 
     std::shared_ptr<BDTHelper::BDT> pGoldenPionBDT, pProtonBDT, pMuonBDT;
     if (config.plotInputVariables.plotBDTResponses)
@@ -128,10 +144,10 @@ void PlotInputVariables(const Config &config)
     TH2F *hPhiCosThetaSim = new TH2F("hPhiCosThetaSim", "", 100u, -3.142f, 3.142f, 100u, -1.f, 1.f);
 
     // Special plot for trackScore for particles with and without descendents
-    PlottingHelper::MultiPlot trackScoreWithDescendents("Track score", yLabel, 30, 0, 1);
-    PlottingHelper::MultiPlot trackScoreWithoutDescendents("Track score", yLabel, 30, 0, 1);
-    PlottingHelper::MultiPlot trackScoreWithDescendentsSignal("Track score", yLabel, 30, 0, 1);
-    PlottingHelper::MultiPlot trackScoreWithoutDescendentsSignal("Track score", yLabel, 30, 0, 1);
+    PlottingHelper::MultiPlot trackScoreWithDescendents("Track score", yLabel, 30, 0, 1, true, false);
+    PlottingHelper::MultiPlot trackScoreWithoutDescendents("Track score", yLabel, 30, 0, 1, true, false);
+    PlottingHelper::MultiPlot trackScoreWithDescendentsSignal("Track score", yLabel, 30, 0, 1, true, false);
+    PlottingHelper::MultiPlot trackScoreWithoutDescendentsSignal("Track score", yLabel, 30, 0, 1, true, false);
 
     //
     // Fill the plots
@@ -142,17 +158,33 @@ void PlotInputVariables(const Config &config)
         if(sampleType != AnalysisHelper::Overlay && sampleType != AnalysisHelper::Dirt && sampleType != AnalysisHelper::DataBNB && sampleType != AnalysisHelper::DataEXT) continue;
         std::cout << "Reading input file: " << filePath << std::endl;
 
+        const auto isOverlay = (sampleType == AnalysisHelper::Overlay);
+        const auto isDirt    = (sampleType == AnalysisHelper::Dirt);
+        const auto isNuWro   = (sampleType == AnalysisHelper::NuWro);
+        const auto isDataBNB = (sampleType == AnalysisHelper::DataBNB);
+        const auto isDetVar  = (sampleType == AnalysisHelper::DetectorVariation);
+        const auto isDataEXT = (sampleType == AnalysisHelper::DataEXT);
         const auto isMC = (sampleType != AnalysisHelper::DataBNB) && (sampleType != AnalysisHelper::DataEXT);
 
         FileReader<EventPeLEE, SubrunPeLEE> readerPeLEE(filePath, isMC);
         const auto pEventPeLEE = readerPeLEE.GetBoundEventAddress();
         const auto nEvents = readerPeLEE.GetNumberOfEvents();
-        std::cout<<"WARNING: Only using 1\%"<<std::endl;
-        for (unsigned int i = 0; i < nEvents/100; ++i)
+        std::cout<<"WARNING: Only using 3\%"<<std::endl;
+        for (unsigned int i = 0; i < nEvents/33; ++i)
         {
             AnalysisHelper::PrintLoadingBar(i, nEvents);
 
             readerPeLEE.LoadEvent(i);
+
+            const auto run = pEventPeLEE->metadata.run();
+            const auto isGoodRun = (isDataBNB || isDataEXT) ? std::find(goodRuns.begin(), goodRuns.end(), run) != goodRuns.end() : true; // Apply good runs cuts to data
+            // if(!isGoodRun) continue;
+            if(!isGoodRun)
+            {
+                // std::cout << "DEBUG - bad run: "<<run<<std::endl;
+                continue;
+            }
+
             Event event(*pEventPeLEE, true); // true or false decides wether to cut generation!=2 particles
             const auto pEvent = std::make_shared<Event>(event);
 
@@ -166,7 +198,7 @@ void PlotInputVariables(const Config &config)
             if (!passesCCInclusive)
                 continue;
 
-            const auto nominalEventWeight = AnalysisHelper::GetNominalEventWeight(pEvent);
+            const auto nominalEventWeight = isMC ? AnalysisHelper::GetNominalEventWeight(pEvent) : 1;
             // std::cout << "nominalEventWeight: " << nominalEventWeight << std::endl;
             const auto weight = normalisation * nominalEventWeight;
             const auto recoParticles = pEvent->reco.particles;
@@ -185,11 +217,11 @@ void PlotInputVariables(const Config &config)
                 if (!AnalysisHelper::HasTrackFit(particle))
                     continue;
 
-                if(particleStyle==PlottingHelper::Photon || 
-                    particleStyle==PlottingHelper::Electron || 
-                        particleStyle==PlottingHelper::Dirt) {
-                    particleStyle=PlottingHelper::External;
-                }
+                // if(particleStyle==PlottingHelper::Photon || 
+                //     particleStyle==PlottingHelper::Electron || 
+                //         particleStyle==PlottingHelper::Dirt) {
+                //     particleStyle=PlottingHelper::External;
+                // }
 
                 // Fill the angle plots
                 const auto dir = TVector3(particle.directionX(), particle.directionY(), particle.directionZ()).Unit();
@@ -227,6 +259,7 @@ void PlotInputVariables(const Config &config)
                         particleStyle != PlottingHelper::GoldenPion &&
                         particleStyle != PlottingHelper::External)
                     {
+                        std::cout<<"Error from particleStyle: "<<particleStyle<<std::endl;
                         throw std::logic_error("Found signal event with reco particle matching to unexpected truth particle");
                     }
 

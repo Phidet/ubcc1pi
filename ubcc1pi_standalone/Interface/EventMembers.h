@@ -213,9 +213,14 @@
     f(p, q, false, int,                 pdgBacktracked) /* New PeLEE variable */                                                           \
     f(p, q, false, float,               purityBacktracked) /* New PeLEE variable */                                                        \
     f(p, q, false, float,               completenessBacktracked) /* New PeLEE variable */                                                  \
-    f(p, q, false, float,               momentumXBacktracked) /* New PeLEE variable */                                                           \
-    f(p, q, false, float,               momentumYBacktracked) /* New PeLEE variable */                                                           \
-    f(p, q, false, float,               momentumZBacktracked) /* New PeLEE variable */                                                           \
+    f(p, q, false, float,               momentumXBacktracked) /* New PeLEE variable */                                                     \
+    f(p, q, false, float,               momentumYBacktracked) /* New PeLEE variable */                                                     \
+    f(p, q, false, float,               momentumZBacktracked) /* New PeLEE variable */                                                     \
+    f(p, q, false, float,               mcsMuonMomentum) /* New PeLEE variable */                                                          \
+    f(p, q, false, int,                 nTrackHitsU) /* New PeLEE variable */                                                              \
+    f(p, q, false, int,                 nTrackHitsV) /* New PeLEE variable */                                                              \
+    f(p, q, false, int,                 nTrackHitsW) /* New PeLEE variable */
+
     // f(p, q, false, double,              vertexDistanceToXBoundary) /* New PeLEE variable !ONLY USED FOR PELEE INPUT*/
     // f(p, q, false, double,              vertexDistanceToZBoundary) /* New PeLEE variable !ONLY USED FOR PELEE INPUT*/
     // f(p, q, false, double,              vertexDistanceToYBoundary) /* New PeLEE variable !ONLY USED FOR PELEE INPUT*/
@@ -392,7 +397,8 @@
     f(p, q, false, bool,                trk_bragg_pion_fwd_preferred_v_v)                                                                  \
     f(p, q, false, int,                 trk_nhits_u_v) /*Used for truncatedMeandEdx*/                                                      \
     f(p, q, false, int,                 trk_nhits_v_v) /*Used for truncatedMeandEdx*/                                                      \
-    f(p, q, false, int,                 trk_nhits_y_v) /*Used for truncatedMeandEdx*/
+    f(p, q, false, int,                 trk_nhits_y_v) /*Used for truncatedMeandEdx*/                                                      \
+    f(p, q, false, float,               trk_mcs_muon_mom_v)
     
     // f(p, q, false, float,               trk_bragg_p_v) /*ATTN: Not same as ubcc1pi - max of fwd and bwd*/
     // f(p, q, false, float,               trk_bragg_mu_v) /*ATTN: Not same as ubcc1pi - max of fwd and bwd*/
@@ -502,10 +508,10 @@
     f(p, q, false, float,                      cc0pi_truth_muonMomentum) \
     f(p, q, false, float,                      cc0pi_truth_muonCosTheta) \
     f(p, q, false, float,                      cc0pi_truth_muonPhi) \
-    f(p, q, false, float,                      cc0pi_truth_pionMomentum) \
-    f(p, q, false, float,                      cc0pi_truth_pionCosTheta) \
-    f(p, q, false, float,                      cc0pi_truth_pionPhi) \
-    f(p, q, false, float,                      cc0pi_truth_muonPionAngle) \
+    f(p, q, false, float,                      cc0pi_truth_protonMomentum) \
+    f(p, q, false, float,                      cc0pi_truth_protonCosTheta) \
+    f(p, q, false, float,                      cc0pi_truth_protonPhi) \
+    f(p, q, false, float,                      cc0pi_truth_muonProtonAngle) \
     f(p, q, false, int,                        cc0pi_truth_nProtons)
 
 // /** The event truth particle information members */
@@ -525,15 +531,15 @@
     f(p, q, false, float,                      cc1pi_reco_pionCosTheta) \
     f(p, q, false, float,                      cc1pi_reco_pionPhi) \
     f(p, q, false, float,                      cc1pi_reco_muonPionAngle) \
-    f(p, q, false, float,                      cc1pi_reco_nProtons) \
+    f(p, q, false, int,                        cc1pi_reco_nProtons) \
     f(p, q, false, float,                      cc0pi_reco_muonMomentum) \
     f(p, q, false, float,                      cc0pi_reco_muonCosTheta) \
     f(p, q, false, float,                      cc0pi_reco_muonPhi) \
-    f(p, q, false, float,                      cc0pi_reco_pionMomentum) \
-    f(p, q, false, float,                      cc0pi_reco_pionCosTheta) \
-    f(p, q, false, float,                      cc0pi_reco_pionPhi) \
-    f(p, q, false, float,                      cc0pi_reco_muonPionAngle) \
-    f(p, q, false, float,                      cc0pi_reco_nProtons) \
+    f(p, q, false, float,                      cc0pi_reco_protonMomentum) \
+    f(p, q, false, float,                      cc0pi_reco_protonCosTheta) \
+    f(p, q, false, float,                      cc0pi_reco_protonPhi) \
+    f(p, q, false, float,                      cc0pi_reco_muonProtonAngle) \
+    f(p, q, false, int,                        cc0pi_reco_nProtons) \
     f(p, q, false, bool,                       passed_particleTrackScore) \
     f(p, q, false, bool,                       passed_particleVertexDistance) \
     f(p, q, false, bool,                       passed_particleGeneration) \
@@ -545,6 +551,7 @@
     f(p, q, false, bool,                       passed_daughterVerticesContained) \
     f(p, q, false, bool,                       passed_nuVertexFiducial) \
     f(p, q, false, bool,                       passed_topologicalOrFlashMatch) \
+    f(p, q, false, bool,                       passed_topologicalScoreCC) \
     f(p, q, false, bool,                       passed_min2Tracks) \
     f(p, q, false, bool,                       passed_max1Uncontained) \
     f(p, q, false, bool,                       passed_2NonProtons) \

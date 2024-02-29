@@ -191,6 +191,14 @@ void BDTHelper::BDTFactory::TrainAndTest()
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
+
+void BDTHelper::BDTFactory::GetFeatureImportance(TH1F *featureImportance)
+{
+    featureImportance = m_pFactory->EvaluateImportance(m_pDataLoader, TMVA::VIType::kAll, TMVA::Types::kBDT, "BDT");
+}
+
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------------------------------------------------------
 
 BDTHelper::BDT::BDT(const std::string &bdtName, const std::vector<std::string> &featureNames) :
@@ -199,30 +207,44 @@ BDTHelper::BDT::BDT(const std::string &bdtName, const std::vector<std::string> &
     m_weightsFile(bdtName + "_dataset/weights/" + bdtName + "_BDT.weights.xml"),
     m_features(featureNames.size(), -std::numeric_limits<float>::max())
 {
+    // std::cout<<"DEBUG - BDTHelper::BDT::BDT Point 0"<<std::endl;
     // Bind the feature vector to the reader
     for (unsigned int iFeature = 0; iFeature < featureNames.size(); ++iFeature)
+    {
+        // std::cout<<"DEBUG - BDTHelper::BDT::BDT Point 0.1 - featureNames.at(iFeature): "<<featureNames.at(iFeature)<<std::endl;
         m_pReader->AddVariable(featureNames.at(iFeature).c_str(), &m_features.at(iFeature));
+    }
 
+    // std::cout<<"DEBUG - BDTHelper::BDT::BDT Point 1"<<std::endl;
     // Book the MVA using the weights file
     m_pReader->BookMVA("BDT", m_weightsFile.c_str());
+    // std::cout<<"DEBUG - BDTHelper::BDT::BDT Point 2"<<std::endl;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------------------
+
+BDTHelper::BDT::~BDT() {
+    delete m_pReader;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
 
 float BDTHelper::BDT::GetResponse(const std::vector<float> &features)
 {
+    // std::cout<<"DEBUG - BDTHelper::BDT::GetResponse Point 0"<<std::endl;
     if (features.size() != m_features.size())
         throw std::invalid_argument("BDTHelper::BDT::GetResponse - Wrong number of features, expected " + std::to_string(m_features.size()) + " but passed " + std::to_string(features.size()));
 
+    // std::cout<<"DEBUG - BDTHelper::BDT::GetResponse Point 1"<<std::endl; 
     // Shallow copy the features
     for (unsigned int iFeature = 0; iFeature < m_features.size(); ++iFeature)
         m_features.at(iFeature) = features.at(iFeature);
 
+    // std::cout<<"DEBUG - BDTHelper::BDT::GetResponse Point 2"<<std::endl;
     // Run the BDT
     return m_pReader->EvaluateMVA("BDT");
 }
 
-// -----------------------------------------------------------------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------------------------------------------------------------
 
 bool BDTHelper::GetBDTFeatures(const Event::Reco::Particle &recoParticle, const std::vector<std::string> &featureNames, std::vector<float> &features, const bool shouldDebug)
@@ -269,10 +291,42 @@ bool BDTHelper::GetBDTFeatures(const Event::Reco::Particle &recoParticle, const 
 
         if (name == "truncMeandEdx")
         {
-            if (!recoParticle.truncatedMeandEdx.IsSet())
+            if (!recoParticle.truncatedMeandEdx.IsSet() || recoParticle.truncatedMeandEdx() > 50 || recoParticle.truncatedMeandEdx() < 0)
             {
                 if (shouldDebug)
+                {
                     std::cout << "DEBUG - Can't calculate: " << name << std::endl;
+                    // if(recoParticle.truncatedMeandEdx.IsSet())
+                    //     std::cout << "\trecoParticle.truncatedMeandEdx(): " << recoParticle.truncatedMeandEdx();
+                    // if(recoParticle.yzAngle.IsSet())
+                    // {
+                    //     std::cout << "\trecoParticle.yzAngle(): " << recoParticle.yzAngle();
+                    //     const auto sin2AngleThreshold = 0.175f;
+                    //     const bool isTrackAlongWWire = (std::pow(std::sin(recoParticle.yzAngle()), 2) < sin2AngleThreshold);
+                    //     std::cout << "\tisTrackAlongWWire: " << isTrackAlongWWire;
+                    // }
+                    // if(recoParticle.nHitsU.IsSet() && recoParticle.nHitsV.IsSet())
+                    // {
+                    //     std::cout << "\trecoParticle.nHitsU(): " << recoParticle.nHitsU() << "\trecoParticle.nHitsV(): " << recoParticle.nHitsV();
+                    // }
+                    // if(recoParticle.nTrackHitsU.IsSet() && recoParticle.nTrackHitsV.IsSet())
+                    // {
+                    //     std::cout << "\trecoParticle.nTrackHitsU(): " << recoParticle.nTrackHitsU() << "\trecoParticle.nTrackHitsV(): " << recoParticle.nTrackHitsV();
+                    //     const auto lengthFraction = 0.333333333f;
+                    //     const auto nHitsToSkip = 3;
+                    //     const auto uWeight = std::max(0.f, (recoParticle.nTrackHitsU() /*dedxPerHit.size()*/ * lengthFraction) - nHitsToSkip);
+                    //     const auto vWeight = std::max(0.f, (recoParticle.nTrackHitsV() /*dedxPerHit.size()*/ * lengthFraction) - nHitsToSkip);
+                    //     std::cout << "\tuWeight: " << uWeight << "\tvWeight: " << vWeight;
+                    // }
+                    // if(recoParticle.truncatedMeandEdxU.IsSet())
+                    //     std::cout << "\trecoParticle.truncatedMeandEdxU(): " << recoParticle.truncatedMeandEdxU();
+                    // if(recoParticle.truncatedMeandEdxV.IsSet())
+                    //     std::cout << "\trecoParticle.truncatedMeandEdxV(): " << recoParticle.truncatedMeandEdxV();
+                    // if(recoParticle.truncatedMeandEdxW.IsSet())
+                    //     std::cout << "\trecoParticle.truncatedMeandEdxW(): " << recoParticle.truncatedMeandEdxW();
+
+                    // std::cout << std::endl;
+                }
 
                 features.clear();
                 return false;
