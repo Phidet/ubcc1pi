@@ -35,8 +35,11 @@ struct Config
         const std::vector<float> dataBNBTor860WCut {1.669e+20, 2.616e+20, 2.642e+20, 4.497e+19, 1.39e+20, 8.586e+19, 4.919e+19, 1.475e+20};
         const std::vector<float> dataEXTE1DCNTWCut {37094047.0, 61882879.0, 63576878.0, 9897624.0, 32968190.0, 19476018.0, 11179292.0, 35265730.0};
 
-        // todo remove dedx ????
-        const std::vector<float> detVarPOT {1.3422e+21, 6.28536e+20, 9.95366e+20, 1.31618e+21, 1.3532e+21, 9.177e+20, 6.344e+20, 6.23808e+20, 1.26005e+21, 1.34671e+21, 1.11179e+21, 1.34253e+21}; // CV, CVextra, WireModdEdx, LYAtteNuation, LYDown, LYRayleigh, Recomb2, SCE, WireModThetaXZ, WireModThetaYZ, WireModX, WireModYZ
+        // CV, CVextra, WireModdEdx, LYAtteNuation, LYDown, LYRayleigh, Recomb2, SCE, WireModThetaXZ, WireModThetaYZ, WireModX, WireModYZ
+        const std::vector<float> detVarPOT3 {1.3422e+21, 6.28536e+20, 9.95366e+20, 1.31618e+21, 1.3532e+21, 9.177e+20, 6.344e+20, 6.23808e+20, 1.26005e+21, 1.34671e+21, 1.11179e+21, 1.34253e+21};
+        // const std::vector<float> detVarPOT4 {}
+        // const std::vector<float> detVarPOT5 {}
+
 
         /**
         *  @brief  Input files
@@ -49,7 +52,7 @@ struct Config
  
             // Beam off
             // { /* 1  */ 1, dataEXTE1DCNTWCut.at(0)/dataEXTTriggers.at(0), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run1.root"},
-            { /* 1  */ 1, dataEXTE1DCNTWCut.at(0)/dataEXTTriggers.at(0), AnalysisHelper::DataEXT, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run1.root"},
+            { /* 1  */ 1, dataEXTE1DCNTWCut.at(0)/dataEXTTriggers.at(0), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run1.root"},
             { /* 2  */ 2, dataEXTE1DCNTWCut.at(1)/dataEXTTriggers.at(1), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run2.root"},
             { /* 3  */ 3, dataEXTE1DCNTWCut.at(2)/dataEXTTriggers.at(2), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run3.root"},
             { /* 4a */ 4, dataEXTE1DCNTWCut.at(3)/dataEXTTriggers.at(3), AnalysisHelper::DataEXT, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_off_peleeTuple_uboone_v08_00_00_73_run4a.root"},
@@ -60,7 +63,7 @@ struct Config
  
             // Beam on
             // { /* 1  */ 1, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run1_C1.root"},
-            { /* 1  */ 1, 1.f, AnalysisHelper::DataBNB, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run1_C1.root"},
+            { /* 1  */ 1, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run1_C1.root"},
             { /* 2  */ 2, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run2.root"},
             { /* 3  */ 3, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run3.root"},
             { /* 4a */ 4, 1.f, AnalysisHelper::DataBNB, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/Run4a_bnb_beamOn_PeLee_ntuples_run4a_ana.root"},
@@ -71,18 +74,19 @@ struct Config
 
             // Overlay dirt
             // { /* 1  */ 1, dataBNBTor860WCut.at(0)/dirtPOT.at(0), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run1_dirt.root"},
-            { /* 1  */ 1, dataBNBTor860WCut.at(0)/dirtPOT.at(0), AnalysisHelper::Dirt, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run1_dirt.root"},
+            { /* 1  */ 1, dataBNBTor860WCut.at(0)/dirtPOT.at(0), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run1_dirt.root"},
             { /* 2  */ 2, dataBNBTor860WCut.at(1)/dirtPOT.at(1), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/overlay_peleeTuple_uboone_v08_00_00_70_run2_dirt.root"},
             { /* 3  */ 3, dataBNBTor860WCut.at(2)/dirtPOT.at(2), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run3_dirt.root"},
             { /* 4a */ 4, dataBNBTor860WCut.at(3)/dirtPOT.at(3), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/Run4a_BNB_dirt_overlay_Pandora_Unified_Reco2_fixed_run4a_ana.root"},
             { /* 4b */ 5, dataBNBTor860WCut.at(4)/dirtPOT.at(4), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4b_dirt.root"},
             { /* 4c */ 6, dataBNBTor860WCut.at(5)/dirtPOT.at(5), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4c_dirt.root"},
             { /* 4d */ 7, dataBNBTor860WCut.at(6)/dirtPOT.at(6), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run4d_dirt.root"},
-            { /* 5  */ 8, dataBNBTor860WCut.at(7)/dirtPOT.at(7), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run5_dirt.root"},
+            // { /* 5  */ 8, dataBNBTor860WCut.at(7)/dirtPOT.at(7), AnalysisHelper::Dirt, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run5_dirt.root"},
+            { /* 5  */ 8, dataBNBTor860WCut.at(7)/dirtPOT.at(7), AnalysisHelper::Dirt, false, "/exp/uboone/data/users/jdetje/PeLEENTuples/overlay_peleeTuple_uboone_v08_00_00_70_run5_dirt_with_fake_weights.root"},
 
             // Overlay MC
             // { /* 1  */ 1, dataBNBTor860WCut.at(0)/overlayPOT.at(0), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run1_nu.root"},
-            { /* 1  */ 1, dataBNBTor860WCut.at(0)/overlayPOT.at(0), AnalysisHelper::Overlay, true, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run1_nu.root"},
+            { /* 1  */ 1, dataBNBTor860WCut.at(0)/overlayPOT.at(0), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run1_nu.root"},
             { /* 2  */ 2, dataBNBTor860WCut.at(1)/overlayPOT.at(1), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run2_nu.root"},
             { /* 3  */ 3, dataBNBTor860WCut.at(2)/overlayPOT.at(2), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run3_nu.root"},
             { /* 4a */ 4, dataBNBTor860WCut.at(3)/overlayPOT.at(3), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_73_run4a_nu.root"},
@@ -92,24 +96,47 @@ struct Config
             // { /* 5  */ 8, dataBNBTor860WCut.at(7)/overlayPOT.at(7), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_peleeTuple_uboone_v08_00_00_70_run5_nu.root"},
             { /* 5  */ 8, dataBNBTor860WCut.at(7)/overlayPOT.at(7), AnalysisHelper::Overlay, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/overlay_nu_peleeTuple_uboone_v08_00_00_73_weightFix_run5.root"},
 
-            // DetVar
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(0), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_CV_virtualParentsFix.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(1), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_CVextra.root"},
-            // {3, dataBNBTor860WCut.at(2)/detVarPOT.at(2), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModdEdx_virtualParentsFix.root.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(3), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYAtteNuation.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(4), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYDown.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(5), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYRayleigh_virtualParentsFix.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(6), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_Recomb2.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(7), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_SCE.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(8), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaXZ.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(9), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaYZ.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(10), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModX_virtualParentsFix.root"},
-            {3, dataBNBTor860WCut.at(2)/detVarPOT.at(11), AnalysisHelper::DetectorVariation, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModYZ.root"},
+            // DetVar runs 1-3
+            {3, dataBNBTor860WCut.at(2)/detVarPOT3.at(0), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_CV_virtualParentsFix.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT3.at(1), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_CVextra.root"},
+            // {3, dataBNBTor860WCut.at(2)/detVarPOT3.at(2), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModdEdx_virtualParentsFix.root.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT3.at(3), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYAtteNuation.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT3.at(4), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYDown.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT3.at(5), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYRayleigh_virtualParentsFix.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT3.at(6), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_Recomb2.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT3.at(7), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_SCE.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT3.at(8), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaXZ.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT3.at(9), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaYZ.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT3.at(10), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModX_virtualParentsFix.root"},
+            {3, dataBNBTor860WCut.at(2)/detVarPOT3.at(11), AnalysisHelper::DetectorVariation, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModYZ.root"},
+
+            // 999: Placeholder for scaling - calculated in xsec_analyzer
+            {4, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/Detvar_BNB_nu_pandora_reco2_CV_run4_reco2_ana.root"},
+            {4, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_5_bnb_nu_overlay_detvar_LYRayleigh_reco2_pandora_unified_run4_ana.root"},
+            {4, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_5_bnb_nu_overlay_detvar_LYDown_reco2_pandora_unified_run4_ana.root"},
+            {4, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/Run_4_BNB_Nu_Detvar_LYAttenuation_Pandora_Reco2_run4_ana.root"},
+            {4, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_bnb_nu_detvar_Recomb2_pandora_reco2_ana.root"},
+            {4, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_bnb_nu_detvar_SCE_pandora_reco2_ana.root"},
+            {4, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_bnb_nu_detvar_Pandora_WireMod_Theta_XZ_reco2_ana.root"},
+            {4, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_bnb_nu_detvar_Pandora_WireMod_Theta_YZ_reco2_ana.root"},
+            {4, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_bnb_nu_detvar_wiremod_x_pandora_reco2_reco2_ana.root"},
+            {4, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_bnb_nu_detvar_wiremod_yz_pandora_reco2_reco2_ana.root"},
+
+            {5, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_DetVar_bnb_CV_Pandora_Unified_reco2_run5_ana.root"},
+            {5, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run4_5_bnb_nu_overlay_detvar_LYRayleigh_reco2_pandora_unified_run5_ana.root"},
+            {5, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run4_5_bnb_nu_overlay_detvar_LYDown_reco2_pandora_unified_run5_ana.root"},
+            {5, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/Run_5_BNB_Nu_Detvar_LYAttenuation_Pandora_Reco2_run5_ana.root"},
+            {5, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_bnb_nu_detvar_Recomb2_pandora_reco2_ana.root"},
+            {5, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_bnb_nu_detvar_SCE_pandora_reco2_ana.root"},
+            {5, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_bnb_nu_detvar_Pandora_WireMod_Theta_XZ_reco2_reco2_ana.root"},
+            {5, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_bnb_nu_detvar_Pandora_WireMod_Theta_YZ_reco2_reco2_ana.root"},
+            {5, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_bnb_nu_detvar_wire_mod_x_Pandora_reco2_reco2_ana.root"},
+            {5, 999, AnalysisHelper::DetectorVariation, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_bnb_nu_detvar_wire_mod_yz_Pandora_reco2_reco2_ana.root"},
 
             // NuWro MC
-            { /* 1  */ 1, dataBNBTor860WCut.at(0)/nuWroPOT.at(0), AnalysisHelper::NuWro, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/nuwro_fakedata_peleeTuple_uboone_run1.root"},
-            { /* 2  */ 2, dataBNBTor860WCut.at(1)/nuWroPOT.at(1), AnalysisHelper::NuWro, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/nuwro_fakedata_peleeTuple_uboone_run2.root"},
-            { /* 3  */ 3, dataBNBTor860WCut.at(2)/nuWroPOT.at(2), AnalysisHelper::NuWro, false, "/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/nuwro_fakedata_peleeTuple_uboone_run3.root"},
+            { /* 1  */ 1, dataBNBTor860WCut.at(0)/nuWroPOT.at(0), AnalysisHelper::NuWro, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/nuwro_fakedata_peleeTuple_uboone_run1.root"},
+            { /* 2  */ 2, dataBNBTor860WCut.at(1)/nuWroPOT.at(1), AnalysisHelper::NuWro, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/nuwro_fakedata_peleeTuple_uboone_run2.root"},
+            { /* 3  */ 3, dataBNBTor860WCut.at(2)/nuWroPOT.at(2), AnalysisHelper::NuWro, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/nuwro_fakedata_peleeTuple_uboone_run3.root"},
             { /* 4 (without 4a)  */ 0, -1, AnalysisHelper::NuWro, false, "/uboone/data/users/apapadop/searchingfornues/high_stat_prodgenie_bnb_nu_nuwro_overlay_run4_pelee.root"},
             { /* 5  */ 8, -1, AnalysisHelper::NuWro, false, "/uboone/data/users/apapadop/searchingfornues/high_stat_prodgenie_bnb_nu_nuwro_overlay_run5_pelee.root"}
         };
@@ -194,7 +221,7 @@ struct Config
             // NuWro MC
             { /* 1  */ 1, dataBNBTor860WCut.at(0)/nuWroPOT.at(0), AnalysisHelper::NuWro, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/nuwro_fakedata_peleeTuple_uboone_run1_ubcc1pi.root"},
             { /* 2  */ 2, dataBNBTor860WCut.at(1)/nuWroPOT.at(1), AnalysisHelper::NuWro, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/nuwro_fakedata_peleeTuple_uboone_run2_ubcc1pi.root"},
-            { /* 3  */ 3, dataBNBTor860WCut.at(2)/nuWroPOT.at(2), AnalysisHelper::NuWro, true, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/nuwro_fakedata_peleeTuple_uboone_run3_ubcc1pi.root"}
+            { /* 3  */ 3, dataBNBTor860WCut.at(2)/nuWroPOT.at(2), AnalysisHelper::NuWro, false, "root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/uboone/persistent/users/jdetje/ubcc1piPelee/100Percent_9/nuwro_fakedata_peleeTuple_uboone_run3_ubcc1pi.root"}
         };
 
     };
@@ -683,7 +710,7 @@ struct Config
         bool        fitInSystematicUniverses    = true;              ///< If we should fit not only in nominal but also in systematic universes
         bool        useEfficiencyCorrection     = false;             ///< If we should use the efficiency-effect-free smearing matrix to use when creating the plots
         std::vector<unsigned int> runs          = {1,2,3};           ///< The runs to use in the analysis
-        std::string outputPath                  = "/pnfs/uboone/persistent/users/jdetje/ubcc1piPelee/"; ///< The location to save processed PeLEE files
+        std::string outputPath                  = "/exp/uboone/data/users/jdetje/ubcc1piPelee/"; ///< The location to save processed PeLEE files
         std::string goodRunListFile             = "/uboone/data/users/jdetje/goodruns/pass_r1-5.txt"; ///< The location of the good run list file
         /**
          *  @brief  The Binning structure

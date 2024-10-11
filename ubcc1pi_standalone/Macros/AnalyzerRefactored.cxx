@@ -1,7 +1,7 @@
 /**
- *  @file  ubcc1pi_standalone/Macros/Analyzer.cxx
+ *  @file  ubcc1pi_standalone/Macros/AnalyzerRefactored.cxx
  *
- *  @brief The implementation file of the Analyzer macro
+ *  @brief The implementation file of the AnalyzerRefactored macro
  */
 
 #include "ubcc1pi_standalone/Macros/Macros.h"
@@ -17,7 +17,7 @@ using namespace ubcc1pi;
 namespace ubcc1pi_macros
 {
 
-void Analyzer(const Config &config)
+void AnalyzerRefactored(const Config &config)
 {
 
     // -------------------------------------------------------------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ void Analyzer(const Config &config)
     // -------------------------------------------------------------------------------------------------------------------------------------
     auto selectionCC0Pi = SelectionHelper::GetCC0piSelectionModifiedPeLEE(-std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), true); // Do not cut on proton kinematics here
     auto selectionCC1Pi = SelectionHelper::GetDefaultSelection2(true); // todo decide on final selection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    const auto protonBDTCutCC1pi = selectionCC1Pi.GetCutValue("2NonProtons");
+
     // ExtractionHelper::InputFileList inputData;
     // typedef std::vector< std::tuple<AnalysisHelper::SampleType, std::string, std::string, float> > InputFileList;
     // inputData.emplace_back(AnalysisHelper::Overlay, "", "/uboone/data/users/jdetje/ubcc1piVSpelee/pelee/neutrinoselection_filt_0_4k.root", 1);
@@ -62,9 +62,10 @@ void Analyzer(const Config &config)
     // inputData.emplace_back(AnalysisHelper::DataBNB, "", "/uboone/data/users/jdetje/pelee_v08_00_00_70/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run2_E1_head5.root", 1);
 
     // Get the muon BDTs
-    BDTHelper::BDT muonBDT("muon", BDTHelper::MuonBDTFeatureNames);
-    BDTHelper::BDT protonBDT("proton", BDTHelper::ProtonBDTFeatureNames);
-    BDTHelper::BDT goldenPionBDT("goldenPion", BDTHelper::GoldenPionBDTFeatureNames);
+    const auto muonFeatureNames = BDTHelper::MuonBDTFeatureNames;
+    BDTHelper::BDT muonBDT("muon", muonFeatureNames);
+    const auto protonFeatureNames = BDTHelper::ProtonBDTFeatureNames;
+    BDTHelper::BDT protonBDT("proton", protonFeatureNames);
 
     // -------------------------------------------------------------------------------------------------------------------------------------
     // Get list of good runs
@@ -140,9 +141,6 @@ void Analyzer(const Config &config)
         treeWriter.SetOutputBranchAddress("cc1pi_selected_generic", (void*)&isSelectedGenericCC1Pi, "cc1pi_selected_generic/O" );
         treeWriter.SetOutputBranchAddress("cc1pi_selected_golden", (void*)&isSelectedGoldenCC1Pi, "cc1pi_selected_golden/O" );
 
-        bool isTrainingEvent;
-        treeWriter.SetOutputBranchAddress("isTrainingEvent", (void*)&isTrainingEvent, "isTrainingEvent/O" );
-
         float cc1pi_reco_muonMomentum, cc1pi_reco_muonCosTheta, cc1pi_reco_muonPhi, cc1pi_reco_pionMomentum, cc1pi_reco_pionCosTheta, cc1pi_reco_pionPhi, cc1pi_reco_muonPionAngle;
         int   cc1pi_reco_nProtons;
         treeWriter.SetOutputBranchAddress("cc1pi_reco_muonMomentum", (void*)&cc1pi_reco_muonMomentum, "cc1pi_reco_muonMomentum/F" );
@@ -165,8 +163,8 @@ void Analyzer(const Config &config)
         treeWriter.SetOutputBranchAddress("cc1pi_recoPion_protonBDTScore", (void*)&cc1pi_recoPion_protonBDTScore, "cc1pi_recoPion_protonBDTScore/F" );
         treeWriter.SetOutputBranchAddress("cc1pi_recoPion_muonBDTScore", (void*)&cc1pi_recoPion_muonBDTScore, "cc1pi_recoPion_muonBDTScore/F" );
 
-        int   cc1pi_backtracked_protonPDG; // Actually contains backtracked pion
-        float cc1pi_backtracked_protonMomentum, cc1pi_backtracked_protonCosTheta, cc1pi_backtracked_protonPhi; // Actually contains backtracked pion
+        int   cc1pi_backtracked_protonPDG;
+        float cc1pi_backtracked_protonMomentum, cc1pi_backtracked_protonCosTheta, cc1pi_backtracked_protonPhi;
         treeWriter.SetOutputBranchAddress("cc1pi_backtracked_protonPDG", (void*)&cc1pi_backtracked_protonPDG, "cc1pi_backtracked_protonPDG/I" );
         treeWriter.SetOutputBranchAddress("cc1pi_backtracked_protonMomentum", (void*)&cc1pi_backtracked_protonMomentum, "cc1pi_backtracked_protonMomentum/F" );
         treeWriter.SetOutputBranchAddress("cc1pi_backtracked_protonCosTheta", (void*)&cc1pi_backtracked_protonCosTheta, "cc1pi_backtracked_protonCosTheta/F" );
@@ -178,9 +176,6 @@ void Analyzer(const Config &config)
         treeWriter.SetOutputBranchAddress("cc1pi_backtracked_muonMomentum", (void*)&cc1pi_backtracked_muonMomentum, "cc1pi_backtracked_muonMomentum/F" );
         treeWriter.SetOutputBranchAddress("cc1pi_backtracked_muonCosTheta", (void*)&cc1pi_backtracked_muonCosTheta, "cc1pi_backtracked_muonCosTheta/F" );
         treeWriter.SetOutputBranchAddress("cc1pi_backtracked_muonPhi", (void*)&cc1pi_backtracked_muonPhi, "cc1pi_backtracked_muonPhi/F" );
-
-        int cc1pi_backtracked_pionPDG;
-        treeWriter.SetOutputBranchAddress("cc1pi_backtracked_pionPDG", (void*)&cc1pi_backtracked_pionPDG, "cc1pi_backtracked_pionPDG/I" );
 
         float cc0pi_reco_muonMomentum, cc0pi_reco_muonCosTheta, cc0pi_reco_muonPhi, cc0pi_reco_protonMomentum, cc0pi_reco_protonCosTheta, cc0pi_reco_protonPhi, cc0pi_reco_muonProtonAngle;
         int   cc0pi_reco_nProtons;
@@ -228,30 +223,34 @@ void Analyzer(const Config &config)
         treeWriter.SetOutputBranchAddress("passed_openingAngle", (void*)&passed_openingAngle, "passed_openingAngle/O" );
         treeWriter.SetOutputBranchAddress("passed_likelyGoldenPion", (void*)&passed_likelyGoldenPion, "passed_likelyGoldenPion/O" );
 
-        // std::vector<int> generationCutValues;
-        // std::vector<float> trackScoreCutValues, vertexDistanceCutValues, trackLengthCutValues, protonChi2CutValues, muonChi2CutValues;
-        // const std::vector<int>* pGenerationCutValues(&generationCutValues);
-        // const std::vector<float>* pTrackScoreCutValues(&trackScoreCutValues);
-        // const std::vector<float>* pVertexDistanceCutValues(&vertexDistanceCutValues);
-        // const std::vector<float>* pTrackLengthCutValues(&trackLengthCutValues);
-        // const std::vector<float>* pProtonChi2CutValues(&protonChi2CutValues);
-        // const std::vector<float>* pMuonChi2CutValues(&muonChi2CutValues);
+        std::vector<int> generationCutValues;
+        std::vector<float> trackScoreCutValues, vertexDistanceCutValues, trackLengthCutValues, protonChi2CutValues, muonChi2CutValues;
+        // int track_num;
+        // treeWriter.SetOutputBranchAddress("track_num", (void*)&track_num, "track_num/I" ); // Needed for root to know the size of the arrays
+        // treeWriter.SetOutputBranchAddress("particle_cutValue_trackScore", (void*)&trackScoreCutValues, "particle_cutValue_trackScore[track_num]/F" );
+        // treeWriter.SetOutputBranchAddress("particle_cutValue_vertexDistance", (void*)&vertexDistanceCutValues, "particle_cutValue_vertexDistance[track_num]/F" );
+        // treeWriter.SetOutputBranchAddress("particle_cutValue_generation", (void*)&generationCutValues, "particle_cutValue_generation[track_num]/I" );
+        // treeWriter.SetOutputBranchAddress("particle_cutValue_trackLength", (void*)&trackLengthCutValues, "particle_cutValue_trackLength[track_num]/F" );
+        // treeWriter.SetOutputBranchAddress("particle_cutValue_protonChi2", (void*)&protonChi2CutValues, "particle_cutValue_protonChi2[track_num]/F" );
+        // treeWriter.SetOutputBranchAddress("particle_cutValue_muonChi2", (void*)&muonChi2CutValues, "particle_cutValue_muonChi2[track_num]/F" );
 
-        // treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("particle_cutValue_trackScore", pTrackScoreCutValues);
-        // treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("particle_cutValue_vertexDistance", pVertexDistanceCutValues);
-        // treeWriter.SetObjectOutputBranchAddress<std::vector<int>>("particle_cutValue_generation", pGenerationCutValues);
-        // treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("particle_cutValue_trackLength", pTrackLengthCutValues);
-        // treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("particle_cutValue_protonChi2", pProtonChi2CutValues);
-        // treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("particle_cutValue_muonChi2", pMuonChi2CutValues);
+        const std::vector<int>* pGenerationCutValues(&generationCutValues);
+        const std::vector<float>* pTrackScoreCutValues(&trackScoreCutValues);
+        const std::vector<float>* pVertexDistanceCutValues(&vertexDistanceCutValues);
+        const std::vector<float>* pTrackLengthCutValues(&trackLengthCutValues);
+        const std::vector<float>* pProtonChi2CutValues(&protonChi2CutValues);
+        const std::vector<float>* pMuonChi2CutValues(&muonChi2CutValues);
 
-        int   nuPdgCode, category, nTracks, nUncontained, nNonProtons;
-        float topologicalScore, flashChi2, piontruncatedMeandEdx, openingAngle, maxVertexDist, goldenPionBDTResponse, pionPhi, muonPhi;
+        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("particle_cutValue_trackScore", pTrackScoreCutValues);
+        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("particle_cutValue_vertexDistance", pVertexDistanceCutValues);
+        treeWriter.SetObjectOutputBranchAddress<std::vector<int>>("particle_cutValue_generation", pGenerationCutValues);
+        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("particle_cutValue_trackLength", pTrackLengthCutValues);
+        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("particle_cutValue_protonChi2", pProtonChi2CutValues);
+        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("particle_cutValue_muonChi2", pMuonChi2CutValues);
+
+        int   nuPdgCode, category;
+        float topologicalScore, flashChi2, piontruncatedMeandEdx, openingAngle, maxVertexDist, goldenPionBDTResponse;
         treeWriter.SetOutputBranchAddress("event_cutValue_nuPdgCode", (void*)&nuPdgCode, "event_cutValue_nuPdgCode/I" );
-        treeWriter.SetOutputBranchAddress("event_cutValue_nTracks", (void*)&nTracks, "event_cutValue_nTracks/I" );
-        treeWriter.SetOutputBranchAddress("event_cutValue_nUncontained", (void*)&nUncontained, "event_cutValue_nUncontained/I" );
-        treeWriter.SetOutputBranchAddress("event_cutValue_nNonProtons", (void*)&nNonProtons, "event_cutValue_nNonProtons/I" );
-        treeWriter.SetOutputBranchAddress("event_cutValue_pionPhi", (void*)&pionPhi, "event_cutValue_pionPhi/F" );
-        treeWriter.SetOutputBranchAddress("event_cutValue_muonPhi", (void*)&muonPhi, "event_cutValue_muonPhi/F" );
         treeWriter.SetOutputBranchAddress("event_cutValue_topologicalScore", (void*)&topologicalScore, "event_cutValue_topologicalScore/F" );
         treeWriter.SetOutputBranchAddress("event_cutValue_flashChi2", (void*)&flashChi2, "event_cutValue_flashChi2/F" );
         treeWriter.SetOutputBranchAddress("event_cutValue_pionTruncatedMeandEdx", (void*)&piontruncatedMeandEdx, "event_cutValue_pionTruncatedMeandEdx/F" );
@@ -259,57 +258,6 @@ void Analyzer(const Config &config)
         treeWriter.SetOutputBranchAddress("event_cutValue_openingAngle", (void*)&openingAngle, "event_cutValue_openingAngle/F" );
         treeWriter.SetOutputBranchAddress("event_cutValue_goldenPionBDT", (void*)&goldenPionBDTResponse, "event_cutValue_goldenPionBDT/F" );
         treeWriter.SetOutputBranchAddress("category", (void*)&category, "category/I" );
-
-
-        // Reco Particle variables
-        std::vector<float> ccIncRecoParticleMuonBDTScore, ccIncRecoParticleProtonBDTScore, ccIncRecoParticleGoldenPionBDTScore; 
-        const std::vector<float>* pCCIncRecoParticleMuonBDTScore(&ccIncRecoParticleMuonBDTScore);
-        const std::vector<float>* pCCIncRecoParticleProtonBDTScore(&ccIncRecoParticleProtonBDTScore);
-        const std::vector<float>* pCCIncRecoParticleGoldenPionBDTScore(&ccIncRecoParticleGoldenPionBDTScore);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_muonBDTScore", pCCIncRecoParticleMuonBDTScore);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_protonBDTScore", pCCIncRecoParticleProtonBDTScore);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_goldenPionBDTScore", pCCIncRecoParticleGoldenPionBDTScore);
-
-        std::vector<float> ccIncRecoParticleLogBragg_pToMIP, ccIncRecoParticleLogBragg_piToMIP, ccIncRecoParticleTruncMeandEdx, ccIncRecoParticleProtonForward, ccIncRecoParticleMuonForward, ccIncRecoParticleWiggliness, ccIncRecoParticleTrackScore;
-        std::vector<int> ccIncRecoParticleNDescendents/*, ccIncRecoParticleNSpacePointsNearEnd*/;
-        std::vector<int> ccIncRecoParticleGeneration;
-        std::vector<int> ccIncRecoParticleContained;
-        const std::vector<float>* pCCIncRecoParticleLogBragg_pToMIP(&ccIncRecoParticleLogBragg_pToMIP);
-        const std::vector<float>* pCCIncRecoParticleLogBragg_piToMIP(&ccIncRecoParticleLogBragg_piToMIP);
-        const std::vector<float>* pCCIncRecoParticleTruncMeandEdx(&ccIncRecoParticleTruncMeandEdx);
-        // const std::vector<float>* pCCIncRecoParticleProtonForward(&ccIncRecoParticleProtonForward);
-        // const std::vector<float>* pCCIncRecoParticleMuonForward(&ccIncRecoParticleMuonForward);
-        const std::vector<float>* pCCIncRecoParticleWiggliness(&ccIncRecoParticleWiggliness);
-        const std::vector<float>* pCCIncRecoParticleTrackScore(&ccIncRecoParticleTrackScore);
-        const std::vector<int>* pCCIncRecoParticleNDescendents(&ccIncRecoParticleNDescendents);
-        // const std::vector<int>* pCCIncRecoParticleNSpacePointsNearEnd(&ccIncRecoParticleNSpacePointsNearEnd);
-        const std::vector<int>* pCCIncRecoParticleGeneration(&ccIncRecoParticleGeneration);
-        const std::vector<int>* pCCIncRecoParticleContained(&ccIncRecoParticleContained);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_logBragg_pToMIP", pCCIncRecoParticleLogBragg_pToMIP);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_logBragg_piToMIP", pCCIncRecoParticleLogBragg_piToMIP);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_truncMeandEdx", pCCIncRecoParticleTruncMeandEdx);
-        // treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_protonForward", pCCIncRecoParticleProtonForward);
-        // treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_muonForward", pCCIncRecoParticleMuonForward);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_wiggliness", pCCIncRecoParticleWiggliness);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_trackScore", pCCIncRecoParticleTrackScore);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<int>>("reco_particle_ccinc_nDescendents", pCCIncRecoParticleNDescendents);
-        // treeWriter.SetObjectOutputBranchAddress<std::vector<int>>("reco_particle_ccinc_nSpacePointsNearEnd", pCCIncRecoParticleNSpacePointsNearEnd);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<int>>("reco_particle_ccinc_generation", pCCIncRecoParticleGeneration);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<int>>("reco_particle_ccinc_contained", pCCIncRecoParticleContained);
-
-        std::vector<int> ccIncRecoParticleBacktrackedPdg;
-        std::vector<float> ccIncRecoParticleBacktrackedMomenum, ccIncRecoParticleBacktrackedCosTheta, ccIncRecoParticleBacktrackedPhi;
-        std::vector<bool> ccIncRecoParticleBacktrackedGoldenPion;
-        const std::vector<int>* pCCIncRecoParticleBacktrackedPdg(&ccIncRecoParticleBacktrackedPdg);
-        const std::vector<float>* pCCIncRecoParticleBacktrackedMomenum(&ccIncRecoParticleBacktrackedMomenum);
-        const std::vector<float>* pCCIncRecoParticleBacktrackedCosTheta(&ccIncRecoParticleBacktrackedCosTheta);
-        const std::vector<float>* pCCIncRecoParticleBacktrackedPhi(&ccIncRecoParticleBacktrackedPhi);
-        const std::vector<bool>* pCCIncRecoParticleBacktrackedGoldenPion(&ccIncRecoParticleBacktrackedGoldenPion);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<int>>("reco_particle_ccinc_backtracked_pdg", pCCIncRecoParticleBacktrackedPdg);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_backtracked_momentum", pCCIncRecoParticleBacktrackedMomenum);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_backtracked_cosTheta", pCCIncRecoParticleBacktrackedCosTheta);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<float>>("reco_particle_ccinc_backtracked_phi", pCCIncRecoParticleBacktrackedPhi);
-        treeWriter.SetObjectOutputBranchAddress<std::vector<bool>>("reco_particle_ccinc_backtracked_goldenPion", pCCIncRecoParticleBacktrackedGoldenPion);
 
         // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         // Truth variables
@@ -319,9 +267,6 @@ void Analyzer(const Config &config)
         treeWriter.SetOutputBranchAddress("true_cc1pi", (void*)&isTrueCC1Pi, "true_cc1pi/O" );
         treeWriter.SetOutputBranchAddress("cc0pi_signal", (void*)&isCC0PiSignal, "cc0pi_signal/O" );
         treeWriter.SetOutputBranchAddress("cc1pi_signal", (void*)&isCC1PiSignal, "cc1pi_signal/O" );
-        bool isTrueGoldenCC1Pi;
-        treeWriter.SetOutputBranchAddress("true_golden_cc1pi", (void*)&isTrueGoldenCC1Pi, "true_golden_cc1pi/O" );
-
 
         // Calculated with true muon and true pion
         float truthCC1PiMuonMomentum, truthCC1PiMuonCosTheta, truthCC1PiMuonPhi, truthCC1PiPionMomentum, truthCC1PiPionCosTheta, truthCC1PiPionPhi, truthCC1PiMuonPionAngle;
@@ -369,10 +314,10 @@ void Analyzer(const Config &config)
         treeWriter.SetOutputBranchAddress("cc0pi_truth_muonProtonAngle", (void*)&truthCC0PiMuonProtonAngle, "cc0pi_truth_muonProtonAngle/F" );
         treeWriter.SetOutputBranchAddress("cc0pi_truth_nProtons", (void*)&truthCC0PiNProtons, "cc0pi_truth_nProtons/I" );
 
-        // std::vector<int> bestMatchedTruthPDGs;
-        // // treeWriter.SetOutputBranchAddress("track_bestMatchedTruthPDG", (void*)&bestMatchedTruthPDGs, "track_bestMatchedTruthPDG[track_num]/I" );
-        // const std::vector<int>* pBestMatchedTruthPDGs(&bestMatchedTruthPDGs);
-        // treeWriter.SetObjectOutputBranchAddress<std::vector<int>>("track_bestMatchedTruthPDG", pBestMatchedTruthPDGs);
+        std::vector<int> bestMatchedTruthPDGs;
+        // treeWriter.SetOutputBranchAddress("track_bestMatchedTruthPDG", (void*)&bestMatchedTruthPDGs, "track_bestMatchedTruthPDG[track_num]/I" );
+        const std::vector<int>* pBestMatchedTruthPDGs(&bestMatchedTruthPDGs);
+        treeWriter.SetObjectOutputBranchAddress<std::vector<int>>("track_bestMatchedTruthPDG", pBestMatchedTruthPDGs);
 
         int mcNuPdg;
         treeWriter.SetOutputBranchAddress("mc_nu_pdg", (void*)&mcNuPdg, "mc_nu_pdg/I");
@@ -397,10 +342,10 @@ void Analyzer(const Config &config)
 
 
         // Loop over the events in the file
-        // std::cout << "### Only processing 3\% of events ###" << std::endl;
         const auto nEvents = readerPeLEE.GetNumberOfEvents();
         const auto pEventPeLEE = readerPeLEE.GetBoundEventAddress();
-        for (unsigned int i = 0; i < nEvents; i++)
+        // std::cout << "### Only processing 10\% of events (out of "<<nEvents<<") ###" << std::endl;
+        for (unsigned int i = 0; i < nEvents; i++) // Todo: Remove!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         {
             AnalysisHelper::PrintLoadingBar(i, nEvents);
             readerPeLEE.LoadEvent(i);
@@ -413,20 +358,122 @@ void Analyzer(const Config &config)
             }
             // else
             // {
-            //     // std::cout << "DEBUG - good run: " << run << std::endl;
+            //     std::cout << "DEBUG - good run: " << run << std::endl;
             // }
 
-            // // // std::cout << "DEBUG Point Y8" << std::endl;
+            // std::cout << "DEBUG Point Y8" << std::endl;
             Event event(*pEventPeLEE, false);// true or false decides wether to cut generation!=2 particles
             const auto pEvent = std::make_shared<Event>(event);
-            // // // std::cout << "DEBUG Point Y9" << std::endl;
+            // std::cout << "DEBUG Point Y9" << std::endl;
 
-            isTrainingEvent = (i % 2 == 0);
 
+            // ####################################################################
+            // #################### Reco CC0pi ####################
+            // ####################################################################
+            const auto &[passedGoldenSelectionCC0Pi, cutsPassedCC0Pi, assignedPdgCodesCC0Pi] = selectionCC0Pi.Execute(pEvent);
+            const auto passedGenericSelectionCC0Pi = SelectionHelper::IsCutPassed(cutsPassedCC0Pi, config.global.lastCutGeneric);
+
+            // Get the reco analysis data (if available, otherwise set to dummy values)
+            const auto recoDataCC0Pi = (
+                passedGenericSelectionCC0Pi
+                    ? AnalysisHelper::GetRecoAnalysisDataCC0Pi(pEvent->reco, assignedPdgCodesCC0Pi, passedGoldenSelectionCC0Pi)
+                    : AnalysisHelper::GetDummyAnalysisData()
+            );
+
+            cc0pi_reco_muonMomentum = recoDataCC0Pi.muonMomentum;
+            cc0pi_reco_muonCosTheta = recoDataCC0Pi.muonCosTheta;
+            cc0pi_reco_muonPhi = recoDataCC0Pi.muonPhi;
+            cc0pi_reco_protonMomentum = recoDataCC0Pi.protonMomentum;
+            cc0pi_reco_protonCosTheta = recoDataCC0Pi.protonCosTheta;
+            cc0pi_reco_protonPhi = recoDataCC0Pi.protonPhi;
+            cc0pi_reco_muonProtonAngle = recoDataCC0Pi.muonProtonAngle;
+            cc0pi_reco_nProtons = recoDataCC0Pi.nProtons;
+
+
+            cc0pi_leadingProton_protonBDTScore = -std::numeric_limits<float>::max();
+            cc0pi_leadingProton_muonBDTScore = -std::numeric_limits<float>::max();
+            unsigned int truthMatchedLeadingProtonIndex = std::numeric_limits<unsigned int>::max();
+            if(passedGenericSelectionCC0Pi)
+            {
+                const auto leadingRecoProtonIndex = SelectionHelper::GetLeadingProtonCandidateIndex(pEvent->reco.particles, assignedPdgCodesCC0Pi);
+                // std::cout<<"DEBUG Point E0.1"<<std::endl;
+                const auto leadingRecoProton = pEvent->reco.particles.at(leadingRecoProtonIndex);
+                // std::cout<<"DEBUG Point E1"<<std::endl;
+
+                std::vector<float> protonFeatures;
+                const auto hasProtonFeatures = BDTHelper::GetBDTFeatures(leadingRecoProton, BDTHelper::ProtonBDTFeatureNames, protonFeatures);
+                std::vector<float> muonFeatures;
+                const auto hasMuonFeatures = BDTHelper::GetBDTFeatures(leadingRecoProton, BDTHelper::MuonBDTFeatureNames, muonFeatures);
+                if(!hasProtonFeatures || !hasMuonFeatures)
+                    throw std::logic_error("Failed to get BDT features for proton or muon. This should not happen for the leading proton.");
+
+                cc0pi_leadingProton_protonBDTScore = protonBDT.GetResponse(protonFeatures);
+                cc0pi_leadingProton_muonBDTScore = muonBDT.GetResponse(muonFeatures);
+
+                if(isMC)
+                {
+                    try{
+                        truthMatchedLeadingProtonIndex = AnalysisHelper::GetBestMatchedTruthParticleIndex(leadingRecoProton,pEvent->truth.particles);
+                    }
+                    catch(const std::logic_error &){
+                        std::cout<<"try failed for truthMatchedLeadingProtonIndex\n"<<std::endl;
+                    }
+                }
+            }
+            // std::cout<<"DEBUG Point E2"<<std::endl;
+            if(truthMatchedLeadingProtonIndex!=std::numeric_limits<unsigned int>::max())
+            {
+                const auto proton = pEvent->truth.particles.at(truthMatchedLeadingProtonIndex);
+                const auto dir = TVector3(proton.momentumX(), proton.momentumY(), proton.momentumZ()).Unit();
+                const auto cosTheta = dir.Z();
+                const auto phi = std::atan2(dir.Y(),dir.X());
+                cc0pi_backtracked_protonPDG = proton.pdgCode();
+                cc0pi_backtracked_protonMomentum = proton.momentum();
+                cc0pi_backtracked_protonCosTheta = cosTheta;
+                cc0pi_backtracked_protonPhi = phi;
+                // cc0pi_backtracked_muonProtonAngle
+            }
+            else
+            {
+                cc0pi_backtracked_protonPDG = -std::numeric_limits<int>::max();
+                cc0pi_backtracked_protonMomentum = -std::numeric_limits<float>::max();
+                cc0pi_backtracked_protonCosTheta = -std::numeric_limits<float>::max();
+                cc0pi_backtracked_protonPhi = -std::numeric_limits<float>::max();
+            }
+            // std::cout<<"DEBUG Point E3"<<std::endl;
+
+            // std::cout << "DEBUG Point Y10" << std::endl;
+            // Here we apply reco-level phase-space restrictions
+            // For any event that passes the generic selection, get the value of the kinematic quantity and check if it is outside of the
+            // min/max values supplied in the binning. If so, then reject the event.
+            auto passesPhaseSpaceRecoCC0Pi = false;
+            if (passedGenericSelectionCC0Pi)
+            {
+                // Start by assuming the event passes the phase-space cuts
+                passesPhaseSpaceRecoCC0Pi = true;
+
+                // Check the value of the kinematic quantities are within the phase-space limits
+                for (const auto &[name, minMax] : phaseSpaceMap)
+                {
+                    const auto &[min, max] = minMax;
+                    const auto value = getValueCC0Pi.at(name)(recoDataCC0Pi);
+
+                    if (value < min || value > max)
+                    {
+                        passesPhaseSpaceRecoCC0Pi = false;
+                        break;
+                    }
+                }
+            }
+            passesGenericCC0Pi = passedGenericSelectionCC0Pi;
+            passesGoldenCC0Pi = passedGoldenSelectionCC0Pi;
+            isSelectedGenericCC0Pi = passedGenericSelectionCC0Pi && passesPhaseSpaceRecoCC0Pi;
+            isSelectedGoldenCC0Pi = passedGoldenSelectionCC0Pi && passesPhaseSpaceRecoCC0Pi;
+
+            // std::cout << "DEBUG Point Y11" << std::endl;
             // ################################################################
             // #################### Reco CC1pi ####################
             // ################################################################
-            // // std::cout << "DEBUG Point Y11" << std::endl;
             const auto &[passedGoldenSelection, cutsPassedCC1Pi, assignedPdgCodesCC1Pi] = selectionCC1Pi.Execute(pEvent);
             const auto passedGenericSelection = SelectionHelper::IsCutPassed(cutsPassedCC1Pi, config.global.lastCutGeneric);
 
@@ -501,18 +548,16 @@ void Analyzer(const Config &config)
 
                     try{
                         truthMatchedMuonIndex = AnalysisHelper::GetBestMatchedTruthParticleIndex(recoMuonCandidate,pEvent->truth.particles);
-                        // // std::cout<<"DEBUG try succeeded for recoMuonCandidate \\/\n"<<std::endl;
+                        // std::cout<<"DEBUG try succeeded for recoMuonCandidate \\/\n"<<std::endl;
                     }
                     catch(const std::logic_error &){
                         std::cout<<"try failed for recoMuonCandidate\n"<<std::endl;
                     }
                 }
             }
-            // std::cout << "DEBUG Point Y12" << std::endl;
 
             if(truthMatchedProtonIndex!=std::numeric_limits<unsigned int>::max())
             {
-                // std::cout << "DEBUG Point Y12.1" << std::endl;
                 const auto matchedTrueProton = pEvent->truth.particles.at(truthMatchedProtonIndex);
                 const auto dir = TVector3(matchedTrueProton.momentumX(), matchedTrueProton.momentumY(), matchedTrueProton.momentumZ()).Unit();
                 const auto cosTheta = dir.Z();
@@ -522,19 +567,15 @@ void Analyzer(const Config &config)
                 cc1pi_backtracked_protonCosTheta = cosTheta;
                 cc1pi_backtracked_protonPhi = phi;
                 // cc0pi_backtracked_muonProtonAngle   
-                // std::cout << "DEBUG Point Y12.2" << std::endl;
             }
             else
             {
-                // std::cout << "DEBUG Point Y12.3" << std::endl;
                 cc1pi_backtracked_protonPDG = -std::numeric_limits<int>::max();
                 cc1pi_backtracked_protonMomentum = -std::numeric_limits<float>::max();
                 cc1pi_backtracked_protonCosTheta = -std::numeric_limits<float>::max();
                 cc1pi_backtracked_protonPhi = -std::numeric_limits<float>::max();
-                // std::cout << "DEBUG Point Y12.4" << std::endl;
             }
 
-            // std::cout << "DEBUG Point Y12.5" << std::endl;
             if(truthMatchedMuonIndex!=std::numeric_limits<unsigned int>::max())
             {
                 const auto matchedTrueMuon = pEvent->truth.particles.at(truthMatchedMuonIndex);
@@ -554,7 +595,6 @@ void Analyzer(const Config &config)
                 cc1pi_backtracked_muonCosTheta = -std::numeric_limits<float>::max();
                 cc1pi_backtracked_muonPhi = -std::numeric_limits<float>::max();
             }
-            // std::cout << "DEBUG Point Y12.6" << std::endl;
 
             // Here we apply reco-level phase-space restrictions
             // For any event that passes the generic selection, get the value of the kinematic quantity and check if it is outside of the
@@ -583,9 +623,8 @@ void Analyzer(const Config &config)
             isSelectedGenericCC1Pi = passedGenericSelection && passesPhaseSpaceRecoCC1Pi;
             isSelectedGoldenCC1Pi = passedGoldenSelection && passesPhaseSpaceRecoCC1Pi;
 
-            // std::cout << "DEBUG Point Y13" << std::endl;
 
-            // // // std::cout << "DEBUG Point Y12" << std::endl;
+            // std::cout << "DEBUG Point Y12" << std::endl;
             // if(isSelectedGenericCC0Pi || isSelectedGenericCC1Pi) {std::cout << "\nDEBUG isSelectedGenericCC0Pi: " << isSelectedGenericCC0Pi << " isSelectedGenericCC1Pi: " << isSelectedGenericCC1Pi << "\n" << std::endl;}
 
             passed_particleTrackScore = SelectionHelper::IsCutPassed(cutsPassedCC1Pi, "particleTrackScore");
@@ -611,280 +650,113 @@ void Analyzer(const Config &config)
             passed_openingAngle = SelectionHelper::IsCutPassed(cutsPassedCC1Pi, "openingAngle");
             passed_likelyGoldenPion = SelectionHelper::IsCutPassed(cutsPassedCC1Pi, "likelyGoldenPion");
 
-            // std::cout << "DEBUG Point Y14" << std::endl;
-            // ####################################################################
-            // #################### Reco CC0pi ####################
-            // ####################################################################
-            const auto &[passedGoldenSelectionCC0Pi, cutsPassedCC0Pi, assignedPdgCodesCC0Pi] = passed_topologicalScoreCC ? selectionCC0Pi.Execute(pEvent) : std::make_tuple(false, std::vector<std::string>(), std::vector<int>());
-            const auto passedGenericSelectionCC0Pi = SelectionHelper::IsCutPassed(cutsPassedCC0Pi, config.global.lastCutGeneric);
 
-            // Get the reco analysis data (if available, otherwise set to dummy values)
-            const auto recoDataCC0Pi = (
-                passedGenericSelectionCC0Pi
-                    ? AnalysisHelper::GetRecoAnalysisDataCC0Pi(pEvent->reco, assignedPdgCodesCC0Pi, passedGoldenSelectionCC0Pi)
-                    : AnalysisHelper::GetDummyAnalysisData()
-            );
-
-            cc0pi_reco_muonMomentum = recoDataCC0Pi.muonMomentum;
-            cc0pi_reco_muonCosTheta = recoDataCC0Pi.muonCosTheta;
-            cc0pi_reco_muonPhi = recoDataCC0Pi.muonPhi;
-            cc0pi_reco_protonMomentum = recoDataCC0Pi.protonMomentum;
-            cc0pi_reco_protonCosTheta = recoDataCC0Pi.protonCosTheta;
-            cc0pi_reco_protonPhi = recoDataCC0Pi.protonPhi;
-            cc0pi_reco_muonProtonAngle = recoDataCC0Pi.muonProtonAngle;
-            cc0pi_reco_nProtons = recoDataCC0Pi.nProtons;
-
-
-            cc0pi_leadingProton_protonBDTScore = -std::numeric_limits<float>::max();
-            cc0pi_leadingProton_muonBDTScore = -std::numeric_limits<float>::max();
-            unsigned int truthMatchedLeadingProtonIndex = std::numeric_limits<unsigned int>::max();
-            // std::cout << "DEBUG Point Y15" << std::endl;
-            if(passedGenericSelectionCC0Pi)
+            // ################### Cut variables for CC1pi ###################
+            const auto &recoParticles = pEvent->reco.particles;
+            trackScoreCutValues.clear();
+            vertexDistanceCutValues.clear();
+            generationCutValues.clear();
+            trackLengthCutValues.clear();
+            protonChi2CutValues.clear();
+            muonChi2CutValues.clear();
+            bestMatchedTruthPDGs.clear();
+            for(unsigned int i = 0; i< recoParticles.size(); ++i)
             {
-                const auto leadingRecoProtonIndex = SelectionHelper::GetLeadingProtonCandidateIndex(pEvent->reco.particles, assignedPdgCodesCC0Pi);
-                // // std::cout<<"DEBUG Point E0.1"<<std::endl;
-                const auto leadingRecoProton = pEvent->reco.particles.at(leadingRecoProtonIndex);
-                // // std::cout<<"DEBUG Point E1"<<std::endl;
+                const auto hasTrackFit = AnalysisHelper::HasTrackFit(recoParticles.at(i));
+                if(!hasTrackFit) continue;
+                bestMatchedTruthPDGs.push_back(-std::numeric_limits<int>::max());// Used later in MC block
+                // particleTrackScore
+                const auto trackScore = recoParticles.at(i).trackScore.IsSet() ? recoParticles.at(i).trackScore() : -std::numeric_limits<float>::max();
+                trackScoreCutValues.push_back(trackScore);
+                // particleVertexDistance
+                const auto recoVertex = pEvent->reco.nuVertexNoSCC();
+                const TVector3 start(recoParticles.at(i).vertexX(), recoParticles.at(i).vertexY(), recoParticles.at(i).vertexZ());
+                vertexDistanceCutValues.push_back(sqrt((start-recoVertex).Mag2()));
+                // particleGeneration
+                generationCutValues.push_back(recoParticles.at(i).generation());
+                // particleTrackLength
+                trackLengthCutValues.push_back(recoParticles.at(i).range());
+                // particleProtonChi2
+                const auto chi2ForwardProtonW = recoParticles.at(i).chi2ForwardProtonW.IsSet() ? recoParticles.at(i).chi2ForwardProtonW() : -std::numeric_limits<float>::max();
+                protonChi2CutValues.push_back(chi2ForwardProtonW);
+                // particleMuonChi2
+                const auto chi2ForwardMuonW = recoParticles.at(i).chi2ForwardMuonW.IsSet() ? recoParticles.at(i).chi2ForwardMuonW() : -std::numeric_limits<float>::max();
+                muonChi2CutValues.push_back(chi2ForwardMuonW);
+                // particleProtonChi2OverMuonChi2 - Use previous values
+            }
+            // track_num = trackScoreCutValues.size();
 
-                std::vector<float> protonFeatures;
-                const auto hasProtonFeatures = BDTHelper::GetBDTFeatures(leadingRecoProton, BDTHelper::ProtonBDTFeatureNames, protonFeatures);
-                std::vector<float> muonFeatures;
-                const auto hasMuonFeatures = BDTHelper::GetBDTFeatures(leadingRecoProton, BDTHelper::MuonBDTFeatureNames, muonFeatures);
-                if(!hasProtonFeatures || !hasMuonFeatures)
-                    throw std::logic_error("Failed to get BDT features for proton or muon. This should not happen for the leading proton.");
-
-                cc0pi_leadingProton_protonBDTScore = protonBDT.GetResponse(protonFeatures);
-                cc0pi_leadingProton_muonBDTScore = muonBDT.GetResponse(muonFeatures);
-
-                if(isMC)
+            // pandoraNuPDGIsNumu
+            nuPdgCode = pEvent->reco.nuPdgCode.IsSet() ? pEvent->reco.nuPdgCode() : -std::numeric_limits<int>::max();
+            // daughterVerticesContained - Use passes cut
+            // nuVertexFiducial - Use passes cut
+            // topologicalOrFlashMatch
+            topologicalScore = pEvent->reco.selectedTopologicalScore.IsSet() ? pEvent->reco.selectedTopologicalScore() : -std::numeric_limits<float>::max();
+            flashChi2 = pEvent->reco.flashChi2.IsSet() ? pEvent->reco.flashChi2() : -std::numeric_limits<float>::max();
+            // min2Tracks - Use passes cut
+            // max1Uncontained - Use passes cut
+            // 2NonProtons - Use passes cut
+            // pionHasValiddEdx
+            auto muonIndex = -std::numeric_limits<int>::max();
+            auto pionIndex = -std::numeric_limits<int>::max();
+            bool maxOneMuonOnePion = true;
+            for (unsigned int i = 0; i < assignedPdgCodesCC1Pi.size(); ++i)
+            {
+                if (assignedPdgCodesCC1Pi.at(i) == 13)
                 {
-                    try{
-                        truthMatchedLeadingProtonIndex = AnalysisHelper::GetBestMatchedTruthParticleIndex(leadingRecoProton,pEvent->truth.particles);
-                    }
-                    catch(const std::logic_error &){
-                        std::cout<<"try failed for truthMatchedLeadingProtonIndex\n"<<std::endl;
-                    }
+                    if(muonIndex == -std::numeric_limits<int>::max()) muonIndex = i;
+                    else maxOneMuonOnePion = false;
+                } else if (assignedPdgCodesCC1Pi.at(i) == 211)
+                {
+                    if(pionIndex == -std::numeric_limits<int>::max()) pionIndex = i;
+                    else maxOneMuonOnePion = false;
                 }
             }
 
-            // std::cout << "DEBUG Point Y16" << std::endl;
-            // // std::cout<<"DEBUG Point E2"<<std::endl;
-            if(truthMatchedLeadingProtonIndex!=std::numeric_limits<unsigned int>::max())
+            piontruncatedMeandEdx = -std::numeric_limits<float>::max();
+            openingAngle = -std::numeric_limits<float>::max();
+            maxVertexDist = -std::numeric_limits<float>::max();
+            goldenPionBDTResponse = -std::numeric_limits<float>::max();
+            // Save some cut variables that are applied after muon and pion have been identified
+            // Ensure that there is only one muon and one pion
+            // All the precise selection logic is saved in the passed_* variables
+            if(maxOneMuonOnePion && muonIndex!=-std::numeric_limits<int>::max() && pionIndex!=-std::numeric_limits<int>::max())
             {
-                const auto proton = pEvent->truth.particles.at(truthMatchedLeadingProtonIndex);
-                const auto dir = TVector3(proton.momentumX(), proton.momentumY(), proton.momentumZ()).Unit();
-                const auto cosTheta = dir.Z();
-                const auto phi = std::atan2(dir.Y(),dir.X());
-                cc0pi_backtracked_protonPDG = proton.pdgCode();
-                cc0pi_backtracked_protonMomentum = proton.momentum();
-                cc0pi_backtracked_protonCosTheta = cosTheta;
-                cc0pi_backtracked_protonPhi = phi;
-                // cc0pi_backtracked_muonProtonAngle
-            }
-            else
-            {
-                cc0pi_backtracked_protonPDG = -std::numeric_limits<int>::max();
-                cc0pi_backtracked_protonMomentum = -std::numeric_limits<float>::max();
-                cc0pi_backtracked_protonCosTheta = -std::numeric_limits<float>::max();
-                cc0pi_backtracked_protonPhi = -std::numeric_limits<float>::max();
-            }
-            // std::cout << "DEBUG Point Y17" << std::endl;
+                const auto muon = recoParticles.at(muonIndex);
+                const auto pion = recoParticles.at(pionIndex);
+                piontruncatedMeandEdx = pion.truncatedMeandEdx.IsSet() ? pion.truncatedMeandEdx() : std::numeric_limits<float>::max();
 
-            // // // std::cout << "DEBUG Point Y10" << std::endl;
-            // Here we apply reco-level phase-space restrictions
-            // For any event that passes the generic selection, get the value of the kinematic quantity and check if it is outside of the
-            // min/max values supplied in the binning. If so, then reject the event.
-            auto passesPhaseSpaceRecoCC0Pi = false;
-            if (passedGenericSelectionCC0Pi)
-            {
-                // Start by assuming the event passes the phase-space cuts
-                passesPhaseSpaceRecoCC0Pi = true;
-
-                // Check the value of the kinematic quantities are within the phase-space limits
-                for (const auto &[name, minMax] : phaseSpaceMap)
+                if(muon.directionX.IsSet() && muon.directionY.IsSet() && muon.directionZ.IsSet() && pion.directionX.IsSet() && pion.directionY.IsSet() && pion.directionZ.IsSet())
                 {
-                    const auto &[min, max] = minMax;
-                    const auto value = getValueCC0Pi.at(name)(recoDataCC0Pi);
-
-                    if (value < min || value > max)
-                    {
-                        passesPhaseSpaceRecoCC0Pi = false;
-                        break;
-                    }
+                    const auto muonDir = TVector3(muon.directionX(), muon.directionY(), muon.directionZ()).Unit();
+                    const auto pionDir = TVector3(pion.directionX(), pion.directionY(), pion.directionZ()).Unit();
+                    openingAngle = muonDir.Angle(pionDir);
                 }
+
+                const auto recoVertex = pEvent->reco.nuVertex();
+                for (const auto &particle : recoParticles)
+                {
+                    // Skip particles without a track fit
+                    if (!AnalysisHelper::HasTrackFit(particle)) continue;
+
+                    // Get the distance between the particle's start position and the vertex
+                    const TVector3 start(particle.startX(), particle.startY(), particle.startZ());
+                    const auto vertexDist = (start - recoVertex).Mag2();
+
+                    // Insist that this isn't too large
+                    if (vertexDist > maxVertexDist) maxVertexDist = vertexDist;
+                }
+                // const auto pMuonBDT = std::make_shared<BDTHelper::BDT>("muon", BDTHelper::MuonBDTFeatureNames);
+                // const auto pProtonBDT = std::make_shared<BDTHelper::BDT>("proton", BDTHelper::ProtonBDTFeatureNames);
+                // const auto pGoldenPionBDT = std::make_shared<BDTHelper::BDT>("goldenPion", BDTHelper::GoldenPionBDTFeatureNames);
+                // std::cout<<"DEBUG P Point 3.5"<<std::endl;
+                // std::vector<float> features;
+                // std::cout<<"DEBUG P Point 3.6"<<std::endl;
+                // const auto hasFeatures = BDTHelper::GetBDTFeatures(pion, BDTHelper::GoldenPionBDTFeatureNames, features);
+                // std::cout<<"DEBUG P Point 3.7"<<std::endl;
+                // goldenPionBDTResponse = hasFeatures ? pGoldenPionBDT->GetResponse(features) : -std::numeric_limits<float>::max();
+                goldenPionBDTResponse = 0;
             }
-            passesGenericCC0Pi = passedGenericSelectionCC0Pi;
-            passesGoldenCC0Pi = passedGoldenSelectionCC0Pi;
-            isSelectedGenericCC0Pi = passedGenericSelectionCC0Pi && passesPhaseSpaceRecoCC0Pi;
-            isSelectedGoldenCC0Pi = passedGoldenSelectionCC0Pi && passesPhaseSpaceRecoCC0Pi;
-
-
-            // std::cout << "DEBUG Point Y18" << std::endl;
-            // ################### Reco Particle variables ################### 
-            // std::cout << "DEBUG Start of CCInclusive variables" << std::endl;
-            if(passed_topologicalScoreCC) // Passed CC Inclusive preselection
-            {
-                // Iterate over reco particles and save the BDT and cut variables
-                // std::cout<<"DEBUG Start of BDT reco particle loop"<<std::endl;
-                for(unsigned int p = 0; p < pEvent->reco.particles.size(); p++)
-                {
-                    const auto recoParticle = pEvent->reco.particles.at(p);
-
-                    std::vector<float> protonBDTFeatures;
-                    const auto hasProtonBDTFeatures = BDTHelper::GetBDTFeatures(recoParticle, BDTHelper::ProtonBDTFeatureNames, protonBDTFeatures);
-                    ccIncRecoParticleProtonBDTScore.push_back(hasProtonBDTFeatures ? protonBDT.GetResponse(protonBDTFeatures) : -std::numeric_limits<float>::max());
-
-                    std::vector<float> muonBDTFeatures;
-                    const auto hasMuonBDTFeatures = BDTHelper::GetBDTFeatures(recoParticle, BDTHelper::MuonBDTFeatureNames, muonBDTFeatures);
-                    ccIncRecoParticleMuonBDTScore.push_back(hasMuonBDTFeatures ? muonBDT.GetResponse(muonBDTFeatures) : -std::numeric_limits<float>::max());
-                    
-                    std::vector<float> pionBDTFeatures;
-                    const auto hasGoldenPionBDTFeatures = BDTHelper::GetBDTFeatures(recoParticle, BDTHelper::GoldenPionBDTFeatureNames, pionBDTFeatures);
-                    ccIncRecoParticleGoldenPionBDTScore.push_back(hasGoldenPionBDTFeatures ? goldenPionBDT.GetResponse(pionBDTFeatures) : -std::numeric_limits<float>::max());
-
-                    float feature = -std::numeric_limits<float>::max();
-                    bool hasFeature;
-
-                    hasFeature = AnalysisHelper::GetLogLikelihoodRatio(recoParticle.likelihoodForwardProton, recoParticle.likelihoodMIP, feature);
-                    ccIncRecoParticleLogBragg_pToMIP.push_back(hasFeature ? feature : -std::numeric_limits<float>::max());
-                    
-                    hasFeature = AnalysisHelper::GetLogLikelihoodRatio(recoParticle.likelihoodForwardPion, recoParticle.likelihoodMIP, feature);
-                    ccIncRecoParticleLogBragg_piToMIP.push_back(hasFeature ? feature : -std::numeric_limits<float>::max());
-
-                    hasFeature = recoParticle.truncatedMeandEdx.IsSet();
-                    ccIncRecoParticleTruncMeandEdx.push_back(hasFeature ? recoParticle.truncatedMeandEdx() : -std::numeric_limits<float>::max());
-                    // ccIncRecoParticleProtonForward.push_back();
-                    // ccIncRecoParticleMuonForward.push_back();
-                    hasFeature = recoParticle.wiggliness.IsSet();
-                    ccIncRecoParticleWiggliness.push_back(hasFeature ? recoParticle.wiggliness() : -std::numeric_limits<float>::max());
-
-                    hasFeature = recoParticle.trackScore.IsSet();
-                    ccIncRecoParticleTrackScore.push_back(hasFeature ? recoParticle.trackScore() : -std::numeric_limits<float>::max());
-
-                    hasFeature = recoParticle.nDescendents.IsSet();
-                    ccIncRecoParticleNDescendents.push_back(hasFeature ? recoParticle.nDescendents() : -std::numeric_limits<int>::max());
-                    // ccIncRecoParticleNSpacePointsNearEnd.push_back();
-
-                    std::cout<<"DEBUG generation (int): " << static_cast<int>(recoParticle.generation()) << " vs float: " << recoParticle.generation() << std::endl;
-                    ccIncRecoParticleGeneration.push_back(static_cast<int>(recoParticle.generation())); // todo check this doesn't cause issues 
-
-                    ccIncRecoParticleContained.push_back(AnalysisHelper::HasTrackFit(recoParticle) && AnalysisHelper::IsContained(recoParticle));
-
-                    auto matchedTrueParticleIndex = std::numeric_limits<unsigned int>::max();
-                    try{
-                        matchedTrueParticleIndex = AnalysisHelper::GetBestMatchedTruthParticleIndex(recoParticle, pEvent->truth.particles);
-                    }
-                    catch(const std::logic_error &){
-                        std::cout<<"try failed for recoParticle\n"<<std::endl;
-                    }
-
-                    if(matchedTrueParticleIndex != std::numeric_limits<unsigned int>::max())
-                    {
-                        const auto matchedTrueParticle = pEvent->truth.particles.at(matchedTrueParticleIndex);
-                        const auto dir = TVector3(matchedTrueParticle.momentumX(), matchedTrueParticle.momentumY(), matchedTrueParticle.momentumZ()).Unit();
-                        const auto cosTheta = dir.Z();
-                        const auto phi = std::atan2(dir.Y(),dir.X());
-                        ccIncRecoParticleBacktrackedPdg.push_back(matchedTrueParticle.pdgCode());
-                        ccIncRecoParticleBacktrackedMomenum.push_back(matchedTrueParticle.momentum());
-                        ccIncRecoParticleBacktrackedCosTheta.push_back(cosTheta);
-                        ccIncRecoParticleBacktrackedPhi.push_back(phi);
-                        const auto isTrueGoldenPion = abs(matchedTrueParticle.pdgCode()) == 211 ? AnalysisHelper::IsGolden(matchedTrueParticle) : false;
-                        ccIncRecoParticleBacktrackedGoldenPion.push_back(isTrueGoldenPion);
-                    }
-                    else
-                    {
-                        ccIncRecoParticleBacktrackedPdg.push_back(-std::numeric_limits<int>::max());
-                        ccIncRecoParticleBacktrackedMomenum.push_back(-std::numeric_limits<float>::max());
-                        ccIncRecoParticleBacktrackedCosTheta.push_back(-std::numeric_limits<float>::max());
-                        ccIncRecoParticleBacktrackedPhi.push_back(-std::numeric_limits<float>::max());
-                        ccIncRecoParticleBacktrackedGoldenPion.push_back(false);
-                    }
-                }
-                // std::cout << "DEBUG Point Y19" << std::endl;
-                // std::cout<<"DEBUG End of BDT reco particle loop"<<std::endl;
-
-                nuPdgCode = pEvent->reco.nuPdgCode.IsSet() ? pEvent->reco.nuPdgCode() : -std::numeric_limits<int>::max();
-                topologicalScore = pEvent->reco.selectedTopologicalScore.IsSet() ? pEvent->reco.selectedTopologicalScore() : -std::numeric_limits<float>::max();
-                flashChi2 = pEvent->reco.flashChi2.IsSet() ? pEvent->reco.flashChi2() : -std::numeric_limits<float>::max();
-
-                nTracks = 0u;
-                nUncontained = 0u;
-                nNonProtons = 0u;
-
-                const auto muonIndex = passed_max1Uncontained ? AnalysisHelper::GetParticleIndexWithPdg(assignedPdgCodesCC1Pi, 13) : std::numeric_limits<unsigned int>::max();
-                // std::cout<<"DEBUG Start of reco particle loop for tracks"<<std::endl;
-                for (unsigned int p = 0; p < pEvent->reco.particles.size(); ++p)
-                {
-                    const auto recoParticle = pEvent->reco.particles.at(p);
-                    if (recoParticle.generation() == 2)
-                    {
-                        if(AnalysisHelper::HasTrackFit(recoParticle))
-                        {
-                            nTracks++;
-                            if(passed_min2Tracks && !AnalysisHelper::IsContained(recoParticle))
-                            {
-                                nUncontained++;
-                            }
-                        }
-
-                        if(passed_max1Uncontained&& (p == muonIndex || 
-                            (
-                                AnalysisHelper::HasTrackFit(recoParticle)
-                                && ccIncRecoParticleProtonBDTScore.at(p) != -std::numeric_limits<float>::max()
-                                && ccIncRecoParticleProtonBDTScore.at(p)<protonBDTCutCC1pi)
-                            ))
-                        {
-                            nNonProtons++;
-                        }
-                    }
-                }
-                // std::cout<<"DEBUG End of reco particle loop for tracks"<<std::endl;
-
-                // std::cout << "DEBUG Point Y20" << std::endl;
-                piontruncatedMeandEdx = -std::numeric_limits<float>::max();
-                openingAngle = -std::numeric_limits<float>::max();
-                muonPhi = -std::numeric_limits<float>::max();
-                pionPhi = -std::numeric_limits<float>::max();
-                maxVertexDist = -std::numeric_limits<float>::max();
-                goldenPionBDTResponse = -std::numeric_limits<float>::max();
-                // Save some cut variables that are applied after muon and pion have been identified
-                // Ensure that there is only one muon and one pion
-                // All the precise selection logic is saved in the passed_* variables
-                // std::cout<<"DEBUG Start of pion and muon variables"<<std::endl;
-                if(passed_2NonProtons)
-                {
-                    const auto pionIndex = AnalysisHelper::GetParticleIndexWithPdg(assignedPdgCodesCC1Pi, 211);
-                    const auto muon = pEvent->reco.particles.at(muonIndex);
-                    const auto pion = pEvent->reco.particles.at(pionIndex);
-                    if(pion.truncatedMeandEdx.IsSet()) piontruncatedMeandEdx = pion.truncatedMeandEdx();
-
-                    if(muon.directionX.IsSet() && muon.directionY.IsSet() && muon.directionZ.IsSet() && pion.directionX.IsSet() && pion.directionY.IsSet() && pion.directionZ.IsSet())
-                    {
-                        const auto muonDir = TVector3(muon.directionX(), muon.directionY(), muon.directionZ()).Unit();
-                        const auto pionDir = TVector3(pion.directionX(), pion.directionY(), pion.directionZ()).Unit();
-                        openingAngle = muonDir.Angle(pionDir);
-                        muonPhi = std::atan2(muonDir.Y(),muonDir.X());
-                        pionPhi = std::atan2(pionDir.Y(),pionDir.X());
-                    }
-
-                    const auto recoVertex = pEvent->reco.nuVertex();
-                    for (const auto &particle : pEvent->reco.particles)
-                    {
-                        // Skip particles without a track fit
-                        if (particle.generation() != 2 || !AnalysisHelper::HasTrackFit(particle)) continue;
-
-                        // Get the distance between the particle's start position and the vertex
-                        const TVector3 start(particle.startX(), particle.startY(), particle.startZ());
-                        const auto vertexDist = (start - recoVertex).Mag2();
-                        if (vertexDist > maxVertexDist) maxVertexDist = vertexDist;
-                    }
-                    goldenPionBDTResponse = ccIncRecoParticleGoldenPionBDTScore.at(pionIndex);
-                }
-                // std::cout << "DEBUG Point Y21" << std::endl;
-                // std::cout<<"DEBUG End of pion and muon variables"<<std::endl;
-            }
-            // std::cout << "DEBUG End of CCInclusive variables" << std::endl;
-
 
             // pionNotInGap - Use passes cut
             // muonNotInGap - Use passes cut
@@ -900,12 +772,11 @@ void Analyzer(const Config &config)
             // treeWriter.SetOutputBranchAddress("muon_candidate_idx", &pEventPeLEE->muon_candidate_idx_, "muon_candidate_idx/I" );
             // treeWriter.SetOutputBranchAddress("pion_candidate_idx", &pEventPeLEE->pion_candidate_idx_, "pion_candidate_idx/I" );
             // treeWriter.SetOutputBranchAddress("lead_p_candidate_idx", &pEventPeLEE->lead_p_candidate_idx_, "lead_p_candidate_idx/I" );
-            // std::cout << "DEBUG Point Y22" << std::endl;
+
             isTrueCC1Pi = false;
             isTrueCC0Pi = false;
             isCC1PiSignal = false;
             isCC0PiSignal = false;
-            isTrueGoldenCC1Pi = false;
 
             truthCC1PiMuonMomentum = -std::numeric_limits<float>::max();
             truthCC1PiMuonCosTheta = -std::numeric_limits<float>::max();
@@ -942,8 +813,8 @@ void Analyzer(const Config &config)
             truecc1pi_recoPion_protonBDTScore = -std::numeric_limits<float>::max();
             truecc1pi_recoPion_muonBDTScore = -std::numeric_limits<float>::max();
 
-            // // std::cout << "DEBUG Point Y14" << std::endl;
-            // std::cout << "DEBUG Point Y23" << std::endl;
+            
+
             if (isMC) // For BNB data that's all we need to do!
             {
                 // #####################################################
@@ -958,8 +829,6 @@ void Analyzer(const Config &config)
                         ? AnalysisHelper::GetTruthAnalysisDataCC0Pi(pEvent->truth, config.global.useAbsPdg, config.global.protonMomentumThreshold)
                         : AnalysisHelper::GetDummyAnalysisData()
                 );
-
-                // // std::cout << "DEBUG Point Y15" << std::endl;
 
                 // Here we apply truth-level phase-space restrictions
                 // For all true CC0Pi events, we check if the values of each kinematic variable are within the supplied limits. If not then the
@@ -984,7 +853,6 @@ void Analyzer(const Config &config)
                         }
                     }
                 }
-                // // std::cout << "DEBUG Point Y16" << std::endl;
                 isCC0PiSignal = isTrueCC0Pi && passesPhaseSpaceTruthCC0Pi;
 
                 // #####################################################
@@ -999,13 +867,10 @@ void Analyzer(const Config &config)
                         : AnalysisHelper::GetDummyAnalysisData()
                 );
 
-                // std::cout << "DEBUG Point Y24" << std::endl;
-
                 // Here we apply truth-level phase-space restrictions
                 // For all true CC1Pi events, we check if the values of each kinematic variable are within the supplied limits. If not then the
                 // event is not classed as "signal"
                 bool passesPhaseSpaceTruthCC1Pi = false;
-                // // std::cout << "DEBUG Point Y17" << std::endl;
                 if (isTrueCC1Pi)
                 {
                     // Start by assuming the event passes the phase-space cuts
@@ -1025,7 +890,6 @@ void Analyzer(const Config &config)
                     }
                 }
                 isCC1PiSignal = isTrueCC1Pi && passesPhaseSpaceTruthCC1Pi;
-                // // std::cout << "DEBUG Point Y18" << std::endl;
 
                 truthCC1PiMuonMomentum = truthDataCC1Pi.muonMomentum;
                 truthCC1PiMuonCosTheta = truthDataCC1Pi.muonCosTheta;
@@ -1035,7 +899,6 @@ void Analyzer(const Config &config)
                 truthCC1PiPionPhi = truthDataCC1Pi.pionPhi;
                 truthCC1PiMuonPionAngle = truthDataCC1Pi.muonPionAngle;
                 truthCC1PiNProtons = truthDataCC1Pi.nProtons;
-                isTrueGoldenCC1Pi = isTrueCC1Pi && truthDataCC1Pi.hasGoldenPion; // isTrueCC1Pi can probably be removed
 
                 truthCC0PiMuonMomentum = truthDataCC0Pi.muonMomentum;
                 truthCC0PiMuonCosTheta = truthDataCC0Pi.muonCosTheta;
@@ -1047,11 +910,9 @@ void Analyzer(const Config &config)
                 truthCC0PiNProtons = truthDataCC0Pi.nProtons;
 
                 mcNuPdg = pEvent->truth.nuPdgCode();
-                // // std::cout << "DEBUG Point Y19" << std::endl;
 
                 if(isTrueCC1Pi)
                 {
-                    // std::cout<<"DEBUG Point Y25"<<std::endl;
                     const auto trueMuonIndex = AnalysisHelper::GetTrueMuonIndex(pEvent->truth, config.global.useAbsPdg);
                     const auto muon = pEvent->truth.particles.at(trueMuonIndex);
                     cc1pi_truthMuon_IsContained = AnalysisHelper::IsContained(muon);
@@ -1065,7 +926,6 @@ void Analyzer(const Config &config)
                     // Find the reco particle that best matche the true muon and pion 
                     auto recoMuonIndex = -std::numeric_limits<int>::max();
                     auto recoPionIndex = -std::numeric_limits<int>::max();
-                    std::cout<<"DEBUG Point 25.1"<<std::endl;
                     for(unsigned int i=0; i<pEvent->reco.particles.size(); i++)
                     {
                         const auto recoParticle = pEvent->reco.particles.at(i);
@@ -1076,7 +936,6 @@ void Analyzer(const Config &config)
                         catch(const std::logic_error &){
                             std::cout<<"try failed for recoParticle\n"<<std::endl;
                         }
-                        // std::cout<<"DEBUG Point Y25.1"<<std::endl;
 
                         if(matchedTrueParticleIndex!=std::numeric_limits<unsigned int>::max())
                         {
@@ -1092,8 +951,6 @@ void Analyzer(const Config &config)
                             recoParticle_backtracked_isContained.push_back(false);
                             recoParticle_backtracked_TrackLength.push_back(-std::numeric_limits<float>::max());
                         }
-
-                        // std::cout<<"DEBUG Point Y25.2"<<std::endl;
                         
                         if(AnalysisHelper::HasTrackFit(recoParticle))
                         {
@@ -1118,37 +975,26 @@ void Analyzer(const Config &config)
                         if(hasMuonBDTFeatures && !hasProtonBDTFeatures) throw std::logic_error("Muon BDT features found but not proton BDT features");
                     }
                 }
-                // // std::cout << "DEBUG Point Y20" << std::endl;
 
 
-            //     unsigned int trackCounter = 0; // Count non skipped particles
-            //     for(unsigned int p = 0; p< pEvent->reco.particles.size(); ++p)
-            //     {
-            //         const auto hasTrackFit = AnalysisHelper::HasTrackFit(pEvent->reco.particles.at(p));
-            //         if(!hasTrackFit) continue; // Needed for consistency with cuts
-            //         // const auto matchedTruthParticle = AnalysisHelper::GetBestMatchedTruthParticle(pEvent->reco.particles.at(i), pEvent->truth.particles, true);
-            //         // const auto mcpdg = matchedTruthParticle.pdgCode();
-            //         if(pEvent->reco.particles.at(p).pdgBacktracked.IsSet())
-            //         {
-            //             const auto matchedPDG = pEvent->reco.particles.at(p).pdgBacktracked(); // todo verifiy and use translation layer
-            //             bestMatchedTruthPDGs.at(trackCounter) = matchedPDG;
-            //         }
-            //         trackCounter++;
-            //     }
+                unsigned int trackCounter = 0; // Count non skipped particles
+                for(unsigned int i = 0; i< recoParticles.size(); ++i)
+                {
+                    const auto hasTrackFit = AnalysisHelper::HasTrackFit(recoParticles.at(i));
+                    if(!hasTrackFit) continue; // Needed for consistency with cuts
+                    // const auto matchedTruthParticle = AnalysisHelper::GetBestMatchedTruthParticle(recoParticles.at(i), pEvent->truth.particles, true);
+                    // const auto mcpdg = matchedTruthParticle.pdgCode();
+                    if(pEvent->reco.particles.at(i).pdgBacktracked.IsSet())
+                    {
+                        const auto matchedPDG = pEvent->reco.particles.at(i).pdgBacktracked(); // todo verifiy and use translation layer
+                        bestMatchedTruthPDGs.at(trackCounter) = matchedPDG;
+                    }
+                    trackCounter++;
+                }
             }
 
-            // // std::cout << "DEBUG Point Y21" << std::endl;
             splineWeight = isMC ? pEventPeLEE->truth.weightSpline() : 1.f;
             tunedCVWeight = isMC ? pEventPeLEE->truth.weightTune() : 1.f;
-
-             // Fix missing dirt tune weights in run 5; Impact is negligible due to 100% uncertainty on dirt and few events in selection
-            if(isDirt && fileRun == 5) 
-            {
-                if (splineWeight > 0 || tunedCVWeight > 0) 
-                    throw std::logic_error("Trying to set tune weights for dirt in run 5 to 1 when suitable weights exist.");
-                splineWeight = 1.f;
-                tunedCVWeight = 1.f;
-            }
 
             weightPtrMap.clear();
             if(isMC)
@@ -1161,7 +1007,6 @@ void Analyzer(const Config &config)
                 }
             }
 
-            // // std::cout << "DEBUG Point Y22" << std::endl;
             const std::vector<int>* pRecoParticle_backtracked_absTruePDG = &recoParticle_backtracked_absTruePDG;
             treeWriter.SetObjectOutputBranchAddress<std::vector<int>>("trueCC1pi_recoParticle_backtracked_absTruePDG_vector", pRecoParticle_backtracked_absTruePDG);
             const std::vector<bool>* pRecoParticle_isContained = &recoParticle_isContained;
@@ -1176,7 +1021,6 @@ void Analyzer(const Config &config)
             treeWriter.SetObjectOutputBranchAddress<std::vector<double>>("trueCC1pi_recoParticle_protonBDTScore_vector", pRecoParticle_protonBDTScore);
             const std::vector<double>* pRecoParticle_muonBDTScore = &recoParticle_muonBDTScore;
             treeWriter.SetObjectOutputBranchAddress<std::vector<double>>("trueCC1pi_recoParticle_muonBDTScore_vector", pRecoParticle_muonBDTScore);
-            // // std::cout << "DEBUG Point Y23" << std::endl;
 
             const auto type = PlottingHelper::GetPlotStyle(sampleType, pEvent, true);
             switch (type) {
@@ -1219,7 +1063,6 @@ void Analyzer(const Config &config)
                     throw std::invalid_argument("Invalid type encountered");
             }
 
-            // // std::cout << "DEBUG Point Y24" << std::endl;
             treeWriter.CreateNoNewBranches(); // Only creates branches for the first run through the loop // todo get rid of this method
             treeWriter.Fill();
 
@@ -1230,28 +1073,6 @@ void Analyzer(const Config &config)
             recoParticle_backtracked_TrackLength.clear();
             recoParticle_protonBDTScore.clear();
             recoParticle_muonBDTScore.clear();
-
-            ccIncRecoParticleMuonBDTScore.clear();
-            ccIncRecoParticleProtonBDTScore.clear();
-            ccIncRecoParticleGoldenPionBDTScore.clear(); 
-            ccIncRecoParticleLogBragg_pToMIP.clear();
-            ccIncRecoParticleLogBragg_piToMIP.clear();
-            ccIncRecoParticleTruncMeandEdx.clear();
-            ccIncRecoParticleProtonForward.clear();
-            ccIncRecoParticleMuonForward.clear();
-            ccIncRecoParticleWiggliness.clear();
-            ccIncRecoParticleTrackScore.clear();
-            ccIncRecoParticleNDescendents.clear();
-            ccIncRecoParticleGeneration.clear();
-            ccIncRecoParticleContained.clear();
-            ccIncRecoParticleBacktrackedPdg.clear();
-            ccIncRecoParticleBacktrackedMomenum.clear();
-            ccIncRecoParticleBacktrackedCosTheta.clear();
-            ccIncRecoParticleBacktrackedPhi.clear();
-            ccIncRecoParticleBacktrackedGoldenPion.clear();
-
-
-
         } // End of event-level iteration
 
     } // End of file-level iterration
